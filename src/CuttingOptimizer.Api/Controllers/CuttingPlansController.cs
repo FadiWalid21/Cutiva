@@ -1,6 +1,7 @@
 using CuttingOptimizer.Api.Contracts.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCuttingPlan;
+using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GetCuttingPlanById;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -31,6 +32,26 @@ public sealed class CuttingPlansController(
             return NotFound(new
             {
                 message = localizer["CuttingPlanNotFound"].Value
+            });
+        }
+
+        return Ok(plan);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<CuttingPlanDto>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var plan = await sender.Send(
+            new GetCuttingPlanByIdQuery(id),
+            cancellationToken);
+
+        if (plan is null)
+        {
+            return NotFound(new
+            {
+                message = localizer["CuttingPlanByIdNotFound"].Value
             });
         }
 

@@ -12,6 +12,10 @@ public interface IApplicationDbContext
     DbSet<Material> Materials { get; }
     DbSet<StockBar> StockBars { get; }
     DbSet<RequiredCut> RequiredCuts { get; }
+    DbSet<CuttingPlan> CuttingPlans { get; }
+    DbSet<CuttingPlanBar> CuttingPlanBars { get; }
+    DbSet<CuttingPlanPiece> CuttingPlanPieces { get; }
+    DbSet<CuttingPlanUnallocatedPiece> CuttingPlanUnallocatedPieces { get; }
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default);
 }

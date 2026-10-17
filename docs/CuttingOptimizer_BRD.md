@@ -394,9 +394,35 @@ These items require business confirmation:
 - Build the solution and manually validate representative scenarios.
 
 ### Phase 3 — Operational Workflow
+
+Phase 3 is split so persistence and dashboard metrics can ship before inventory mutation.
+
+#### Phase 3a — Persist plans and workshop dashboard (current)
+
+- Persist each generated cutting plan as a snapshot (`CuttingPlan` with bars, pieces, and unallocated pieces).
+- Generation still does **not** consume or reserve stock (FR-11 remains).
+- Store length totals used for KPIs:
+  - `TotalPieceLengthMm` — sum of allocated piece lengths
+  - `TotalStockLengthMm` — sum of lengths of physical bar instances used
+  - Identity: `TotalStockLengthMm = TotalPieceLengthMm + TotalKerfMm + TotalLeftoverMm`
+- Workshop dashboard endpoint aggregates over a **recent window**:
+  - **Recent window:** plans with `CreatedAtUtc >= UtcNow - 30 days`
+  - **KPIs:** sum all plans in that 30-day window (DB-side `Sum` projections; do not load full plan graphs)
+  - **Material efficiency** = `sum(TotalPieceLengthMm) / sum(TotalStockLengthMm)` (API exposes as percent 0–100)
+  - **Waste %** = `sum(TotalKerfMm + TotalLeftoverMm) / sum(TotalStockLengthMm)` (API exposes as percent 0–100; equals `1 - efficiency` when stock > 0)
+  - **Stock bars used** = `sum(TotalBarsUsed)`
+  - **Estimated cost / savings proxy** = `sum(TotalMaterialCost)` as a bare decimal (no currency code; currency model TBD)
+  - Guard: if `sum(TotalStockLengthMm) == 0`, efficiency and waste are `0`
+  - **Recent projects list:** up to the **20** most recent distinct projects touched by plans in the 30-day window
+- **Projected leftovers** (API field: `projectedLeftovers`): bar remainders from saved plans with `RemainingLengthMm > 0`. These are **not** inventoriable stock remnants. UI copy should say “projected leftover” / “متوقع من الخطة”.
+- Index `(WorkshopId, CreatedAtUtc)` on `CuttingPlans` supports dashboard filters.
+
+#### Phase 3b — Approve / consume (later)
+
 - Add plan review and approval if required.
 - Define inventory reservation/consumption rules.
-- Track actual material usage and leftovers.
+- Track actual material usage and leftovers as real inventory changes.
+- Only after approve/consume may leftovers become inventoriable remnants (Phase 4).
 
 ### Phase 4 — Improve Optimization
 - Compare heuristic results against alternative algorithms.

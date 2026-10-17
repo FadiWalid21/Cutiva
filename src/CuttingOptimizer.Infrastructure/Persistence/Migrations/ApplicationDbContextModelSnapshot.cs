@@ -22,6 +22,164 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsComplete")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("KerfMm")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StrategyNote")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("TotalBarsUsed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalKerfMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalLeftoverMm")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("TotalMaterialCost")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<int>("TotalPieceLengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalStockLengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("WorkshopId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("WorkshopId", "CreatedAtUtc");
+
+                    b.ToTable("CuttingPlans", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CuttingPlans_KerfMm", "\"KerfMm\" >= 0");
+
+                            t.HasCheckConstraint("CK_CuttingPlans_TotalPieceLengthMm", "\"TotalPieceLengthMm\" >= 0");
+
+                            t.HasCheckConstraint("CK_CuttingPlans_TotalStockLengthMm", "\"TotalStockLengthMm\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanBar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CuttingPlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("KerfMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RemainingLengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StockBarId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuttingPlanId");
+
+                    b.HasIndex("StockBarId");
+
+                    b.ToTable("CuttingPlanBars", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanPiece", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CuttingPlanBarId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("LengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("RequiredCutId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuttingPlanBarId");
+
+                    b.HasIndex("RequiredCutId");
+
+                    b.ToTable("CuttingPlanPieces", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanUnallocatedPiece", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CuttingPlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("LengthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("RequiredCutId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuttingPlanId");
+
+                    b.HasIndex("RequiredCutId");
+
+                    b.ToTable("CuttingPlanUnallocatedPieces", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>
                 {
                     b.Property<Guid>("Id")
@@ -219,6 +377,89 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("Workshops");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Workshop");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanBar", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.CuttingPlan", "CuttingPlan")
+                        .WithMany("Bars")
+                        .HasForeignKey("CuttingPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.StockBar", "StockBar")
+                        .WithMany()
+                        .HasForeignKey("StockBarId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CuttingPlan");
+
+                    b.Navigation("StockBar");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanPiece", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.CuttingPlanBar", "CuttingPlanBar")
+                        .WithMany("Pieces")
+                        .HasForeignKey("CuttingPlanBarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.RequiredCut", "RequiredCut")
+                        .WithMany()
+                        .HasForeignKey("RequiredCutId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CuttingPlanBar");
+
+                    b.Navigation("RequiredCut");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanUnallocatedPiece", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.CuttingPlan", "CuttingPlan")
+                        .WithMany("UnallocatedPieces")
+                        .HasForeignKey("CuttingPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.RequiredCut", "RequiredCut")
+                        .WithMany()
+                        .HasForeignKey("RequiredCutId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CuttingPlan");
+
+                    b.Navigation("RequiredCut");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Sector", "Sector")
@@ -288,6 +529,18 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Material");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
+                {
+                    b.Navigation("Bars");
+
+                    b.Navigation("UnallocatedPieces");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlanBar", b =>
+                {
+                    b.Navigation("Pieces");
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>

@@ -3,14 +3,18 @@ using CuttingOptimizer.Application.Features.Sectors.Commands.CreateSector;
 using CuttingOptimizer.Application.Features.Sectors.Commands.DeleteSector;
 using CuttingOptimizer.Application.Features.Sectors.Commands.UpdateSector;
 using CuttingOptimizer.Application.Features.Sectors.Queries.GetSectors;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/sectors")]
-public sealed class SectorsController(ISender sender) : ControllerBase
+public sealed class SectorsController(
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -36,7 +40,7 @@ public sealed class SectorsController(ISender sender) : ControllerBase
         {
             return Conflict(new
             {
-                message = "A sector with this code already exists."
+                message = localizer["SectorCodeExists"].Value
             });
         }
 
@@ -49,9 +53,7 @@ public sealed class SectorsController(ISender sender) : ControllerBase
                 request.Name
             });
     }
-    
-    
-    
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -67,11 +69,11 @@ public sealed class SectorsController(ISender sender) : ControllerBase
             UpdateSectorResult.Updated => NoContent(),
             UpdateSectorResult.NotFound => NotFound(new
             {
-                message = "Sector not found."
+                message = localizer["SectorNotFound"].Value
             }),
             UpdateSectorResult.CodeAlreadyExists => Conflict(new
             {
-                message = "A sector with this code already exists."
+                message = localizer["SectorCodeExists"].Value
             }),
             _ => StatusCode(500)
         };
@@ -91,11 +93,11 @@ public sealed class SectorsController(ISender sender) : ControllerBase
             DeleteSectorResult.Deleted => NoContent(),
             DeleteSectorResult.NotFound => NotFound(new
             {
-                message = "Sector not found."
+                message = localizer["SectorNotFound"].Value
             }),
             DeleteSectorResult.InUse => Conflict(new
             {
-                message = "Cannot delete a sector used by project sections."
+                message = localizer["SectorInUse"].Value
             }),
             _ => StatusCode(500)
         };

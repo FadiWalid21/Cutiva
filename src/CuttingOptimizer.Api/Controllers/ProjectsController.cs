@@ -3,14 +3,18 @@ using CuttingOptimizer.Application.Features.Projects;
 using CuttingOptimizer.Application.Features.Projects.Commands.DeleteProject;
 using CuttingOptimizer.Application.Features.Projects.Commands.UpdateProject;
 using CuttingOptimizer.Application.Features.Projects.Queries.GetProjects;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/workshops/{workshopId:guid}/projects")]
-public sealed class ProjectsController(ISender sender) : ControllerBase
+public sealed class ProjectsController(
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -29,7 +33,7 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
         {
             return NotFound(new
             {
-                message = "Workshop not found."
+                message = localizer["WorkshopNotFound"].Value
             });
         }
 
@@ -43,7 +47,7 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
                 request.CustomerName
             });
     }
-    
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         Guid workshopId,
@@ -56,12 +60,11 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
             cancellationToken);
 
         if (result is null)
-            return NotFound(new { message = "Workshop not found." });
+            return NotFound(new { message = localizer["WorkshopNotFound"].Value });
 
         return Ok(result);
     }
-    
-    
+
     [HttpPut("{projectId:guid}")]
     public async Task<IActionResult> Update(
         Guid workshopId,
@@ -78,7 +81,7 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
             cancellationToken);
 
         if (!updated)
-            return NotFound(new { message = "Project not found." });
+            return NotFound(new { message = localizer["ProjectNotFound"].Value });
 
         return NoContent();
     }
@@ -94,7 +97,7 @@ public sealed class ProjectsController(ISender sender) : ControllerBase
             cancellationToken);
 
         if (!deleted)
-            return NotFound(new { message = "Project not found." });
+            return NotFound(new { message = localizer["ProjectNotFound"].Value });
 
         return NoContent();
     }

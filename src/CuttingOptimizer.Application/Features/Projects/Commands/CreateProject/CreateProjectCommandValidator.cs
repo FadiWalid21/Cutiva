@@ -1,24 +1,26 @@
+using CuttingOptimizer.Application.Resources;
 using FluentValidation;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Application.Features.Projects;
 
 public sealed class CreateProjectCommandValidator
     : AbstractValidator<CreateProjectCommand>
 {
-    public CreateProjectCommandValidator()
+    public CreateProjectCommandValidator(IStringLocalizer<Messages> localizer)
     {
         RuleFor(x => x.WorkshopId)
             .NotEmpty()
-            .WithMessage("Workshop ID is required.");
+            .WithMessage(_ => localizer["WorkshopIdRequired"]);
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Project name is required.")
+            .WithMessage(_ => localizer["ProjectNameRequired"])
             .MaximumLength(200)
-            .WithMessage("Project name must not exceed 200 characters.");
+            .WithMessage(_ => localizer["ProjectNameMaxLength"]);
 
         RuleFor(x => x.CustomerName)
             .MaximumLength(150)
-            .WithMessage("Customer name must not exceed 150 characters.");
+            .WithMessage(_ => localizer["CustomerNameMaxLength"]);
     }
 }

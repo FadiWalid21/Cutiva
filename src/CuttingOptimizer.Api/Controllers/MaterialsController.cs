@@ -3,14 +3,18 @@ using CuttingOptimizer.Application.Features.Materials.Commands.CreateMaterial;
 using CuttingOptimizer.Application.Features.Materials.Queries;
 using CuttingOptimizer.Application.Features.Materials.Queries.GetMaterialById;
 using CuttingOptimizer.Application.Features.Materials.Queries.GetMaterials;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/materials")]
-public sealed class MaterialsController(ISender sender) : ControllerBase
+public sealed class MaterialsController(
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -29,7 +33,7 @@ public sealed class MaterialsController(ISender sender) : ControllerBase
         {
             return Conflict(new
             {
-                message = "Sector not found or material code already exists."
+                message = localizer["SectorNotFoundOrMaterialCodeExists"].Value
             });
         }
 
@@ -44,7 +48,7 @@ public sealed class MaterialsController(ISender sender) : ControllerBase
                 request.Description
             });
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<MaterialDto>>> GetAll(
         [FromQuery] Guid? sectorId,
@@ -70,7 +74,7 @@ public sealed class MaterialsController(ISender sender) : ControllerBase
         {
             return NotFound(new
             {
-                message = "Material not found."
+                message = localizer["MaterialNotFound"].Value
             });
         }
 

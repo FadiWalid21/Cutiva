@@ -1,31 +1,33 @@
+using CuttingOptimizer.Application.Resources;
 using FluentValidation;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Application.Features.RequiredCuts.Commands.CreateRequiredCut;
 
 public sealed class CreateRequiredCutValidator
     : AbstractValidator<CreateRequiredCutCommand>
 {
-    public CreateRequiredCutValidator()
+    public CreateRequiredCutValidator(IStringLocalizer<Messages> localizer)
     {
         RuleFor(x => x.ProjectSectionId)
             .NotEmpty()
-            .WithMessage("Project section is required.");
+            .WithMessage(_ => localizer["ProjectSectionRequired"]);
 
         RuleFor(x => x.MaterialId)
             .NotEmpty()
-            .WithMessage("Material is required.");
+            .WithMessage(_ => localizer["MaterialRequired"]);
 
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(150)
-            .WithMessage("Name is required and cannot exceed 150 characters.");
+            .WithMessage(_ => localizer["NameRequiredMax150"]);
 
         RuleFor(x => x.LengthMm)
             .GreaterThan(0)
-            .WithMessage("Length must be greater than zero.");
+            .WithMessage(_ => localizer["LengthMustBePositive"]);
 
         RuleFor(x => x.Quantity)
             .GreaterThan(0)
-            .WithMessage("Quantity must be greater than zero.");
+            .WithMessage(_ => localizer["QuantityMustBePositive"]);
     }
 }

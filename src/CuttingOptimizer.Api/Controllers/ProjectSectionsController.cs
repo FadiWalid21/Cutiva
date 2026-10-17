@@ -1,15 +1,18 @@
 using CuttingOptimizer.Api.Contracts.ProjectSections;
 using CuttingOptimizer.Application.Features.ProjectSections.Commands.CreateProjectSection;
 using CuttingOptimizer.Application.Features.ProjectSections.Queries.GetProjectSections;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/projects/{projectId:guid}/sections")]
-public sealed class ProjectSectionsController(ISender sender)
-    : ControllerBase
+public sealed class ProjectSectionsController(
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -28,7 +31,7 @@ public sealed class ProjectSectionsController(ISender sender)
         {
             return NotFound(new
             {
-                message = "Project or sector not found."
+                message = localizer["ProjectOrSectorNotFound"].Value
             });
         }
 
@@ -42,8 +45,7 @@ public sealed class ProjectSectionsController(ISender sender)
                 request.Name
             });
     }
-    
-    
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         Guid projectId,
@@ -57,7 +59,7 @@ public sealed class ProjectSectionsController(ISender sender)
         {
             return NotFound(new
             {
-                message = "Project not found."
+                message = localizer["ProjectNotFound"].Value
             });
         }
 

@@ -1,15 +1,18 @@
 using CuttingOptimizer.Api.Contracts.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCuttingPlan;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/cutting-plans")]
 public sealed class CuttingPlansController(
-    ISender sender) : ControllerBase
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<CuttingPlanDto>> Generate(
@@ -27,7 +30,7 @@ public sealed class CuttingPlansController(
         {
             return NotFound(new
             {
-                message = "Material was not found, or one or more required cuts were missing or do not belong to the material."
+                message = localizer["CuttingPlanNotFound"].Value
             });
         }
 

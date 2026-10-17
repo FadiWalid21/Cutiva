@@ -1,19 +1,21 @@
-
 using CuttingOptimizer.Api.Contracts.StockBars;
 using CuttingOptimizer.Application.Features.StockBars.Commands.CreateStockBar;
 using CuttingOptimizer.Application.Features.StockBars.Commands.UpdateStockBar;
 using CuttingOptimizer.Application.Features.StockBars.Commands.DeactivateStockBar;
 using CuttingOptimizer.Application.Features.StockBars.Queries;
 using CuttingOptimizer.Application.Features.StockBars.Queries.GetStockBars;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/stock-bars")]
 public sealed class StockBarsController(
-    ISender sender) : ControllerBase
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -32,7 +34,7 @@ public sealed class StockBarsController(
         {
             return NotFound(new
             {
-                message = "The specified material was not found."
+                message = localizer["MaterialNotFoundSimple"].Value
             });
         }
 
@@ -81,7 +83,7 @@ public sealed class StockBarsController(
         {
             return NotFound(new
             {
-                message = "Stock bar or material was not found."
+                message = localizer["StockBarOrMaterialNotFound"].Value
             });
         }
 
@@ -101,7 +103,7 @@ public sealed class StockBarsController(
         {
             return NotFound(new
             {
-                message = "Stock bar not found."
+                message = localizer["StockBarNotFound"].Value
             });
         }
 

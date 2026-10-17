@@ -1,24 +1,26 @@
+using CuttingOptimizer.Application.Resources;
 using FluentValidation;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Application.Features.ProjectSections.Commands.CreateProjectSection;
 
 public sealed class CreateProjectSectionCommandValidator
     : AbstractValidator<CreateProjectSectionCommand>
 {
-    public CreateProjectSectionCommandValidator()
+    public CreateProjectSectionCommandValidator(IStringLocalizer<Messages> localizer)
     {
         RuleFor(x => x.ProjectId)
             .NotEmpty()
-            .WithMessage("Project ID is required.");
+            .WithMessage(_ => localizer["ProjectIdRequired"]);
 
         RuleFor(x => x.SectorId)
             .NotEmpty()
-            .WithMessage("Sector ID is required.");
+            .WithMessage(_ => localizer["SectorIdRequired"]);
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Section name is required.")
+            .WithMessage(_ => localizer["SectionNameRequired"])
             .MaximumLength(200)
-            .WithMessage("Section name must not exceed 200 characters.");
+            .WithMessage(_ => localizer["SectionNameMaxLength"]);
     }
 }

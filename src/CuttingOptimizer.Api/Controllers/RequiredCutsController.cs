@@ -3,15 +3,18 @@ using CuttingOptimizer.Application.Features.RequiredCuts.Commands.CreateRequired
 using CuttingOptimizer.Application.Features.RequiredCuts.Commands.DeleteRequiredCut;
 using CuttingOptimizer.Application.Features.RequiredCuts.Commands.UpdateRequiredCut;
 using CuttingOptimizer.Application.Features.RequiredCuts.Queries.GetRequiredCuts;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/required-cuts")]
 public sealed class RequiredCutsController(
-    ISender sender) : ControllerBase
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -31,7 +34,7 @@ public sealed class RequiredCutsController(
         {
             return NotFound(new
             {
-                message = "Project section or matching material was not found."
+                message = localizer["RequiredCutSectionOrMaterialNotFound"].Value
             });
         }
 
@@ -61,7 +64,7 @@ public sealed class RequiredCutsController(
 
         return Ok(cuts);
     }
-    
+
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -82,7 +85,7 @@ public sealed class RequiredCutsController(
         {
             return NotFound(new
             {
-                message = "Required cut, project section, or matching material was not found."
+                message = localizer["RequiredCutUpdateNotFound"].Value
             });
         }
 
@@ -102,7 +105,7 @@ public sealed class RequiredCutsController(
         {
             return NotFound(new
             {
-                message = "Required cut not found."
+                message = localizer["RequiredCutNotFound"].Value
             });
         }
 

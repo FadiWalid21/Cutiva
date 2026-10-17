@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="ValidationFailed" xml:space="preserve"><value>فشل التحقق من الصحة</value></data>
+  <data name="ValidationFailedDetail" xml:space="preserve"><value>حدث خطأ أو أكثر في التحقق من البيانات.</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>حدث خطأ غير متوقع.</value></data>
+
+  <data name="WorkshopNotFound" xml:space="preserve"><value>الورشة غير موجودة.</value></data>
+  <data name="ProjectNotFound" xml:space="preserve"><value>المشروع غير موجود.</value></data>
+  <data name="ProjectOrSectorNotFound" xml:space="preserve"><value>المشروع أو القطاع غير موجود.</value></data>
+  <data name="SectorNotFound" xml:space="preserve"><value>القطاع غير موجود.</value></data>
+  <data name="SectorCodeExists" xml:space="preserve"><value>يوجد قطاع بهذا الرمز بالفعل.</value></data>
+  <data name="SectorInUse" xml:space="preserve"><value>لا يمكن حذف قطاع مستخدم في أقسام المشاريع.</value></data>
+  <data name="MaterialNotFound" xml:space="preserve"><value>المادة غير موجودة.</value></data>
+  <data name="SectorNotFoundOrMaterialCodeExists" xml:space="preserve"><value>القطاع غير موجود أو رمز المادة مستخدم بالفعل.</value></data>
+  <data name="MaterialNotFoundSimple" xml:space="preserve"><value>المادة المحددة غير موجودة.</value></data>
+  <data name="StockBarOrMaterialNotFound" xml:space="preserve"><value>قضيب المخزون أو المادة غير موجود.</value></data>
+  <data name="StockBarNotFound" xml:space="preserve"><value>قضيب المخزون غير موجود.</value></data>
+  <data name="RequiredCutSectionOrMaterialNotFound" xml:space="preserve"><value>قسم المشروع أو المادة المطابقة غير موجودة.</value></data>
+  <data name="RequiredCutUpdateNotFound" xml:space="preserve"><value>القطعة المطلوبة أو قسم المشروع أو المادة المطابقة غير موجودة.</value></data>
+  <data name="RequiredCutNotFound" xml:space="preserve"><value>القطعة المطلوبة غير موجودة.</value></data>
+  <data name="CuttingPlanNotFound" xml:space="preserve"><value>المادة غير موجودة، أو بعض القطع المطلوبة مفقودة أو لا تنتمي إلى المادة.</value></data>
+
+  <data name="WorkshopNameRequired" xml:space="preserve"><value>اسم الورشة مطلوب.</value></data>
+  <data name="WorkshopNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم الورشة 150 حرفًا.</value></data>
+  <data name="WorkshopIdRequired" xml:space="preserve"><value>معرّف الورشة مطلوب.</value></data>
+  <data name="ProjectNameRequired" xml:space="preserve"><value>اسم المشروع مطلوب.</value></data>
+  <data name="ProjectNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم المشروع 200 حرفًا.</value></data>
+  <data name="CustomerNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم العميل 150 حرفًا.</value></data>
+  <data name="ProjectIdRequired" xml:space="preserve"><value>معرّف المشروع مطلوب.</value></data>
+  <data name="SectorIdRequired" xml:space="preserve"><value>معرّف القطاع مطلوب.</value></data>
+  <data name="SectionNameRequired" xml:space="preserve"><value>اسم القسم مطلوب.</value></data>
+  <data name="SectionNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم القسم 200 حرفًا.</value></data>
+  <data name="MaterialRequired" xml:space="preserve"><value>المادة مطلوبة.</value></data>
+  <data name="ProjectSectionRequired" xml:space="preserve"><value>قسم المشروع مطلوب.</value></data>
+  <data name="NameRequiredMax150" xml:space="preserve"><value>الاسم مطلوب ويجب ألا يتجاوز 150 حرفًا.</value></data>
+  <data name="LengthMustBePositive" xml:space="preserve"><value>يجب أن يكون الطول أكبر من صفر.</value></data>
+  <data name="QuantityMustBePositive" xml:space="preserve"><value>يجب أن تكون الكمية أكبر من صفر.</value></data>
+</root>

@@ -1,11 +1,14 @@
+using CuttingOptimizer.Application.Resources;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Exceptions;
 
 public sealed class GlobalExceptionHandler(
-    ILogger<GlobalExceptionHandler> logger)
+    ILogger<GlobalExceptionHandler> logger,
+    IStringLocalizer<Messages> localizer)
     : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
@@ -30,10 +33,10 @@ public sealed class GlobalExceptionHandler(
         {
             Status = statusCode,
             Title = statusCode == StatusCodes.Status400BadRequest
-                ? "Validation failed"
-                : "An unexpected error occurred.",
+                ? localizer["ValidationFailed"].Value
+                : localizer["UnexpectedError"].Value,
             Detail = statusCode == StatusCodes.Status400BadRequest
-                ? "One or more validation errors occurred."
+                ? localizer["ValidationFailedDetail"].Value
                 : null,
             Instance = httpContext.Request.Path
         };

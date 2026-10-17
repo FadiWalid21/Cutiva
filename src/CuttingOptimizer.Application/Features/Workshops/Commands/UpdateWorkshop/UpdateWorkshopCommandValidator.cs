@@ -1,19 +1,21 @@
+using CuttingOptimizer.Application.Resources;
 using FluentValidation;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Application.Features.Workshops.Commands.UpdateWorkshop;
 
 public sealed class UpdateWorkshopCommandValidator
     : AbstractValidator<UpdateWorkshopCommand>
 {
-    public UpdateWorkshopCommandValidator()
+    public UpdateWorkshopCommandValidator(IStringLocalizer<Messages> localizer)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
 
         RuleFor(x => x.Name)
             .NotEmpty()
-            .WithMessage("Workshop name is required.")
+            .WithMessage(_ => localizer["WorkshopNameRequired"])
             .MaximumLength(150)
-            .WithMessage("Workshop name must not exceed 150 characters.");
+            .WithMessage(_ => localizer["WorkshopNameMaxLength"]);
     }
 }

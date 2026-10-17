@@ -1,0 +1,26 @@
+﻿
+services:
+  database:
+    image: postgres:17
+    container_name: cuttingoptimizer-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: cuttingoptimizer
+      POSTGRES_USER: cuttingoptimizer_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+
+    ports:
+      - "127.0.0.1:5432:5432"
+
+    volumes:
+      - cuttingoptimizer_pgdata:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cuttingoptimizer_user -d cuttingoptimizer"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cuttingoptimizer_pgdata:

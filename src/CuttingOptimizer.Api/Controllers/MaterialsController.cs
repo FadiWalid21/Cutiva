@@ -1,0 +1,79 @@
+using CuttingOptimizer.Api.Contracts.Materials;
+using CuttingOptimizer.Application.Features.Materials.Commands.CreateMaterial;
+using CuttingOptimizer.Application.Features.Materials.Queries;
+using CuttingOptimizer.Application.Features.Materials.Queries.GetMaterialById;
+using CuttingOptimizer.Application.Features.Materials.Queries.GetMaterials;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CuttingOptimizer.Api.Controllers;
+
+[ApiController]
+[Route("api/materials")]
+public sealed class MaterialsController(ISender sender) : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        [FromBody] CreateMaterialRequest request,
+        CancellationToken cancellationToken)
+    {
+        var materialId = await sender.Send(
+            new CreateMaterialCommand(
+                request.SectorId,
+                request.Code,
+                request.Name,
+                request.Description),
+            cancellationToken);
+
+        if (materialId is null)
+        {
+            return Conflict(new
+            {
+                message = "Sector not found or material code already exists."
+            });
+        }
+
+        return Created(
+            $"/api/materials/{materialId}",
+            new
+            {
+                id = materialId,
+                request.SectorId,
+                code = request.Code.Trim().ToUpperInvariant(),
+                request.Name,
+                request.Description
+            });
+    }
+    
+    [HttpGet]
+    public async Task<ActionResult<IReadOnlyList<MaterialDto>>> GetAll(
+        [FromQuery] Guid? sectorId,
+        CancellationToken cancellationToken)
+    {
+        var materials = await sender.Send(
+            new GetMaterialsQuery(sectorId),
+            cancellationToken);
+
+        return Ok(materials);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<MaterialDto>> GetById(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var material = await sender.Send(
+            new GetMaterialByIdQuery(id),
+            cancellationToken);
+
+        if (material is null)
+        {
+            return NotFound(new
+            {
+                message = "Material not found."
+            });
+        }
+
+        return Ok(material);
+    }
+}

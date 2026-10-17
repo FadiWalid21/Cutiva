@@ -1,0 +1,32 @@
+<div class="shell">
+  <header class="shell__header">
+    <div class="shell__brand">
+      <strong>{{ 'app.name' | translate }}</strong>
+      <span>{{ 'app.tagline' | translate }}</span>
+    </div>
+
+    <nav class="shell__nav" aria-label="Main">
+      <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+        {{ 'nav.home' | translate }}
+      </a>
+      <a routerLink="/workshops" routerLinkActive="is-active">{{ 'nav.workshops' | translate }}</a>
+      <a routerLink="/materials" routerLinkActive="is-active">{{ 'nav.materials' | translate }}</a>
+      <a routerLink="/cutting-plans" routerLinkActive="is-active">{{ 'nav.cuttingPlans' | translate }}</a>
+    </nav>
+
+    <label class="shell__lang">
+      <span>{{ 'language.label' | translate }}</span>
+      <select
+        [value]="currentLanguage()"
+        (change)="setLanguage($any($event.target).value)"
+      >
+        <option value="en">{{ 'language.en' | translate }}</option>
+        <option value="ar">{{ 'language.ar' | translate }}</option>
+      </select>
+    </label>
+  </header>
+
+  <main class="shell__main">
+    <router-outlet />
+  </main>
+</div>

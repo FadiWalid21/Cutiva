@@ -1,0 +1,21 @@
+{
+  "app": {
+    "name": "Cutiva",
+    "tagline": "Cutting plan workspace"
+  },
+  "nav": {
+    "home": "Home",
+    "workshops": "Workshops",
+    "materials": "Materials",
+    "cuttingPlans": "Cutting plans"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  },
+  "home": {
+    "title": "Welcome to Cutiva",
+    "subtitle": "Frontend scaffold is ready. Brand colors and fonts will be applied next."
+  }
+}

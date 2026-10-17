@@ -24,6 +24,15 @@ public class ApplicationDbContext(
 
     public DbSet<RequiredCut> RequiredCuts => Set<RequiredCut>();
 
+    public DbSet<CuttingPlan> CuttingPlans => Set<CuttingPlan>();
+
+    public DbSet<CuttingPlanBar> CuttingPlanBars => Set<CuttingPlanBar>();
+
+    public DbSet<CuttingPlanPiece> CuttingPlanPieces => Set<CuttingPlanPiece>();
+
+    public DbSet<CuttingPlanUnallocatedPiece> CuttingPlanUnallocatedPieces =>
+        Set<CuttingPlanUnallocatedPiece>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -35,6 +44,10 @@ public class ApplicationDbContext(
         ConfigureMaterial(modelBuilder);
         ConfigureStockBar(modelBuilder);
         ConfigureRequiredCut(modelBuilder);
+        ConfigureCuttingPlan(modelBuilder);
+        ConfigureCuttingPlanBar(modelBuilder);
+        ConfigureCuttingPlanPiece(modelBuilder);
+        ConfigureCuttingPlanUnallocatedPiece(modelBuilder);
     }
 
     private static void ConfigureWorkshop(ModelBuilder modelBuilder)
@@ -220,6 +233,131 @@ public class ApplicationDbContext(
             entity.HasOne(x => x.Material)
                 .WithMany(x => x.RequiredCuts)
                 .HasForeignKey(x => x.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureCuttingPlan(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CuttingPlan>(entity =>
+        {
+            entity.ToTable("CuttingPlans", table =>
+            {
+                table.HasCheckConstraint(
+                    "CK_CuttingPlans_KerfMm",
+                    "\"KerfMm\" >= 0");
+
+                table.HasCheckConstraint(
+                    "CK_CuttingPlans_TotalPieceLengthMm",
+                    "\"TotalPieceLengthMm\" >= 0");
+
+                table.HasCheckConstraint(
+                    "CK_CuttingPlans_TotalStockLengthMm",
+                    "\"TotalStockLengthMm\" >= 0");
+            });
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.TotalMaterialCost)
+                .HasPrecision(12, 2);
+
+            entity.Property(x => x.StrategyNote)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            entity.HasIndex(x => new { x.WorkshopId, x.CreatedAtUtc });
+
+            entity.HasOne(x => x.Workshop)
+                .WithMany()
+                .HasForeignKey(x => x.WorkshopId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Material)
+                .WithMany()
+                .HasForeignKey(x => x.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.Project)
+                .WithMany()
+                .HasForeignKey(x => x.ProjectId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureCuttingPlanBar(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CuttingPlanBar>(entity =>
+        {
+            entity.ToTable("CuttingPlanBars");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.UnitPrice)
+                .HasPrecision(12, 2);
+
+            entity.HasIndex(x => x.CuttingPlanId);
+
+            entity.HasOne(x => x.CuttingPlan)
+                .WithMany(x => x.Bars)
+                .HasForeignKey(x => x.CuttingPlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.StockBar)
+                .WithMany()
+                .HasForeignKey(x => x.StockBarId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureCuttingPlanPiece(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CuttingPlanPiece>(entity =>
+        {
+            entity.ToTable("CuttingPlanPieces");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(150)
+                .IsRequired();
+
+            entity.HasIndex(x => x.CuttingPlanBarId);
+
+            entity.HasOne(x => x.CuttingPlanBar)
+                .WithMany(x => x.Pieces)
+                .HasForeignKey(x => x.CuttingPlanBarId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.RequiredCut)
+                .WithMany()
+                .HasForeignKey(x => x.RequiredCutId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureCuttingPlanUnallocatedPiece(
+        ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CuttingPlanUnallocatedPiece>(entity =>
+        {
+            entity.ToTable("CuttingPlanUnallocatedPieces");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(150)
+                .IsRequired();
+
+            entity.HasIndex(x => x.CuttingPlanId);
+
+            entity.HasOne(x => x.CuttingPlan)
+                .WithMany(x => x.UnallocatedPieces)
+                .HasForeignKey(x => x.CuttingPlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.RequiredCut)
+                .WithMany()
+                .HasForeignKey(x => x.RequiredCutId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
     }

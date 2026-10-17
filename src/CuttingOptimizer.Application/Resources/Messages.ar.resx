@@ -24,6 +24,8 @@
   <data name="RequiredCutUpdateNotFound" xml:space="preserve"><value>القطعة المطلوبة أو قسم المشروع أو المادة المطابقة غير موجودة.</value></data>
   <data name="RequiredCutNotFound" xml:space="preserve"><value>القطعة المطلوبة غير موجودة.</value></data>
   <data name="CuttingPlanNotFound" xml:space="preserve"><value>المادة غير موجودة، أو بعض القطع المطلوبة مفقودة أو لا تنتمي إلى المادة.</value></data>
+  <data name="CuttingPlanByIdNotFound" xml:space="preserve"><value>خطة القص غير موجودة.</value></data>
+  <data name="WorkshopDashboardNotFound" xml:space="preserve"><value>الورشة غير موجودة.</value></data>
 
   <data name="WorkshopNameRequired" xml:space="preserve"><value>اسم الورشة مطلوب.</value></data>
   <data name="WorkshopNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم الورشة 150 حرفًا.</value></data>

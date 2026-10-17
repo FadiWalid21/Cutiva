@@ -1,17 +1,23 @@
 using CuttingOptimizer.Api.Contracts.Workshops;
+using CuttingOptimizer.Application.Features.Dashboard;
+using CuttingOptimizer.Application.Features.Dashboard.Queries.GetWorkshopDashboard;
 using CuttingOptimizer.Application.Features.Workshops.Commands.CreateWorkshop;
 using CuttingOptimizer.Application.Features.Workshops.Commands.DeleteWorkshop;
 using CuttingOptimizer.Application.Features.Workshops.Commands.UpdateWorkshop;
 using CuttingOptimizer.Application.Features.Workshops.Queries.GetWorkshopById;
 using CuttingOptimizer.Application.Features.Workshops.Queries.GetWorkshops;
+using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class WorkshopsController(ISender sender) : ControllerBase
+public sealed class WorkshopsController(
+    ISender sender,
+    IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> Create(
@@ -42,9 +48,27 @@ public sealed class WorkshopsController(ISender sender) : ControllerBase
 
         return Ok(workshop);
     }
-    
-    
-    
+
+    [HttpGet("{workshopId:guid}/dashboard")]
+    public async Task<ActionResult<WorkshopDashboardDto>> GetDashboard(
+        Guid workshopId,
+        CancellationToken cancellationToken)
+    {
+        var dashboard = await sender.Send(
+            new GetWorkshopDashboardQuery(workshopId),
+            cancellationToken);
+
+        if (dashboard is null)
+        {
+            return NotFound(new
+            {
+                message = localizer["WorkshopDashboardNotFound"].Value
+            });
+        }
+
+        return Ok(dashboard);
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,

@@ -7,7 +7,13 @@
   </header>
 
   @if (error()) {
-    <p class="page__error">{{ error()! | translate }}</p>
+    <p class="page__error">
+      @if (isI18nKey(error()!)) {
+        {{ error()! | translate }}
+      } @else {
+        {{ error()! }}
+      }
+    </p>
   }
 
   <div class="materials__grid">
@@ -62,7 +68,7 @@
                 <th>{{ 'materials.unitPrice' | translate }}</th>
                 <th>{{ 'materials.quantity' | translate }}</th>
                 <th>{{ 'materials.active' | translate }}</th>
-                <th></th>
+                <th>{{ 'common.actions' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -70,10 +76,23 @@
                 <tr>
                   <td>{{ bar.lengthMm }}</td>
                   <td>{{ bar.unitPrice | number: '1.0-2' }}</td>
-                  <td>{{ bar.availableQuantity }}</td>
-                  <td>{{ bar.isActive ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
                   <td>
+                    <input
+                      class="qty-input"
+                      type="number"
+                      min="0"
+                      [ngModel]="editingQty()[bar.id]"
+                      (ngModelChange)="setQtyDraft(bar.id, $event)"
+                      [name]="'qty-' + bar.id"
+                      [disabled]="!bar.isActive"
+                    />
+                  </td>
+                  <td>{{ bar.isActive ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+                  <td class="actions">
                     @if (bar.isActive) {
+                      <button type="button" class="btn btn--ghost" (click)="saveStockQty(bar)">
+                        {{ 'common.save' | translate }}
+                      </button>
                       <button type="button" class="btn btn--ghost" (click)="deactivate(bar)">
                         {{ 'materials.deactivate' | translate }}
                       </button>

@@ -74,7 +74,13 @@
       </fieldset>
 
       @if (error()) {
-        <p class="page__error">{{ error()! | translate }}</p>
+        <p class="page__error">
+          @if (isI18nKey(error()!)) {
+            {{ error()! | translate }}
+          } @else {
+            {{ error()! }}
+          }
+        </p>
       }
 
       <button type="submit" class="btn btn--primary" [disabled]="saving()">

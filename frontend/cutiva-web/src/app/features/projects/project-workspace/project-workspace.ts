@@ -1,8 +1,9 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MaterialsApi, Material } from '../../../core/api/materials.api';
+import { ProjectsApi } from '../../../core/api/projects.api';
 import {
   ProjectSection,
   ProjectSectionsApi,
@@ -12,6 +13,8 @@ import {
   RequiredCutsApi,
 } from '../../../core/api/required-cuts.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
+import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
+import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 
 @Component({
   selector: 'app-project-workspace',
@@ -25,8 +28,11 @@ export class ProjectWorkspace {
   private readonly cutsApi = inject(RequiredCutsApi);
   private readonly sectorsApi = inject(SectorsApi);
   private readonly materialsApi = inject(MaterialsApi);
+  private readonly projectsApi = inject(ProjectsApi);
+  private readonly workshopContext = inject(WorkshopContextService);
 
   readonly projectId = signal<string>('');
+  readonly projectName = signal<string>('');
   readonly sections = signal<ProjectSection[]>([]);
   readonly cuts = signal<RequiredCut[]>([]);
   readonly sectors = signal<Sector[]>([]);
@@ -34,6 +40,8 @@ export class ProjectWorkspace {
   readonly selectedSectionId = signal<string | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  readonly isI18nKey = isI18nKey;
 
   sectionName = '';
   sectionSectorId = '';
@@ -43,14 +51,6 @@ export class ProjectWorkspace {
   cutQuantity = 1;
 
   constructor() {
-    effect(() => {
-      const id = this.route.snapshot.paramMap.get('projectId') ?? '';
-      this.projectId.set(id);
-      if (id) {
-        this.bootstrap(id);
-      }
-    });
-
     this.route.paramMap.subscribe((params) => {
       const id = params.get('projectId') ?? '';
       this.projectId.set(id);
@@ -61,6 +61,8 @@ export class ProjectWorkspace {
   private bootstrap(projectId: string): void {
     this.loading.set(true);
     this.error.set(null);
+    this.resolveProjectName(projectId);
+
     this.sectorsApi.list().subscribe({
       next: (sectors) => {
         this.sectors.set(sectors);
@@ -80,6 +82,22 @@ export class ProjectWorkspace {
     this.reloadSections(projectId);
   }
 
+  private resolveProjectName(projectId: string): void {
+    const workshopId = this.workshopContext.selectedWorkshopId();
+    if (!workshopId) {
+      this.projectName.set('');
+      return;
+    }
+
+    this.projectsApi.list(workshopId, 1, 100).subscribe({
+      next: (page) => {
+        const match = page.items.find((p) => p.id === projectId);
+        this.projectName.set(match?.name ?? '');
+      },
+      error: () => this.projectName.set(''),
+    });
+  }
+
   reloadSections(projectId = this.projectId()): void {
     this.sectionsApi.list(projectId).subscribe({
       next: (sections) => {
@@ -94,8 +112,8 @@ export class ProjectWorkspace {
         if (selected) this.loadCuts(selected);
         else this.cuts.set([]);
       },
-      error: () => {
-        this.error.set('common.loadError');
+      error: (err) => {
+        this.error.set(apiErrorMessage(err, 'common.loadError'));
         this.loading.set(false);
       },
     });
@@ -109,7 +127,7 @@ export class ProjectWorkspace {
   loadCuts(sectionId: string): void {
     this.cutsApi.list({ projectSectionId: sectionId }).subscribe({
       next: (cuts) => this.cuts.set(cuts),
-      error: () => this.error.set('common.loadError'),
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
     });
   }
 
@@ -125,7 +143,7 @@ export class ProjectWorkspace {
           this.sectionName = '';
           this.reloadSections();
         },
-        error: () => this.error.set('common.saveError'),
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
       });
   }
 
@@ -146,7 +164,7 @@ export class ProjectWorkspace {
           this.cutName = '';
           this.loadCuts(sectionId);
         },
-        error: () => this.error.set('common.saveError'),
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
       });
   }
 
@@ -156,7 +174,7 @@ export class ProjectWorkspace {
         const sectionId = this.selectedSectionId();
         if (sectionId) this.loadCuts(sectionId);
       },
-      error: () => this.error.set('common.deleteError'),
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.deleteError')),
     });
   }
 }

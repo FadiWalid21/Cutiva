@@ -8,6 +8,7 @@ import { MaterialsApi, Material } from '../../../core/api/materials.api';
 import { ProjectsApi, ProjectListItem } from '../../../core/api/projects.api';
 import { ProjectSectionsApi } from '../../../core/api/project-sections.api';
 import { RequiredCut, RequiredCutsApi } from '../../../core/api/required-cuts.api';
+import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 
 @Component({
@@ -32,6 +33,8 @@ export class PlanGenerate {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+
+  readonly isI18nKey = isI18nKey;
 
   materialId = '';
   kerfMm = 3;
@@ -141,9 +144,9 @@ export class PlanGenerate {
           this.saving.set(false);
           void this.router.navigate(['/cutting-plans', plan.cuttingPlanId]);
         },
-        error: () => {
+        error: (err) => {
           this.saving.set(false);
-          this.error.set('plans.generateError');
+          this.error.set(apiErrorMessage(err, 'plans.generateError'));
         },
       });
   }

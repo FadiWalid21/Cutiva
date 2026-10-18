@@ -60,16 +60,6 @@
   </aside>
 
   <div class="app-shell__main">
-    <header class="topbar">
-      <label class="topbar__search">
-        <span class="visually-hidden">{{ 'header.searchPlaceholder' | translate }}</span>
-        <input type="search" [placeholder]="'header.searchPlaceholder' | translate" />
-      </label>
-      <div class="topbar__user">
-        <span class="topbar__role">{{ 'header.role' | translate }}</span>
-      </div>
-    </header>
-
     <main class="app-shell__content">
       <router-outlet />
     </main>

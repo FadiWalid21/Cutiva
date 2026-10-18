@@ -1,9 +1,9 @@
-import { DecimalPipe, DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { CuttingPlan, CuttingPlansApi } from '../../../core/api/cutting-plans.api';
-import { HttpErrorResponse } from '@angular/common/http';
+import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 
 @Component({
   selector: 'app-plan-detail',
@@ -21,6 +21,8 @@ export class PlanDetail {
   readonly approving = signal(false);
   readonly notice = signal<string | null>(null);
 
+  readonly isI18nKey = isI18nKey;
+
   constructor() {
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
@@ -36,8 +38,8 @@ export class PlanDetail {
         this.plan.set(plan);
         this.loading.set(false);
       },
-      error: () => {
-        this.error.set('plans.notFound');
+      error: (err) => {
+        this.error.set(apiErrorMessage(err, 'plans.notFound'));
         this.loading.set(false);
       },
     });
@@ -61,15 +63,9 @@ export class PlanDetail {
         this.approving.set(false);
         this.notice.set('plans.approveSuccess');
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err) => {
         this.approving.set(false);
-        if (err.status === 409) {
-          this.error.set('plans.approveConflict');
-        } else if (err.status === 400) {
-          this.error.set('plans.approveInsufficient');
-        } else {
-          this.error.set('plans.approveError');
-        }
+        this.error.set(apiErrorMessage(err, 'plans.approveError'));
       },
     });
   }

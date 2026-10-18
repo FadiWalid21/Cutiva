@@ -2,7 +2,13 @@
   @if (loading()) {
     <p class="page__muted">{{ 'common.loading' | translate }}</p>
   } @else if (error() && !plan()) {
-    <p class="page__error">{{ error()! | translate }}</p>
+    <p class="page__error">
+      @if (isI18nKey(error()!)) {
+        {{ error()! | translate }}
+      } @else {
+        {{ error()! }}
+      }
+    </p>
   } @else if (plan(); as p) {
     <header class="detail__header card">
       <div>
@@ -35,7 +41,13 @@
       <p class="page__ok">{{ notice()! | translate }}</p>
     }
     @if (error()) {
-      <p class="page__error">{{ error()! | translate }}</p>
+      <p class="page__error">
+        @if (isI18nKey(error()!)) {
+          {{ error()! | translate }}
+        } @else {
+          {{ error()! }}
+        }
+      </p>
     }
 
     <section class="kpi-row">

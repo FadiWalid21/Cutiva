@@ -2,7 +2,7 @@
   <header class="workspace__header">
     <div>
       <a routerLink="/projects" class="back">← {{ 'projects.backToList' | translate }}</a>
-      <h1>{{ 'projects.workspaceTitle' | translate }}</h1>
+      <h1>{{ projectName() || ('projects.workspaceTitle' | translate) }}</h1>
       <p>{{ 'projects.workspaceSubtitle' | translate }}</p>
     </div>
     <a routerLink="/cutting-plans/new" class="btn btn--primary">
@@ -11,7 +11,13 @@
   </header>
 
   @if (error()) {
-    <p class="page__error">{{ error()! | translate }}</p>
+    <p class="page__error">
+      @if (isI18nKey(error()!)) {
+        {{ error()! | translate }}
+      } @else {
+        {{ error()! }}
+      }
+    </p>
   }
 
   <div class="workspace__grid">

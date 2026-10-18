@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MaterialsApi, Material } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { StockBar, StockBarsApi } from '../../../core/api/stock-bars.api';
+import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 
 @Component({
   selector: 'app-materials-page',
@@ -22,6 +23,9 @@ export class MaterialsPage implements OnInit {
   readonly stockBars = signal<StockBar[]>([]);
   readonly selectedMaterialId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  readonly editingQty = signal<Record<string, number>>({});
+
+  readonly isI18nKey = isI18nKey;
 
   materialCode = '';
   materialName = '';
@@ -29,8 +33,8 @@ export class MaterialsPage implements OnInit {
   materialDescription = '';
 
   stockLengthMm = 6000;
-  stockUnitPrice = 0;
-  stockQuantity = 1;
+  stockUnitPrice = 120;
+  stockQuantity = 10;
 
   ngOnInit(): void {
     this.reload();
@@ -57,7 +61,7 @@ export class MaterialsPage implements OnInit {
         if (selected) this.loadStock(selected);
         else this.stockBars.set([]);
       },
-      error: () => this.error.set('common.loadError'),
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
     });
   }
 
@@ -68,9 +72,23 @@ export class MaterialsPage implements OnInit {
 
   loadStock(materialId: string): void {
     this.stockBarsApi.list({ materialId }).subscribe({
-      next: (bars) => this.stockBars.set(bars),
-      error: () => this.error.set('common.loadError'),
+      next: (bars) => {
+        this.stockBars.set(bars);
+        const drafts: Record<string, number> = {};
+        for (const bar of bars) {
+          drafts[bar.id] = bar.availableQuantity;
+        }
+        this.editingQty.set(drafts);
+      },
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
     });
+  }
+
+  setQtyDraft(barId: string, value: string | number): void {
+    this.editingQty.update((map) => ({
+      ...map,
+      [barId]: Number(value),
+    }));
   }
 
   createMaterial(): void {
@@ -91,7 +109,7 @@ export class MaterialsPage implements OnInit {
           this.materialDescription = '';
           this.reload();
         },
-        error: () => this.error.set('common.saveError'),
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
       });
   }
 
@@ -107,7 +125,27 @@ export class MaterialsPage implements OnInit {
       })
       .subscribe({
         next: () => this.loadStock(materialId),
-        error: () => this.error.set('common.saveError'),
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
+      });
+  }
+
+  saveStockQty(bar: StockBar): void {
+    const qty = this.editingQty()[bar.id];
+    if (qty === undefined || Number.isNaN(qty) || qty < 0) return;
+
+    this.stockBarsApi
+      .update(bar.id, {
+        materialId: bar.materialId,
+        lengthMm: bar.lengthMm,
+        unitPrice: bar.unitPrice,
+        availableQuantity: qty,
+      })
+      .subscribe({
+        next: () => {
+          const materialId = this.selectedMaterialId();
+          if (materialId) this.loadStock(materialId);
+        },
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
       });
   }
 
@@ -117,7 +155,7 @@ export class MaterialsPage implements OnInit {
         const materialId = this.selectedMaterialId();
         if (materialId) this.loadStock(materialId);
       },
-      error: () => this.error.set('common.saveError'),
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
     });
   }
 }

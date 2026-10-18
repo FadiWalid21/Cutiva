@@ -1,5 +1,6 @@
 using CuttingOptimizer.Api.Contracts.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans;
+using CuttingOptimizer.Application.Features.CuttingPlans.Commands.ApproveCuttingPlan;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCuttingPlan;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GetCuttingPlanById;
 using CuttingOptimizer.Application.Resources;
@@ -56,5 +57,33 @@ public sealed class CuttingPlansController(
         }
 
         return Ok(plan);
+    }
+
+    [HttpPost("{id:guid}/approve")]
+    public async Task<ActionResult<CuttingPlanDto>> Approve(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new ApproveCuttingPlanCommand(id),
+            cancellationToken);
+
+        return result switch
+        {
+            ApproveCuttingPlanSucceeded succeeded => Ok(succeeded.Plan),
+            ApproveCuttingPlanNotFound => NotFound(new
+            {
+                message = localizer["CuttingPlanByIdNotFound"].Value
+            }),
+            ApproveCuttingPlanAlreadyApproved => Conflict(new
+            {
+                message = localizer["CuttingPlanAlreadyApproved"].Value
+            }),
+            ApproveCuttingPlanInsufficientStock => BadRequest(new
+            {
+                message = localizer["CuttingPlanInsufficientStock"].Value
+            }),
+            _ => StatusCode(500)
+        };
     }
 }

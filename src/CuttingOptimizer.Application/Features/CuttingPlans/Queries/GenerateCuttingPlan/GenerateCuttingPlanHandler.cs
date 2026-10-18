@@ -3,6 +3,7 @@ using CuttingOptimizer.Application.Abstractions.Optimization;
 using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Services.Optimization;
 using CuttingOptimizer.Domain.Entities;
+using CuttingOptimizer.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -106,6 +107,7 @@ public sealed class GenerateCuttingPlanHandler(
             ProjectId = projectId,
             KerfMm = request.KerfMm,
             IsComplete = result.IsComplete,
+            Status = CuttingPlanStatus.Draft,
             TotalPieceLengthMm = totalPieceLengthMm,
             TotalStockLengthMm = totalStockLengthMm,
             TotalBarsUsed = result.TotalBarsUsed,
@@ -154,43 +156,6 @@ public sealed class GenerateCuttingPlanHandler(
         context.CuttingPlans.Add(plan);
         await context.SaveChangesAsync(cancellationToken);
 
-        return MapToDto(plan);
+        return CuttingPlanMapper.ToDto(plan);
     }
-
-    private static CuttingPlanDto MapToDto(CuttingPlan plan) =>
-        new(
-            plan.Id,
-            plan.WorkshopId,
-            plan.MaterialId,
-            plan.ProjectId,
-            plan.KerfMm,
-            plan.IsComplete,
-            plan.TotalPieceLengthMm,
-            plan.TotalStockLengthMm,
-            plan.TotalBarsUsed,
-            plan.TotalMaterialCost,
-            plan.TotalKerfMm,
-            plan.TotalLeftoverMm,
-            plan.CreatedAtUtc,
-            plan.Bars
-                .Select(bar => new CuttingPlanBarDto(
-                    bar.StockBarId,
-                    bar.LengthMm,
-                    bar.UnitPrice,
-                    bar.KerfMm,
-                    bar.RemainingLengthMm,
-                    bar.Pieces
-                        .Select(piece => new CuttingPlanPieceDto(
-                            piece.RequiredCutId,
-                            piece.Name,
-                            piece.LengthMm))
-                        .ToList()))
-                .ToList(),
-            plan.UnallocatedPieces
-                .Select(piece => new CuttingPlanUnallocatedPieceDto(
-                    piece.RequiredCutId,
-                    piece.Name,
-                    piece.LengthMm))
-                .ToList(),
-            plan.StrategyNote);
 }

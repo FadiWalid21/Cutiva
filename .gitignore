@@ -56,6 +56,9 @@ yarn-error.log*
 Thumbs.db
 Desktop.ini
 
+# Design mockups / inspiration images (local only — not for GitHub)
+design-refs/
+
 # Cursor / AI local files
 .cursor/
 .cursorignore

@@ -1,0 +1,45 @@
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.kpi {
+  padding: 1.1rem 1.2rem;
+}
+
+.kpi__label {
+  margin: 0 0 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.kpi__value {
+  margin: 0;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.kpi__meta {
+  margin: 0.45rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.kpi--accent .kpi__value {
+  color: var(--color-accent);
+}
+
+@media (max-width: 1100px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

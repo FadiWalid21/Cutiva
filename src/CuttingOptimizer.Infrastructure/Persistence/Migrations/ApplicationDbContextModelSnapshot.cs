@@ -28,6 +28,9 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -42,6 +45,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("StrategyNote")
                         .IsRequired()

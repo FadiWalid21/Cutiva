@@ -1,0 +1,70 @@
+<section class="settings">
+  <header>
+    <h1>{{ 'settings.title' | translate }}</h1>
+    <p>{{ 'settings.subtitle' | translate }}</p>
+  </header>
+
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  }
+  @if (notice()) {
+    <p class="page__ok">{{ notice()! | translate }}</p>
+  }
+
+  <div class="settings__grid">
+    <article class="card panel">
+      <h2>{{ 'settings.workshops' | translate }}</h2>
+      <form class="inline-form" (ngSubmit)="createWorkshop()">
+        <input
+          [(ngModel)]="workshopName"
+          name="workshopName"
+          [placeholder]="'settings.workshopName' | translate"
+          required
+        />
+        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+      </form>
+
+      <ul class="list">
+        @for (workshop of workshopContext.workshops(); track workshop.id) {
+          <li class="list__row">
+            <input
+              [ngModel]="workshopDraft(workshop.id, workshop.name)"
+              (ngModelChange)="setWorkshopDraft(workshop.id, $event)"
+              [name]="'w-' + workshop.id"
+            />
+            <button
+              type="button"
+              class="btn btn--ghost"
+              (click)="renameWorkshop(workshop.id, workshop.name)"
+            >
+              {{ 'common.save' | translate }}
+            </button>
+            <button type="button" class="btn btn--ghost" (click)="deleteWorkshop(workshop.id)">
+              {{ 'common.delete' | translate }}
+            </button>
+          </li>
+        }
+      </ul>
+    </article>
+
+    <article class="card panel">
+      <h2>{{ 'settings.sectors' | translate }}</h2>
+      <form class="inline-form" (ngSubmit)="createSector()">
+        <input [(ngModel)]="sectorCode" name="sectorCode" [placeholder]="'settings.sectorCode' | translate" required />
+        <input [(ngModel)]="sectorName" name="sectorName" [placeholder]="'settings.sectorName' | translate" required />
+        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+      </form>
+
+      <ul class="list">
+        @for (sector of sectors(); track sector.id) {
+          <li class="list__row">
+            <span>{{ sector.code }} — {{ sector.name }}</span>
+            <button type="button" class="btn btn--ghost" (click)="deleteSector(sector.id)">
+              {{ 'common.delete' | translate }}
+            </button>
+          </li>
+        }
+      </ul>
+    </article>
+  </div>
+</section>

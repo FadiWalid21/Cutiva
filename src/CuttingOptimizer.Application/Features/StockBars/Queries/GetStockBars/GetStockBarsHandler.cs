@@ -47,6 +47,7 @@ public sealed class GetStockBarsHandler(
                 stockBar.Material.Sector.Name,
                 stockBar.LengthMm,
                 stockBar.UnitPrice,
+                stockBar.AvailableQuantity,
                 stockBar.IsActive))
             .ToListAsync(cancellationToken);
     }

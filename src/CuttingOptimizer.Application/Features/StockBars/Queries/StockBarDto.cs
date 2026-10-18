@@ -10,5 +10,6 @@ public sealed record StockBarDto(
     string SectorName,
     int LengthMm,
     decimal UnitPrice,
+    int AvailableQuantity,
     bool IsActive
 );

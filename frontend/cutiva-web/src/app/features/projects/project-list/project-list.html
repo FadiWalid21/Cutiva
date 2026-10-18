@@ -1,0 +1,74 @@
+<section class="page card">
+  <header class="page__header">
+    <div>
+      <h1>{{ 'projects.listTitle' | translate }}</h1>
+      <p>{{ 'projects.listSubtitle' | translate }}</p>
+    </div>
+    <a routerLink="/projects/new" class="btn btn--primary">
+      + {{ 'nav.newProject' | translate }}
+    </a>
+  </header>
+
+  @if (!workshopContext.hasWorkshops()) {
+    <p class="page__empty">
+      {{ 'dashboard.noWorkshop' | translate }}
+      <a routerLink="/settings">{{ 'settings.goSettings' | translate }}</a>
+    </p>
+  } @else if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  } @else if (projects().length === 0) {
+    <p class="page__empty">{{ 'projects.empty' | translate }}</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'projects.name' | translate }}</th>
+            <th>{{ 'projects.customer' | translate }}</th>
+            <th>{{ 'common.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of projects(); track project.id) {
+            <tr>
+              @if (editingId() === project.id) {
+                <td>
+                  <input [(ngModel)]="editName" [name]="'n-' + project.id" />
+                </td>
+                <td>
+                  <input [(ngModel)]="editCustomer" [name]="'c-' + project.id" />
+                </td>
+                <td class="actions">
+                  <button type="button" class="btn btn--primary" (click)="saveEdit(project)">
+                    {{ 'common.save' | translate }}
+                  </button>
+                  <button type="button" class="btn btn--ghost" (click)="cancelEdit()">
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                </td>
+              } @else {
+                <td>
+                  <a [routerLink]="['/projects', project.id]">{{ project.name }}</a>
+                </td>
+                <td>{{ project.customerName || '—' }}</td>
+                <td class="actions">
+                  <a class="btn btn--ghost" [routerLink]="['/projects', project.id]">
+                    {{ 'projects.open' | translate }}
+                  </a>
+                  <button type="button" class="btn btn--ghost" (click)="startEdit(project)">
+                    {{ 'common.edit' | translate }}
+                  </button>
+                  <button type="button" class="btn btn--ghost" (click)="remove(project)">
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

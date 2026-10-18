@@ -1,0 +1,95 @@
+<section class="detail">
+  @if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (error() && !plan()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  } @else if (plan(); as p) {
+    <header class="detail__header card">
+      <div>
+        <a routerLink="/" class="back">← {{ 'nav.dashboard' | translate }}</a>
+        <h1>{{ 'plans.detailTitle' | translate }}</h1>
+        <p>
+          {{ 'plans.status' | translate }}:
+          <strong>{{ p.status || 'Draft' }}</strong>
+          · {{ p.createdAtUtc | date: 'medium' }}
+        </p>
+      </div>
+      <div class="detail__actions">
+        @if (isDraft()) {
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="approving()"
+            (click)="approve()"
+          >
+            {{ 'plans.approve' | translate }}
+          </button>
+        }
+        <a routerLink="/cutting-plans/new" class="btn btn--ghost">
+          {{ 'plans.generateCta' | translate }}
+        </a>
+      </div>
+    </header>
+
+    @if (notice()) {
+      <p class="page__ok">{{ notice()! | translate }}</p>
+    }
+    @if (error()) {
+      <p class="page__error">{{ error()! | translate }}</p>
+    }
+
+    <section class="kpi-row">
+      <article class="card kpi">
+        <span>{{ 'plans.barsUsed' | translate }}</span>
+        <strong>{{ p.totalBarsUsed }}</strong>
+      </article>
+      <article class="card kpi">
+        <span>{{ 'plans.pieceLength' | translate }}</span>
+        <strong>{{ p.totalPieceLengthMm }} mm</strong>
+      </article>
+      <article class="card kpi">
+        <span>{{ 'plans.stockLength' | translate }}</span>
+        <strong>{{ p.totalStockLengthMm }} mm</strong>
+      </article>
+      <article class="card kpi">
+        <span>{{ 'plans.cost' | translate }}</span>
+        <strong>{{ p.totalMaterialCost | number: '1.0-2' }}</strong>
+      </article>
+    </section>
+
+    <article class="card block">
+      <h2>{{ 'plans.bars' | translate }}</h2>
+      @for (bar of p.bars; track bar.stockBarId + $index) {
+        <div class="bar">
+          <header>
+            <strong>{{ bar.lengthMm }} mm</strong>
+            <span>
+              {{ 'plans.leftover' | translate }}: {{ bar.remainingLengthMm }} mm ·
+              kerf {{ bar.kerfMm }} mm
+            </span>
+          </header>
+          <ul>
+            @for (piece of bar.pieces; track piece.requiredCutId + $index) {
+              <li>{{ piece.name }} — {{ piece.lengthMm }} mm</li>
+            }
+          </ul>
+        </div>
+      }
+    </article>
+
+    @if (p.unallocatedPieces.length) {
+      <article class="card block">
+        <h2>{{ 'plans.unallocated' | translate }}</h2>
+        <ul>
+          @for (piece of p.unallocatedPieces; track piece.requiredCutId + $index) {
+            <li>{{ piece.name }} — {{ piece.lengthMm }} mm</li>
+          }
+        </ul>
+      </article>
+    }
+
+    @if (p.strategyNote) {
+      <p class="page__muted">{{ p.strategyNote }}</p>
+    }
+  }
+</section>

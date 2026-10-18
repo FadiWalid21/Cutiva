@@ -1,21 +1,167 @@
 {
   "app": {
-    "name": "Cutiva",
-    "tagline": "Cutting plan workspace"
+    "name": "CUTIVA",
+    "tagline": "Linear CAD Engine"
+  },
+  "common": {
+    "loading": "Loading…",
+    "loadError": "Could not load data.",
+    "saveError": "Could not save.",
+    "deleteError": "Could not delete.",
+    "actions": "Actions",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "workshop": {
+    "label": "Workshop",
+    "loading": "Loading workshops…",
+    "empty": "No workshops yet.",
+    "loadError": "Could not load workshops."
   },
   "nav": {
-    "home": "Home",
-    "workshops": "Workshops",
+    "operations": "Operations",
+    "dashboard": "Dashboard",
+    "newProject": "New Project",
+    "projects": "Projects",
     "materials": "Materials",
-    "cuttingPlans": "Cutting plans"
+    "cuttingPlans": "Cutting Plans",
+    "settings": "Settings"
   },
   "language": {
     "label": "Language",
     "en": "English",
     "ar": "Arabic"
   },
-  "home": {
-    "title": "Welcome to Cutiva",
-    "subtitle": "Frontend scaffold is ready. Brand colors and fonts will be applied next."
+  "header": {
+    "searchPlaceholder": "Search cut profiles, stock codes, jobs",
+    "role": "Production Engineer"
+  },
+  "dashboard": {
+    "title": "Optimization Overview",
+    "subtitle": "Plan smarter cuts. Reduce material waste.",
+    "loading": "Loading dashboard…",
+    "noWorkshop": "Select or create a workshop to see dashboard metrics.",
+    "loadError": "Could not load dashboard data. Is the API running?",
+    "kpi": {
+      "efficiency": "Material Efficiency",
+      "waste": "Waste",
+      "stockBarsUsed": "Stock Bars Used",
+      "costProxy": "Material cost (proxy)"
+    },
+    "leftover": {
+      "title": "Projected leftovers",
+      "subtitle": "Remainders projected from saved cutting plans (not inventory)",
+      "length": "Leftover length",
+      "percent": "Of bar",
+      "projected": "Projected leftover",
+      "empty": "No projected leftovers in the recent window."
+    },
+    "recent": {
+      "title": "Recent projects",
+      "subtitle": "Projects touched by plans in the last 30 days",
+      "project": "Project",
+      "material": "Material",
+      "efficiency": "Efficiency",
+      "status": "Status",
+      "updated": "Last plan",
+      "actions": "Actions",
+      "viewPlan": "View plan",
+      "empty": "No recent projects yet."
+    },
+    "quickCreate": {
+      "title": "Start a new project",
+      "body": "Create a workshop job quickly and begin entering required cuts.",
+      "cta": "Create project"
+    },
+    "status": {
+      "optimized": "Optimized",
+      "inProgress": "In progress"
+    }
+  },
+  "projects": {
+    "listTitle": "Projects",
+    "listSubtitle": "Workshop jobs for the selected workshop.",
+    "createTitle": "Create project",
+    "createSubtitle": "Add a new workshop job.",
+    "workspaceTitle": "Project workspace",
+    "workspaceSubtitle": "Sections and required cuts for this project.",
+    "backToList": "Back to projects",
+    "name": "Project name",
+    "customer": "Customer name",
+    "submit": "Save project",
+    "cancel": "Cancel",
+    "open": "Open",
+    "empty": "No projects yet.",
+    "sections": "Sections",
+    "sectionName": "Section name",
+    "noSections": "No sections yet.",
+    "cuts": "Required cuts",
+    "cutName": "Cut name",
+    "material": "Material",
+    "lengthMm": "Length (mm)",
+    "quantity": "Qty",
+    "noCuts": "No cuts in this section.",
+    "selectSection": "Select a section to manage cuts."
+  },
+  "plans": {
+    "generateTitle": "Generate cutting plan",
+    "generateSubtitle": "Pick material, kerf, and required cuts. Stock is not consumed until approve.",
+    "generateCta": "Generate plan",
+    "generate": "Generate",
+    "generateError": "Could not generate the cutting plan.",
+    "selectCuts": "Select at least one required cut.",
+    "noCuts": "No required cuts for this project and material.",
+    "project": "Project",
+    "material": "Material",
+    "kerfMm": "Kerf (mm)",
+    "requiredCuts": "Required cuts",
+    "detailTitle": "Cutting plan",
+    "status": "Status",
+    "approve": "Approve & consume stock",
+    "approveSuccess": "Plan approved. Stock updated and remnant bars created.",
+    "approveConflict": "This plan is already approved.",
+    "approveInsufficient": "Not enough active stock to approve this plan.",
+    "approveError": "Could not approve the plan.",
+    "notFound": "Cutting plan not found.",
+    "barsUsed": "Bars used",
+    "pieceLength": "Piece length",
+    "stockLength": "Stock length",
+    "cost": "Material cost",
+    "bars": "Bars",
+    "leftover": "Leftover",
+    "unallocated": "Unallocated pieces"
+  },
+  "materials": {
+    "title": "Materials & stock",
+    "subtitle": "Catalog materials and stock bar lengths for optimization.",
+    "list": "Materials",
+    "stock": "Stock bars",
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "lengthMm": "Length (mm)",
+    "unitPrice": "Unit price",
+    "quantity": "Available qty",
+    "active": "Active",
+    "deactivate": "Deactivate",
+    "selectMaterial": "Select a material to manage stock."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Workshops and sectors.",
+    "goSettings": "Open settings",
+    "workshops": "Workshops",
+    "workshopName": "Workshop name",
+    "workshopCreated": "Workshop created.",
+    "workshopUpdated": "Workshop updated.",
+    "workshopDeleted": "Workshop deleted.",
+    "sectors": "Sectors",
+    "sectorCode": "Sector code",
+    "sectorName": "Sector name"
   }
 }

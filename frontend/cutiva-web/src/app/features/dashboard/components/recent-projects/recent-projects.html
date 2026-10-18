@@ -1,0 +1,60 @@
+<section class="card recent">
+  <header class="recent__header">
+    <div>
+      <h2>{{ 'dashboard.recent.title' | translate }}</h2>
+      <p>{{ 'dashboard.recent.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (projects().length === 0) {
+    <p class="recent__empty">{{ 'dashboard.recent.empty' | translate }}</p>
+  } @else {
+    <div class="recent__table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'dashboard.recent.project' | translate }}</th>
+            <th>{{ 'dashboard.recent.material' | translate }}</th>
+            <th>{{ 'dashboard.recent.efficiency' | translate }}</th>
+            <th>{{ 'dashboard.recent.status' | translate }}</th>
+            <th>{{ 'dashboard.recent.updated' | translate }}</th>
+            <th>{{ 'dashboard.recent.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of projects(); track project.id) {
+            <tr>
+              <td>
+                <strong>{{ project.name }}</strong>
+              </td>
+              <td>{{ project.material }}</td>
+              <td>
+                <div class="eff">
+                  <div class="eff__track">
+                    <span [style.width.%]="project.efficiencyPercent"></span>
+                  </div>
+                  <em>{{ project.efficiencyPercent | number: '1.1-1' }}%</em>
+                </div>
+              </td>
+              <td>
+                <span [class]="statusClass(project.status)">
+                  {{ statusKey(project.status) | translate }}
+                </span>
+              </td>
+              <td>{{ project.lastPlanAtUtc | date: 'medium' }}</td>
+              <td>
+                @if (project.cuttingPlanId) {
+                  <a [routerLink]="['/cutting-plans', project.cuttingPlanId]">
+                    {{ 'dashboard.recent.viewPlan' | translate }}
+                  </a>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,129 @@
+<section class="workspace">
+  <header class="workspace__header">
+    <div>
+      <a routerLink="/projects" class="back">← {{ 'projects.backToList' | translate }}</a>
+      <h1>{{ 'projects.workspaceTitle' | translate }}</h1>
+      <p>{{ 'projects.workspaceSubtitle' | translate }}</p>
+    </div>
+    <a routerLink="/cutting-plans/new" class="btn btn--primary">
+      {{ 'plans.generateCta' | translate }}
+    </a>
+  </header>
+
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  }
+
+  <div class="workspace__grid">
+    <article class="card panel">
+      <h2>{{ 'projects.sections' | translate }}</h2>
+      <form class="inline-form" (ngSubmit)="addSection()">
+        <input
+          [(ngModel)]="sectionName"
+          name="sectionName"
+          [placeholder]="'projects.sectionName' | translate"
+          required
+        />
+        <select [(ngModel)]="sectionSectorId" name="sectionSectorId" required>
+          @for (sector of sectors(); track sector.id) {
+            <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
+          }
+        </select>
+        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+      </form>
+
+      @if (sections().length === 0) {
+        <p class="page__muted">{{ 'projects.noSections' | translate }}</p>
+      } @else {
+        <ul class="list">
+          @for (section of sections(); track section.id) {
+            <li>
+              <button
+                type="button"
+                class="list__item"
+                [class.is-active]="selectedSectionId() === section.id"
+                (click)="selectSection(section.id)"
+              >
+                <strong>{{ section.name }}</strong>
+                <span>{{ section.sectorCode }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <article class="card panel">
+      <h2>{{ 'projects.cuts' | translate }}</h2>
+      @if (!selectedSectionId()) {
+        <p class="page__muted">{{ 'projects.selectSection' | translate }}</p>
+      } @else {
+        <form class="inline-form" (ngSubmit)="addCut()">
+          <input
+            [(ngModel)]="cutName"
+            name="cutName"
+            [placeholder]="'projects.cutName' | translate"
+            required
+          />
+          <select [(ngModel)]="cutMaterialId" name="cutMaterialId" required>
+            @for (material of materials(); track material.id) {
+              <option [value]="material.id">
+                {{ material.code }} — {{ material.name }}
+              </option>
+            }
+          </select>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="cutLengthMm"
+            name="cutLengthMm"
+            [placeholder]="'projects.lengthMm' | translate"
+            required
+          />
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="cutQuantity"
+            name="cutQuantity"
+            [placeholder]="'projects.quantity' | translate"
+            required
+          />
+          <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+        </form>
+
+        @if (cuts().length === 0) {
+          <p class="page__muted">{{ 'projects.noCuts' | translate }}</p>
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'projects.cutName' | translate }}</th>
+                  <th>{{ 'projects.material' | translate }}</th>
+                  <th>{{ 'projects.lengthMm' | translate }}</th>
+                  <th>{{ 'projects.quantity' | translate }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cut of cuts(); track cut.id) {
+                  <tr>
+                    <td>{{ cut.name }}</td>
+                    <td>{{ cut.materialCode }}</td>
+                    <td>{{ cut.lengthMm }}</td>
+                    <td>{{ cut.quantity }}</td>
+                    <td>
+                      <button type="button" class="btn btn--ghost" (click)="removeCut(cut)">
+                        {{ 'common.delete' | translate }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </article>
+  </div>
+</section>

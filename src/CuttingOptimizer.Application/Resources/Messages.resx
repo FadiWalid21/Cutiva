@@ -25,6 +25,8 @@
   <data name="RequiredCutNotFound" xml:space="preserve"><value>Required cut not found.</value></data>
   <data name="CuttingPlanNotFound" xml:space="preserve"><value>Material was not found, or one or more required cuts were missing or do not belong to the material.</value></data>
   <data name="CuttingPlanByIdNotFound" xml:space="preserve"><value>Cutting plan not found.</value></data>
+  <data name="CuttingPlanAlreadyApproved" xml:space="preserve"><value>This cutting plan is already approved.</value></data>
+  <data name="CuttingPlanInsufficientStock" xml:space="preserve"><value>Not enough active stock to approve this cutting plan.</value></data>
   <data name="WorkshopDashboardNotFound" xml:space="preserve"><value>Workshop not found.</value></data>
 
   <data name="WorkshopNameRequired" xml:space="preserve"><value>Workshop name is required.</value></data>

@@ -13,44 +13,15 @@ public sealed class GetCuttingPlanByIdHandler(
         GetCuttingPlanByIdQuery request,
         CancellationToken cancellationToken)
     {
-        return await context.CuttingPlans
+        var plan = await context.CuttingPlans
             .AsNoTracking()
-            .Where(plan => plan.Id == request.Id)
-            .Select(plan => new CuttingPlanDto(
-                plan.Id,
-                plan.WorkshopId,
-                plan.MaterialId,
-                plan.ProjectId,
-                plan.KerfMm,
-                plan.IsComplete,
-                plan.TotalPieceLengthMm,
-                plan.TotalStockLengthMm,
-                plan.TotalBarsUsed,
-                plan.TotalMaterialCost,
-                plan.TotalKerfMm,
-                plan.TotalLeftoverMm,
-                plan.CreatedAtUtc,
-                plan.Bars
-                    .Select(bar => new CuttingPlanBarDto(
-                        bar.StockBarId,
-                        bar.LengthMm,
-                        bar.UnitPrice,
-                        bar.KerfMm,
-                        bar.RemainingLengthMm,
-                        bar.Pieces
-                            .Select(piece => new CuttingPlanPieceDto(
-                                piece.RequiredCutId,
-                                piece.Name,
-                                piece.LengthMm))
-                            .ToList()))
-                    .ToList(),
-                plan.UnallocatedPieces
-                    .Select(piece => new CuttingPlanUnallocatedPieceDto(
-                        piece.RequiredCutId,
-                        piece.Name,
-                        piece.LengthMm))
-                    .ToList(),
-                plan.StrategyNote))
-            .FirstOrDefaultAsync(cancellationToken);
+            .Include(p => p.Bars)
+                .ThenInclude(b => b.Pieces)
+            .Include(p => p.UnallocatedPieces)
+            .FirstOrDefaultAsync(
+                p => p.Id == request.Id,
+                cancellationToken);
+
+        return plan is null ? null : CuttingPlanMapper.ToDto(plan);
     }
 }

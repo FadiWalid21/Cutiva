@@ -417,12 +417,16 @@ Phase 3 is split so persistence and dashboard metrics can ship before inventory 
 - **Projected leftovers** (API field: `projectedLeftovers`): bar remainders from saved plans with `RemainingLengthMm > 0`. These are **not** inventoriable stock remnants. UI copy should say “projected leftover” / “متوقع من الخطة”.
 - Index `(WorkshopId, CreatedAtUtc)` on `CuttingPlans` supports dashboard filters.
 
-#### Phase 3b — Approve / consume (later)
+#### Phase 3b — Approve / consume
 
-- Add plan review and approval if required.
-- Define inventory reservation/consumption rules.
-- Track actual material usage and leftovers as real inventory changes.
-- Only after approve/consume may leftovers become inventoriable remnants (Phase 4).
+- Cutting plans are created with status `Draft`. Generation still does **not** mutate stock.
+- `POST /api/cutting-plans/{id}/approve`:
+  1. Reject if plan missing, already `Approved`, or any used stock bar is inactive / insufficient quantity.
+  2. Decrement `StockBar.AvailableQuantity` by the number of plan-bar instances for each `StockBarId`.
+  3. For each plan bar with `RemainingLengthMm > 0`, insert a new inventoriable `StockBar` (`AvailableQuantity = 1`, same material, leftover length, unit price from plan bar or source).
+  4. Set status `Approved` and `ApprovedAtUtc`.
+- Dashboard `projectedLeftovers` remain plan-based projections; inventoriable remnants appear in stock inventory after approve.
+- Phase 4 may add offcut eligibility/reuse policy on top of these remnant stock rows.
 
 ### Phase 4 — Improve Optimization
 - Compare heuristic results against alternative algorithms.

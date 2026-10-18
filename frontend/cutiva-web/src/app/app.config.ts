@@ -11,6 +11,7 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import { languageInterceptor } from './core/interceptors/language.interceptor';
 import { LanguageService } from './core/services/language.service';
+import { WorkshopContextService } from './core/services/workshop-context.service';
 import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -28,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAppInitializer(() => {
       inject(LanguageService).init();
+      inject(WorkshopContextService).load();
     }),
   ],
 };

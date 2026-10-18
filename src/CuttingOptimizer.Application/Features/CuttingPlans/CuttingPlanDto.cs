@@ -7,6 +7,8 @@ public sealed record CuttingPlanDto(
     Guid? ProjectId,
     int KerfMm,
     bool IsComplete,
+    string Status,
+    DateTime? ApprovedAtUtc,
     int TotalPieceLengthMm,
     int TotalStockLengthMm,
     int TotalBarsUsed,

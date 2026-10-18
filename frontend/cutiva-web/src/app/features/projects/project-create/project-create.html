@@ -1,0 +1,36 @@
+<section class="create card">
+  <header>
+    <h1>{{ 'projects.createTitle' | translate }}</h1>
+    <p>{{ 'projects.createSubtitle' | translate }}</p>
+  </header>
+
+  @if (!workshopContext.hasWorkshops()) {
+    <p class="create__notice">
+      {{ 'dashboard.noWorkshop' | translate }}
+      <a routerLink="/settings">{{ 'settings.goSettings' | translate }}</a>
+    </p>
+  } @else {
+    <form class="create__form" (ngSubmit)="submit()">
+      <label>
+        <span>{{ 'projects.name' | translate }}</span>
+        <input name="name" [(ngModel)]="name" required />
+      </label>
+
+      <label>
+        <span>{{ 'projects.customer' | translate }}</span>
+        <input name="customerName" [(ngModel)]="customerName" />
+      </label>
+
+      @if (error()) {
+        <p class="create__notice">{{ error()! | translate }}</p>
+      }
+
+      <div class="create__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ 'projects.submit' | translate }}
+        </button>
+        <a routerLink="/projects" class="btn btn--ghost">{{ 'projects.cancel' | translate }}</a>
+      </div>
+    </form>
+  }
+</section>

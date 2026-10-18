@@ -1,0 +1,48 @@
+<section class="card remnant">
+  <header class="remnant__header">
+    <div>
+      <h2>{{ 'dashboard.leftover.title' | translate }}</h2>
+      <p>{{ 'dashboard.leftover.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (leftovers().length === 0) {
+    <p class="remnant__empty">{{ 'dashboard.leftover.empty' | translate }}</p>
+  } @else {
+    <ul class="remnant__list">
+      @for (item of leftovers(); track item.id) {
+        <li class="remnant__item">
+          <div class="remnant__bar" aria-hidden="true">
+            <span class="remnant__used"></span>
+            <span
+              class="remnant__scrap"
+              [style.flex-grow]="item.percentOfBar"
+            ></span>
+          </div>
+          <div class="remnant__meta">
+            <div>
+              <strong>{{ item.materialName }}</strong>
+              <span>{{ item.sourceBarLabel }}</span>
+              @if (item.isProjected) {
+                <em class="remnant__flag">{{ 'dashboard.leftover.projected' | translate }}</em>
+              }
+            </div>
+            <dl>
+              <div>
+                <dt>{{ 'dashboard.leftover.length' | translate }}</dt>
+                <dd>{{ item.lengthMm | number: '1.0-0' }} mm</dd>
+              </div>
+              <div>
+                <dt>{{ 'dashboard.leftover.percent' | translate }}</dt>
+                <dd>{{ item.percentOfBar | number: '1.1-1' }}%</dd>
+              </div>
+            </dl>
+            <a class="btn btn--ghost" [routerLink]="['/cutting-plans', item.cuttingPlanId]">
+              {{ 'dashboard.recent.viewPlan' | translate }}
+            </a>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

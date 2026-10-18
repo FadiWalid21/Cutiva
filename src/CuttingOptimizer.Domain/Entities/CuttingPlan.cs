@@ -1,3 +1,5 @@
+using CuttingOptimizer.Domain.Enums;
+
 namespace CuttingOptimizer.Domain.Entities;
 
 public class CuttingPlan
@@ -13,6 +15,10 @@ public class CuttingPlan
     public int KerfMm { get; set; }
 
     public bool IsComplete { get; set; }
+
+    public CuttingPlanStatus Status { get; set; } = CuttingPlanStatus.Draft;
+
+    public DateTime? ApprovedAtUtc { get; set; }
 
     public int TotalPieceLengthMm { get; set; }
 

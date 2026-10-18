@@ -265,6 +265,11 @@ public class ApplicationDbContext(
                 .HasMaxLength(500)
                 .IsRequired();
 
+            entity.Property(x => x.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32)
+                .IsRequired();
+
             entity.HasIndex(x => new { x.WorkshopId, x.CreatedAtUtc });
 
             entity.HasOne(x => x.Workshop)

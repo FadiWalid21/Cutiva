@@ -1,21 +1,167 @@
 {
   "app": {
-    "name": "Cutiva",
-    "tagline": "مساحة عمل خطط القص"
+    "name": "CUTIVA",
+    "tagline": "محرك القص الخطي"
+  },
+  "common": {
+    "loading": "جارٍ التحميل…",
+    "loadError": "تعذّر تحميل البيانات.",
+    "saveError": "تعذّر الحفظ.",
+    "deleteError": "تعذّر الحذف.",
+    "actions": "إجراءات",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "add": "إضافة",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "workshop": {
+    "label": "الورشة",
+    "loading": "جارٍ تحميل الورش…",
+    "empty": "لا توجد ورش بعد.",
+    "loadError": "تعذّر تحميل الورش."
   },
   "nav": {
-    "home": "الرئيسية",
-    "workshops": "الورش",
+    "operations": "العمليات",
+    "dashboard": "لوحة التحكم",
+    "newProject": "مشروع جديد",
+    "projects": "المشاريع",
     "materials": "المواد",
-    "cuttingPlans": "خطط القص"
+    "cuttingPlans": "خطط القص",
+    "settings": "الإعدادات"
   },
   "language": {
     "label": "اللغة",
     "en": "الإنجليزية",
     "ar": "العربية"
   },
-  "home": {
-    "title": "مرحبًا بك في Cutiva",
-    "subtitle": "هيكل الواجهة جاهز. سيتم تطبيق ألوان العلامة والخطوط لاحقًا."
+  "header": {
+    "searchPlaceholder": "ابحث عن القطاعات أو المخزون أو الوظائف",
+    "role": "مهندس إنتاج"
+  },
+  "dashboard": {
+    "title": "نظرة عامة على التحسين",
+    "subtitle": "خطط قصًا أذكى. قلل هدر المواد.",
+    "loading": "جارٍ تحميل لوحة التحكم…",
+    "noWorkshop": "اختر أو أنشئ ورشة لعرض مؤشرات اللوحة.",
+    "loadError": "تعذّر تحميل بيانات اللوحة. هل الـ API يعمل؟",
+    "kpi": {
+      "efficiency": "كفاءة المواد",
+      "waste": "الهدر",
+      "stockBarsUsed": "قضبان المخزون المستخدمة",
+      "costProxy": "تكلفة المواد (تقديرية)"
+    },
+    "leftover": {
+      "title": "بواقي متوقعة",
+      "subtitle": "بواقي متوقعة من خطط القص المحفوظة (ليست مخزونًا)",
+      "length": "طول الباقي",
+      "percent": "من القضيب",
+      "projected": "متوقع من الخطة",
+      "empty": "لا توجد بواقي متوقعة في النافذة الأخيرة."
+    },
+    "recent": {
+      "title": "آخر المشاريع",
+      "subtitle": "مشاريع لمستها خطط خلال آخر 30 يومًا",
+      "project": "المشروع",
+      "material": "المادة",
+      "efficiency": "الكفاءة",
+      "status": "الحالة",
+      "updated": "آخر خطة",
+      "actions": "إجراءات",
+      "viewPlan": "عرض الخطة",
+      "empty": "لا توجد مشاريع حديثة بعد."
+    },
+    "quickCreate": {
+      "title": "ابدأ مشروعًا جديدًا",
+      "body": "أنشئ وظيفة ورشة بسرعة وابدأ إدخال القطع المطلوبة.",
+      "cta": "إنشاء مشروع"
+    },
+    "status": {
+      "optimized": "مُحسَّن",
+      "inProgress": "جارٍ العمل"
+    }
+  },
+  "projects": {
+    "listTitle": "المشاريع",
+    "listSubtitle": "وظائف الورشة المحددة.",
+    "createTitle": "إنشاء مشروع",
+    "createSubtitle": "أضف وظيفة ورشة جديدة.",
+    "workspaceTitle": "مساحة المشروع",
+    "workspaceSubtitle": "الأقسام والقطع المطلوبة لهذا المشروع.",
+    "backToList": "العودة إلى المشاريع",
+    "name": "اسم المشروع",
+    "customer": "اسم العميل",
+    "submit": "حفظ المشروع",
+    "cancel": "إلغاء",
+    "open": "فتح",
+    "empty": "لا توجد مشاريع بعد.",
+    "sections": "الأقسام",
+    "sectionName": "اسم القسم",
+    "noSections": "لا توجد أقسام بعد.",
+    "cuts": "القطع المطلوبة",
+    "cutName": "اسم القطعة",
+    "material": "المادة",
+    "lengthMm": "الطول (مم)",
+    "quantity": "الكمية",
+    "noCuts": "لا توجد قطع في هذا القسم.",
+    "selectSection": "اختر قسمًا لإدارة القطع."
+  },
+  "plans": {
+    "generateTitle": "إنشاء خطة قص",
+    "generateSubtitle": "اختر المادة والكرْف والقطع. لا يُستهلك المخزون حتى الاعتماد.",
+    "generateCta": "إنشاء خطة",
+    "generate": "إنشاء",
+    "generateError": "تعذّر إنشاء خطة القص.",
+    "selectCuts": "اختر قطعة واحدة على الأقل.",
+    "noCuts": "لا توجد قطع لهذا المشروع والمادة.",
+    "project": "المشروع",
+    "material": "المادة",
+    "kerfMm": "الكرْف (مم)",
+    "requiredCuts": "القطع المطلوبة",
+    "detailTitle": "خطة القص",
+    "status": "الحالة",
+    "approve": "اعتماد واستهلاك المخزون",
+    "approveSuccess": "تم الاعتماد. تم تحديث المخزون وإنشاء بواقي مخزنية.",
+    "approveConflict": "هذه الخطة معتمدة مسبقًا.",
+    "approveInsufficient": "لا يوجد مخزون كافٍ لاعتماد هذه الخطة.",
+    "approveError": "تعذّر اعتماد الخطة.",
+    "notFound": "خطة القص غير موجودة.",
+    "barsUsed": "القضبان المستخدمة",
+    "pieceLength": "طول القطع",
+    "stockLength": "طول المخزون",
+    "cost": "تكلفة المواد",
+    "bars": "القضبان",
+    "leftover": "الباقي",
+    "unallocated": "قطع غير مخصصة"
+  },
+  "materials": {
+    "title": "المواد والمخزون",
+    "subtitle": "كتالوج المواد وأطوال قضبان المخزون للتحسين.",
+    "list": "المواد",
+    "stock": "قضبان المخزون",
+    "code": "الرمز",
+    "name": "الاسم",
+    "description": "الوصف",
+    "lengthMm": "الطول (مم)",
+    "unitPrice": "سعر الوحدة",
+    "quantity": "الكمية المتاحة",
+    "active": "نشط",
+    "deactivate": "إلغاء التفعيل",
+    "selectMaterial": "اختر مادة لإدارة المخزون."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "الورش والقطاعات.",
+    "goSettings": "افتح الإعدادات",
+    "workshops": "الورش",
+    "workshopName": "اسم الورشة",
+    "workshopCreated": "تم إنشاء الورشة.",
+    "workshopUpdated": "تم تحديث الورشة.",
+    "workshopDeleted": "تم حذف الورشة.",
+    "sectors": "القطاعات",
+    "sectorCode": "رمز القطاع",
+    "sectorName": "اسم القطاع"
   }
 }

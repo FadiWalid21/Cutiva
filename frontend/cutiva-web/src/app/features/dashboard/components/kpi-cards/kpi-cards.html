@@ -1,0 +1,23 @@
+<section class="kpi-grid" aria-label="KPIs">
+  <article class="card kpi">
+    <p class="kpi__label">{{ 'dashboard.kpi.efficiency' | translate }}</p>
+    <p class="kpi__value">{{ kpis().materialEfficiencyPercent | number: '1.1-1' }}%</p>
+  </article>
+
+  <article class="card kpi">
+    <p class="kpi__label">{{ 'dashboard.kpi.waste' | translate }}</p>
+    <p class="kpi__value">{{ kpis().wastePercent | number: '1.1-1' }}%</p>
+  </article>
+
+  <article class="card kpi">
+    <p class="kpi__label">{{ 'dashboard.kpi.stockBarsUsed' | translate }}</p>
+    <p class="kpi__value">{{ kpis().stockBarsUsed }}</p>
+  </article>
+
+  <article class="card kpi kpi--accent">
+    <p class="kpi__label">{{ 'dashboard.kpi.costProxy' | translate }}</p>
+    <p class="kpi__value">
+      {{ kpis().totalMaterialCost | number: '1.0-2' }}
+    </p>
+  </article>
+</section>

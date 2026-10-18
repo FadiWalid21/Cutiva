@@ -1,14 +1,21 @@
-/* Brand tokens — placeholders until final colors/fonts are provided */
+/* Cutiva theme tokens — edit colors/fonts here only */
 :root {
-  --color-bg: #f7f7f5;
-  --color-surface: #ffffff;
-  --color-text: #1a1a1a;
-  --color-muted: #5c5c5c;
-  --color-border: #d9d9d4;
-  --color-accent: #2f5d50;
-  --color-accent-soft: #e4efe9;
-  --font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --radius-sm: 0.35rem;
+  --color-bg: #12191c;
+  --color-surface: #1b252b;
+  --color-surface-elevated: #222d34;
+  --color-border: #2a353c;
+  --color-text: #e8eef1;
+  --color-muted: #8b9aa3;
+  --color-accent: #2fbdae;
+  --color-accent-deep: #2d5a4c;
+  --color-accent-soft: rgba(47, 189, 174, 0.14);
+  --color-warning: #c6a667;
+  --color-danger: #d96b6b;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sidebar-width: 260px;
+  --header-height: 64px;
 }
 
 *,
@@ -27,7 +34,8 @@ body {
 }
 
 body {
-  line-height: 1.4;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -35,4 +43,73 @@ input,
 select,
 textarea {
   font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: #0b1214;
+
+  &:hover {
+    filter: brightness(1.05);
+  }
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text);
+
+  &:hover {
+    background: var(--color-accent-soft);
+    border-color: var(--color-accent);
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge--success {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.badge--warning {
+  background: rgba(198, 166, 103, 0.16);
+  color: var(--color-warning);
+}
+
+.badge--info {
+  background: rgba(90, 160, 200, 0.16);
+  color: #7ec4e0;
 }

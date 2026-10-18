@@ -1,0 +1,91 @@
+<section class="page card">
+  <header class="page__header">
+    <div>
+      <h1>{{ 'plans.generateTitle' | translate }}</h1>
+      <p>{{ 'plans.generateSubtitle' | translate }}</p>
+    </div>
+    <a routerLink="/" class="btn btn--ghost">{{ 'common.cancel' | translate }}</a>
+  </header>
+
+  @if (!workshopContext.hasWorkshops()) {
+    <p class="page__empty">{{ 'dashboard.noWorkshop' | translate }}</p>
+  } @else if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <form class="form" (ngSubmit)="generate()">
+      <label>
+        <span>{{ 'plans.project' | translate }}</span>
+        <select
+          [(ngModel)]="projectId"
+          name="projectId"
+          (ngModelChange)="onProjectOrMaterialChange()"
+          required
+        >
+          @for (project of projects(); track project.id) {
+            <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>{{ 'plans.material' | translate }}</span>
+        <select
+          [(ngModel)]="materialId"
+          name="materialId"
+          (ngModelChange)="onProjectOrMaterialChange()"
+          required
+        >
+          @for (material of materials(); track material.id) {
+            <option [value]="material.id">
+              {{ material.code }} — {{ material.name }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>{{ 'plans.kerfMm' | translate }}</span>
+        <input type="number" min="0" [(ngModel)]="kerfMm" name="kerfMm" required />
+      </label>
+
+      <fieldset>
+        <legend>{{ 'plans.requiredCuts' | translate }}</legend>
+        @if (cuts().length === 0) {
+          <p class="page__muted">{{ 'plans.noCuts' | translate }}</p>
+        } @else {
+          <ul class="cut-list">
+            @for (cut of cuts(); track cut.id) {
+              <li>
+                <label>
+                  <input
+                    type="checkbox"
+                    [checked]="isSelected(cut.id)"
+                    (change)="toggleCut(cut.id, $any($event.target).checked)"
+                  />
+                  <span>
+                    {{ cut.name }} · {{ cut.lengthMm }} mm × {{ cut.quantity }}
+                    ({{ cut.projectSectionName }})
+                  </span>
+                </label>
+              </li>
+            }
+          </ul>
+        }
+      </fieldset>
+
+      @if (error()) {
+        <p class="page__error">
+          @if (isI18nKey(error()!)) {
+            {{ error()! | translate }}
+          } @else {
+            {{ error()! }}
+          }
+        </p>
+      }
+
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ 'plans.generate' | translate }}
+      </button>
+    </form>
+  }
+</section>

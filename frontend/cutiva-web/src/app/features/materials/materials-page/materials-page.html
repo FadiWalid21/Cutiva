@@ -1,0 +1,109 @@
+<section class="materials">
+  <header class="materials__header">
+    <div>
+      <h1>{{ 'materials.title' | translate }}</h1>
+      <p>{{ 'materials.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (error()) {
+    <p class="page__error">
+      @if (isI18nKey(error()!)) {
+        {{ error()! | translate }}
+      } @else {
+        {{ error()! }}
+      }
+    </p>
+  }
+
+  <div class="materials__grid">
+    <article class="card panel">
+      <h2>{{ 'materials.list' | translate }}</h2>
+      <form class="inline-form" (ngSubmit)="createMaterial()">
+        <input [(ngModel)]="materialCode" name="materialCode" [placeholder]="'materials.code' | translate" required />
+        <input [(ngModel)]="materialName" name="materialName" [placeholder]="'materials.name' | translate" required />
+        <select [(ngModel)]="materialSectorId" name="materialSectorId" required>
+          @for (sector of sectors(); track sector.id) {
+            <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
+          }
+        </select>
+        <input [(ngModel)]="materialDescription" name="materialDescription" [placeholder]="'materials.description' | translate" />
+        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+      </form>
+
+      <ul class="list">
+        @for (material of materials(); track material.id) {
+          <li>
+            <button
+              type="button"
+              class="list__item"
+              [class.is-active]="selectedMaterialId() === material.id"
+              (click)="selectMaterial(material.id)"
+            >
+              <strong>{{ material.code }} — {{ material.name }}</strong>
+              <span>{{ material.sectorName }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    </article>
+
+    <article class="card panel">
+      <h2>{{ 'materials.stock' | translate }}</h2>
+      @if (!selectedMaterialId()) {
+        <p class="page__muted">{{ 'materials.selectMaterial' | translate }}</p>
+      } @else {
+        <form class="inline-form" (ngSubmit)="createStock()">
+          <input type="number" min="1" [(ngModel)]="stockLengthMm" name="stockLengthMm" [placeholder]="'materials.lengthMm' | translate" required />
+          <input type="number" min="0" step="0.01" [(ngModel)]="stockUnitPrice" name="stockUnitPrice" [placeholder]="'materials.unitPrice' | translate" required />
+          <input type="number" min="0" [(ngModel)]="stockQuantity" name="stockQuantity" [placeholder]="'materials.quantity' | translate" required />
+          <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+        </form>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'materials.lengthMm' | translate }}</th>
+                <th>{{ 'materials.unitPrice' | translate }}</th>
+                <th>{{ 'materials.quantity' | translate }}</th>
+                <th>{{ 'materials.active' | translate }}</th>
+                <th>{{ 'common.actions' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (bar of stockBars(); track bar.id) {
+                <tr>
+                  <td>{{ bar.lengthMm }}</td>
+                  <td>{{ bar.unitPrice | number: '1.0-2' }}</td>
+                  <td>
+                    <input
+                      class="qty-input"
+                      type="number"
+                      min="0"
+                      [ngModel]="editingQty()[bar.id]"
+                      (ngModelChange)="setQtyDraft(bar.id, $event)"
+                      [name]="'qty-' + bar.id"
+                      [disabled]="!bar.isActive"
+                    />
+                  </td>
+                  <td>{{ bar.isActive ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+                  <td class="actions">
+                    @if (bar.isActive) {
+                      <button type="button" class="btn btn--ghost" (click)="saveStockQty(bar)">
+                        {{ 'common.save' | translate }}
+                      </button>
+                      <button type="button" class="btn btn--ghost" (click)="deactivate(bar)">
+                        {{ 'materials.deactivate' | translate }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  </div>
+</section>

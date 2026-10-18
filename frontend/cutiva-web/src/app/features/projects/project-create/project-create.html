@@ -1,4 +1,4 @@
-<section class="create card">
+<section class="create card" #pageRoot>
   <header>
     <h1>{{ 'projects.createTitle' | translate }}</h1>
     <p>{{ 'projects.createSubtitle' | translate }}</p>
@@ -10,19 +10,31 @@
       <a routerLink="/settings">{{ 'settings.goSettings' | translate }}</a>
     </p>
   } @else {
-    <form class="create__form" (ngSubmit)="submit()">
-      <label>
+    <form class="create__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label class="field">
         <span>{{ 'projects.name' | translate }}</span>
-        <input name="name" [(ngModel)]="name" required />
+        <input name="name" formControlName="name" [attr.aria-invalid]="!!fieldErrors().name" />
+        <app-form-field-error [message]="fieldErrors().name" />
       </label>
 
-      <label>
+      <label class="field">
         <span>{{ 'projects.customer' | translate }}</span>
-        <input name="customerName" [(ngModel)]="customerName" />
+        <input
+          name="customerName"
+          formControlName="customerName"
+          [attr.aria-invalid]="!!fieldErrors().customerName"
+        />
+        <app-form-field-error [message]="fieldErrors().customerName" />
       </label>
 
-      @if (error()) {
-        <p class="create__notice">{{ error()! | translate }}</p>
+      @if (error(); as err) {
+        <p class="create__notice">
+          @if (isI18nKey(err)) {
+            {{ err | translate }}
+          } @else {
+            {{ err }}
+          }
+        </p>
       }
 
       <div class="create__actions">

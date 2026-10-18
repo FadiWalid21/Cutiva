@@ -1,41 +1,43 @@
-@if (state$ | async; as state) {
-  @switch (state.status) {
-    @case ('boot') {
-      <p class="dashboard__status">{{ 'dashboard.loading' | translate }}</p>
-    }
-    @case ('loading') {
-      <p class="dashboard__status">{{ 'dashboard.loading' | translate }}</p>
-    }
-    @case ('noWorkshop') {
-      <div class="dashboard__status dashboard__status--empty">
-        <h1>{{ 'dashboard.title' | translate }}</h1>
-        <p>{{ 'dashboard.noWorkshop' | translate }}</p>
-      </div>
-    }
-    @case ('error') {
-      <div class="dashboard__status dashboard__status--error">
-        <h1>{{ 'dashboard.title' | translate }}</h1>
-        <p>{{ 'dashboard.loadError' | translate }}</p>
-      </div>
-    }
-    @case ('ready') {
-      <div class="dashboard">
-        <header class="dashboard__header">
-          <div>
-            <h1>{{ 'dashboard.title' | translate }}</h1>
-            <p>{{ 'dashboard.subtitle' | translate }}</p>
-          </div>
-        </header>
-
-        <app-kpi-cards [kpis]="state.data.kpis" />
-
-        <div class="dashboard__mid">
-          <app-remnant-panel [leftovers]="state.data.projectedLeftovers" />
-          <app-quick-create-cta />
+<div #pageRoot>
+  @if (state$ | async; as state) {
+    @switch (state.status) {
+      @case ('boot') {
+        <p class="dashboard__status">{{ 'dashboard.loading' | translate }}</p>
+      }
+      @case ('loading') {
+        <p class="dashboard__status">{{ 'dashboard.loading' | translate }}</p>
+      }
+      @case ('noWorkshop') {
+        <div class="dashboard__status dashboard__status--empty">
+          <h1>{{ 'dashboard.title' | translate }}</h1>
+          <p>{{ 'dashboard.noWorkshop' | translate }}</p>
         </div>
+      }
+      @case ('error') {
+        <div class="dashboard__status dashboard__status--error">
+          <h1>{{ 'dashboard.title' | translate }}</h1>
+          <p>{{ 'dashboard.loadError' | translate }}</p>
+        </div>
+      }
+      @case ('ready') {
+        <div class="dashboard">
+          <header class="dashboard__header">
+            <div>
+              <h1>{{ 'dashboard.title' | translate }}</h1>
+              <p>{{ 'dashboard.subtitle' | translate }}</p>
+            </div>
+          </header>
 
-        <app-recent-projects [projects]="state.data.recentProjects" />
-      </div>
+          <app-kpi-cards [kpis]="state.data.kpis" />
+
+          <div class="dashboard__mid">
+            <app-remnant-panel [leftovers]="state.data.projectedLeftovers" />
+            <app-quick-create-cta />
+          </div>
+
+          <app-recent-projects [projects]="state.data.recentProjects" />
+        </div>
+      }
     }
   }
-}
+</div>

@@ -1,21 +1,28 @@
-/* Cutiva theme tokens — edit colors/fonts here only */
+/* Cutiva — Apple-inspired dark product tokens */
 :root {
-  --color-bg: #12191c;
-  --color-surface: #1b252b;
-  --color-surface-elevated: #222d34;
-  --color-border: #2a353c;
-  --color-text: #e8eef1;
-  --color-muted: #8b9aa3;
-  --color-accent: #2fbdae;
-  --color-accent-deep: #2d5a4c;
-  --color-accent-soft: rgba(47, 189, 174, 0.14);
+  --color-bg: #0a0e10;
+  --color-surface: rgba(22, 28, 32, 0.72);
+  --color-surface-solid: #161c20;
+  --color-surface-elevated: rgba(28, 36, 42, 0.88);
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-text: #f2f5f7;
+  --color-muted: #8a969e;
+  --color-accent: #3eb8a8;
+  --color-accent-deep: #1f4f47;
+  --color-accent-soft: rgba(62, 184, 168, 0.14);
   --color-warning: #c6a667;
   --color-danger: #d96b6b;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --sidebar-width: 260px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI',
+    system-ui, sans-serif;
+  --font-display: 'Geist', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --sidebar-width: 272px;
   --header-height: 64px;
+  --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.35);
 }
 
 *,
@@ -29,13 +36,16 @@ body {
   margin: 0;
   min-height: 100%;
   font-family: var(--font-family);
-  background: var(--color-bg);
+  background:
+    radial-gradient(ellipse 90% 60% at 10% -10%, rgba(62, 184, 168, 0.08), transparent 50%),
+    var(--color-bg);
   color: var(--color-text);
 }
 
 body {
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -50,10 +60,27 @@ a {
   color: inherit;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.glass {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(22px) saturate(1.2);
+  -webkit-backdrop-filter: blur(22px) saturate(1.2);
+  box-shadow: var(--shadow-soft);
+}
+
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .btn {
@@ -61,32 +88,53 @@ a {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.65rem 1rem;
+  min-height: 2.6rem;
+  padding: 0.7rem 1.15rem;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
   cursor: pointer;
   text-decoration: none;
   font-weight: 600;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    filter 0.15s ease;
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
 }
 
 .btn--primary {
   background: var(--color-accent);
-  color: #0b1214;
+  color: #061012;
 
-  &:hover {
-    filter: brightness(1.05);
+  &:hover:not(:disabled) {
+    filter: brightness(1.06);
   }
 }
 
 .btn--ghost {
   background: transparent;
-  border-color: var(--color-border);
+  border-color: var(--color-border-strong);
   color: var(--color-text);
 
-  &:hover {
+  &:hover:not(:disabled) {
     background: var(--color-accent-soft);
-    border-color: var(--color-accent);
+    border-color: rgba(62, 184, 168, 0.45);
   }
 }
 
@@ -112,4 +160,45 @@ a {
 .badge--info {
   background: rgba(90, 160, 200, 0.16);
   color: #7ec4e0;
+}
+
+.field-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-danger);
+  line-height: 1.35;
+}
+
+.page__error {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: rgba(217, 107, 107, 0.1);
+  border: 1px solid rgba(217, 107, 107, 0.28);
+  color: #f0b4b4;
+}
+
+.page__muted {
+  color: var(--color-muted);
+}
+
+input,
+select,
+textarea {
+  &:focus-visible {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -17,6 +17,41 @@
     "yes": "Yes",
     "no": "No"
   },
+  "auth": {
+    "logout": "Log out",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "displayName": "Display name"
+    },
+    "login": {
+      "title": "Welcome back",
+      "headline": "Plan cuts with calm precision.",
+      "support": "Sign in to your workshop workspace.",
+      "submit": "Sign in",
+      "noAccount": "New to Cutiva?",
+      "goSignup": "Create an account"
+    },
+    "signup": {
+      "title": "Create account",
+      "headline": "Start optimizing material today.",
+      "support": "Email and password — no OAuth in this release.",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "goLogin": "Sign in"
+    },
+    "validation": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Password is required.",
+      "passwordMin": "Password must be at least 8 characters.",
+      "passwordHint": "At least 8 characters, including one digit.",
+      "displayNameMax": "Display name must not exceed 150 characters."
+    },
+    "errors": {
+      "generic": "Something went wrong. Try again."
+    }
+  },
   "workshop": {
     "label": "Workshop",
     "loading": "Loading workshops…",
@@ -106,7 +141,12 @@
     "lengthMm": "Length (mm)",
     "quantity": "Qty",
     "noCuts": "No cuts in this section.",
-    "selectSection": "Select a section to manage cuts."
+    "selectSection": "Select a section to manage cuts.",
+    "validation": {
+      "nameRequired": "Project name is required.",
+      "nameMax": "Project name must not exceed 200 characters.",
+      "customerMax": "Customer name must not exceed 150 characters."
+    }
   },
   "plans": {
     "generateTitle": "Generate cutting plan",
@@ -149,7 +189,12 @@
     "quantity": "Available qty",
     "active": "Active",
     "deactivate": "Deactivate",
-    "selectMaterial": "Select a material to manage stock."
+    "selectMaterial": "Select a material to manage stock.",
+    "validation": {
+      "codeRequired": "Material code is required.",
+      "nameRequired": "Material name is required.",
+      "sectorRequired": "Select a sector."
+    }
   },
   "settings": {
     "title": "Settings",

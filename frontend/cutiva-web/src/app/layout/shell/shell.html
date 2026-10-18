@@ -1,5 +1,5 @@
-<div class="app-shell">
-  <aside class="sidebar">
+<div class="app-shell" #shellRoot>
+  <aside class="sidebar glass">
     <div class="sidebar__brand">
       <span class="sidebar__logo">{{ 'app.name' | translate }}</span>
       <span class="sidebar__tagline">{{ 'app.tagline' | translate }}</span>
@@ -7,7 +7,7 @@
 
     <p class="sidebar__section">{{ 'nav.operations' | translate }}</p>
 
-    <nav class="sidebar__nav" aria-label="Main">
+    <nav class="sidebar__nav" aria-label="Main" #navLinks>
       <a
         routerLink="/"
         routerLinkActive="is-active"
@@ -25,6 +25,13 @@
     </nav>
 
     <div class="sidebar__footer">
+      @if (currentUser(); as user) {
+        <div class="sidebar__user">
+          <span class="sidebar__user-name">{{ user.displayName || user.email }}</span>
+          <span class="sidebar__user-email">{{ user.email }}</span>
+        </div>
+      }
+
       <label class="sidebar__lang">
         <span>{{ 'language.label' | translate }}</span>
         <select
@@ -37,7 +44,6 @@
       </label>
 
       <label class="sidebar__workshop">
-        <span class="dot" aria-hidden="true"></span>
         <span class="sidebar__workshop-label">{{ 'workshop.label' | translate }}</span>
         @if (workshopContext.loading()) {
           <span class="sidebar__workshop-status">{{ 'workshop.loading' | translate }}</span>
@@ -56,6 +62,10 @@
           </select>
         }
       </label>
+
+      <button type="button" class="btn btn--ghost sidebar__logout" (click)="logout()">
+        {{ 'auth.logout' | translate }}
+      </button>
     </div>
   </aside>
 

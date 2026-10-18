@@ -5,11 +5,13 @@ using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCutting
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GetCuttingPlanById;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/cutting-plans")]
 public sealed class CuttingPlansController(

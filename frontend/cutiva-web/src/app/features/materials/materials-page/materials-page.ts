@@ -1,28 +1,57 @@
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MaterialsApi, Material } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { StockBar, StockBarsApi } from '../../../core/api/stock-bars.api';
-import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
+import {
+  apiErrorMessage,
+  apiFieldErrors,
+  firstFieldError,
+  isI18nKey,
+} from '../../../core/http/api-error';
+import { MotionService } from '../../../core/motion/motion.service';
+import { FormFieldError } from '../../../shared/form-field/form-field-error';
 
 @Component({
   selector: 'app-materials-page',
-  imports: [FormsModule, TranslatePipe, DecimalPipe],
+  imports: [FormsModule, TranslatePipe, DecimalPipe, FormFieldError],
   templateUrl: './materials-page.html',
   styleUrl: './materials-page.scss',
 })
-export class MaterialsPage implements OnInit {
+export class MaterialsPage implements OnInit, AfterViewInit {
   private readonly materialsApi = inject(MaterialsApi);
   private readonly sectorsApi = inject(SectorsApi);
   private readonly stockBarsApi = inject(StockBarsApi);
+  private readonly motion = inject(MotionService);
+
+  private readonly root = viewChild<ElementRef<HTMLElement>>('pageRoot');
 
   readonly materials = signal<Material[]>([]);
   readonly sectors = signal<Sector[]>([]);
   readonly stockBars = signal<StockBar[]>([]);
   readonly selectedMaterialId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
+  readonly materialFieldErrors = signal<{
+    code?: string | null;
+    name?: string | null;
+    sectorId?: string | null;
+    description?: string | null;
+  }>({});
+  readonly stockFieldErrors = signal<{
+    lengthMm?: string | null;
+    unitPrice?: string | null;
+    availableQuantity?: string | null;
+  }>({});
   readonly editingQty = signal<Record<string, number>>({});
 
   readonly isI18nKey = isI18nKey;
@@ -38,6 +67,10 @@ export class MaterialsPage implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+  }
+
+  ngAfterViewInit(): void {
+    this.motion.pageEnter(this.root()?.nativeElement ?? null);
   }
 
   reload(): void {
@@ -92,9 +125,18 @@ export class MaterialsPage implements OnInit {
   }
 
   createMaterial(): void {
+    this.materialFieldErrors.set({});
+    this.error.set(null);
+
     if (!this.materialCode.trim() || !this.materialName.trim() || !this.materialSectorId) {
+      this.materialFieldErrors.set({
+        code: !this.materialCode.trim() ? 'materials.validation.codeRequired' : null,
+        name: !this.materialName.trim() ? 'materials.validation.nameRequired' : null,
+        sectorId: !this.materialSectorId ? 'materials.validation.sectorRequired' : null,
+      });
       return;
     }
+
     this.materialsApi
       .create({
         sectorId: this.materialSectorId,
@@ -109,13 +151,26 @@ export class MaterialsPage implements OnInit {
           this.materialDescription = '';
           this.reload();
         },
-        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
+        error: (err) => {
+          const fields = apiFieldErrors(err);
+          this.materialFieldErrors.set({
+            code: firstFieldError(fields, 'code'),
+            name: firstFieldError(fields, 'name'),
+            sectorId: firstFieldError(fields, 'sectorId'),
+            description: firstFieldError(fields, 'description'),
+          });
+          this.error.set(apiErrorMessage(err, 'common.saveError'));
+        },
       });
   }
 
   createStock(): void {
     const materialId = this.selectedMaterialId();
     if (!materialId) return;
+
+    this.stockFieldErrors.set({});
+    this.error.set(null);
+
     this.stockBarsApi
       .create({
         materialId,
@@ -125,7 +180,15 @@ export class MaterialsPage implements OnInit {
       })
       .subscribe({
         next: () => this.loadStock(materialId),
-        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
+        error: (err) => {
+          const fields = apiFieldErrors(err);
+          this.stockFieldErrors.set({
+            lengthMm: firstFieldError(fields, 'lengthMm'),
+            unitPrice: firstFieldError(fields, 'unitPrice'),
+            availableQuantity: firstFieldError(fields, 'availableQuantity'),
+          });
+          this.error.set(apiErrorMessage(err, 'common.saveError'));
+        },
       });
   }
 

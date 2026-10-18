@@ -1,13 +1,14 @@
 .create {
-  max-width: 36rem;
-  padding: 1.5rem;
+  max-width: 38rem;
+  padding: clamp(1.4rem, 3vw, 1.85rem);
 
   header {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.35rem;
 
     h1 {
-      margin: 0 0 0.35rem;
-      font-size: 1.4rem;
+      margin: 0 0 0.4rem;
+      font-size: 1.55rem;
+      font-weight: 600;
     }
 
     p {
@@ -19,24 +20,31 @@
 
 .create__form {
   display: grid;
-  gap: 1rem;
+  gap: 1.05rem;
+}
 
-  label {
-    display: grid;
-    gap: 0.4rem;
-    color: var(--color-muted);
-    font-size: 0.85rem;
-  }
+.field {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
 
   input {
-    background: var(--color-surface-elevated);
-    border: 1px solid var(--color-border);
+    min-height: 2.7rem;
+    background: rgba(10, 14, 16, 0.45);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-sm);
-    padding: 0.65rem 0.75rem;
+    padding: 0.7rem 0.85rem;
     outline: none;
+    color: var(--color-text);
 
     &:focus {
       border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px var(--color-accent-soft);
+    }
+
+    &[aria-invalid='true'] {
+      border-color: rgba(217, 107, 107, 0.7);
     }
   }
 }
@@ -49,7 +57,12 @@
 }
 
 .create__notice {
-  margin: 1rem 0 0;
+  margin: 0.25rem 0 0;
   color: var(--color-warning);
   font-size: 0.9rem;
+
+  a {
+    color: var(--color-accent);
+    margin-inline-start: 0.35rem;
+  }
 }

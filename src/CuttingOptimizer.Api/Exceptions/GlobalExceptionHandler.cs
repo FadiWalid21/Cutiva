@@ -43,12 +43,20 @@ public sealed class GlobalExceptionHandler(
 
         if (exception is ValidationException validationException)
         {
-            problem.Extensions["errors"] = validationException.Errors
-                .GroupBy(error => error.PropertyName)
+            var errors = validationException.Errors
+                .GroupBy(error =>
+                    string.IsNullOrWhiteSpace(error.PropertyName)
+                        ? "form"
+                        : char.ToLowerInvariant(error.PropertyName[0])
+                          + error.PropertyName[1..])
                 .ToDictionary(
                     group => group.Key,
                     group => group.Select(error => error.ErrorMessage).ToArray());
+
+            problem.Extensions["errors"] = errors;
+            problem.Extensions["message"] = localizer["ValidationFailedDetail"].Value;
         }
+
 
         httpContext.Response.StatusCode = statusCode;
 

@@ -29,6 +29,16 @@
   <data name="CuttingPlanInsufficientStock" xml:space="preserve"><value>Not enough active stock to approve this cutting plan.</value></data>
   <data name="WorkshopDashboardNotFound" xml:space="preserve"><value>Workshop not found.</value></data>
 
+  <data name="AuthEmailRequired" xml:space="preserve"><value>Email is required.</value></data>
+  <data name="AuthEmailInvalid" xml:space="preserve"><value>Enter a valid email address.</value></data>
+  <data name="AuthPasswordRequired" xml:space="preserve"><value>Password is required.</value></data>
+  <data name="AuthPasswordMinLength" xml:space="preserve"><value>Password must be at least 8 characters.</value></data>
+  <data name="AuthPasswordComplexity" xml:space="preserve"><value>Password must include at least one digit.</value></data>
+  <data name="AuthDisplayNameMaxLength" xml:space="preserve"><value>Display name must not exceed 150 characters.</value></data>
+  <data name="AuthEmailExists" xml:space="preserve"><value>An account with this email already exists.</value></data>
+  <data name="AuthRegisterFailed" xml:space="preserve"><value>Could not create the account. Check your password and try again.</value></data>
+  <data name="AuthInvalidCredentials" xml:space="preserve"><value>Invalid email or password.</value></data>
+
   <data name="WorkshopNameRequired" xml:space="preserve"><value>Workshop name is required.</value></data>
   <data name="WorkshopNameMaxLength" xml:space="preserve"><value>Workshop name must not exceed 150 characters.</value></data>
   <data name="WorkshopIdRequired" xml:space="preserve"><value>Workshop ID is required.</value></data>

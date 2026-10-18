@@ -6,11 +6,13 @@ using CuttingOptimizer.Application.Features.StockBars.Queries;
 using CuttingOptimizer.Application.Features.StockBars.Queries.GetStockBars;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/stock-bars")]
 public sealed class StockBarsController(

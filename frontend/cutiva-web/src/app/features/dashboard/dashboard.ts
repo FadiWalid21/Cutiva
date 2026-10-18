@@ -1,5 +1,11 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
@@ -11,6 +17,7 @@ import {
   startWith,
   switchMap,
 } from 'rxjs';
+import { MotionService } from '../../core/motion/motion.service';
 import { WorkshopContextService } from '../../core/services/workshop-context.service';
 import { KpiCards } from './components/kpi-cards/kpi-cards';
 import { QuickCreateCta } from './components/quick-create-cta/quick-create-cta';
@@ -39,9 +46,11 @@ export type DashboardViewState =
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
-export class Dashboard {
+export class Dashboard implements AfterViewInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly workshopContext = inject(WorkshopContextService);
+  private readonly motion = inject(MotionService);
+  private readonly pageRoot = viewChild<ElementRef<HTMLElement>>('pageRoot');
 
   readonly state$: Observable<DashboardViewState> = combineLatest([
     toObservable(this.workshopContext.loaded),
@@ -68,4 +77,10 @@ export class Dashboard {
       );
     }),
   );
+
+  ngAfterViewInit(): void {
+    queueMicrotask(() => {
+      this.motion.pageEnter(this.pageRoot()?.nativeElement ?? null);
+    });
+  }
 }

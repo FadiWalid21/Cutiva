@@ -5,11 +5,13 @@ using CuttingOptimizer.Application.Features.Projects.Commands.UpdateProject;
 using CuttingOptimizer.Application.Features.Projects.Queries.GetProjects;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/workshops/{workshopId:guid}/projects")]
 public sealed class ProjectsController(

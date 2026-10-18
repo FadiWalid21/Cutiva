@@ -5,11 +5,13 @@ using CuttingOptimizer.Application.Features.Sectors.Commands.UpdateSector;
 using CuttingOptimizer.Application.Features.Sectors.Queries.GetSectors;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/sectors")]
 public sealed class SectorsController(

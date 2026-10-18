@@ -1,4 +1,4 @@
-<section class="materials">
+<section class="materials" #pageRoot>
   <header class="materials__header">
     <div>
       <h1>{{ 'materials.title' | translate }}</h1>
@@ -6,12 +6,12 @@
     </div>
   </header>
 
-  @if (error()) {
+  @if (error(); as err) {
     <p class="page__error">
-      @if (isI18nKey(error()!)) {
-        {{ error()! | translate }}
+      @if (isI18nKey(err)) {
+        {{ err | translate }}
       } @else {
-        {{ error()! }}
+        {{ err }}
       }
     </p>
   }
@@ -20,14 +20,44 @@
     <article class="card panel">
       <h2>{{ 'materials.list' | translate }}</h2>
       <form class="inline-form" (ngSubmit)="createMaterial()">
-        <input [(ngModel)]="materialCode" name="materialCode" [placeholder]="'materials.code' | translate" required />
-        <input [(ngModel)]="materialName" name="materialName" [placeholder]="'materials.name' | translate" required />
-        <select [(ngModel)]="materialSectorId" name="materialSectorId" required>
-          @for (sector of sectors(); track sector.id) {
-            <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
-          }
-        </select>
-        <input [(ngModel)]="materialDescription" name="materialDescription" [placeholder]="'materials.description' | translate" />
+        <div class="field">
+          <input
+            [(ngModel)]="materialCode"
+            name="materialCode"
+            [placeholder]="'materials.code' | translate"
+            [attr.aria-invalid]="!!materialFieldErrors().code"
+          />
+          <app-form-field-error [message]="materialFieldErrors().code ?? null" />
+        </div>
+        <div class="field">
+          <input
+            [(ngModel)]="materialName"
+            name="materialName"
+            [placeholder]="'materials.name' | translate"
+            [attr.aria-invalid]="!!materialFieldErrors().name"
+          />
+          <app-form-field-error [message]="materialFieldErrors().name ?? null" />
+        </div>
+        <div class="field">
+          <select
+            [(ngModel)]="materialSectorId"
+            name="materialSectorId"
+            [attr.aria-invalid]="!!materialFieldErrors().sectorId"
+          >
+            @for (sector of sectors(); track sector.id) {
+              <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
+            }
+          </select>
+          <app-form-field-error [message]="materialFieldErrors().sectorId ?? null" />
+        </div>
+        <div class="field">
+          <input
+            [(ngModel)]="materialDescription"
+            name="materialDescription"
+            [placeholder]="'materials.description' | translate"
+          />
+          <app-form-field-error [message]="materialFieldErrors().description ?? null" />
+        </div>
         <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
       </form>
 
@@ -54,9 +84,40 @@
         <p class="page__muted">{{ 'materials.selectMaterial' | translate }}</p>
       } @else {
         <form class="inline-form" (ngSubmit)="createStock()">
-          <input type="number" min="1" [(ngModel)]="stockLengthMm" name="stockLengthMm" [placeholder]="'materials.lengthMm' | translate" required />
-          <input type="number" min="0" step="0.01" [(ngModel)]="stockUnitPrice" name="stockUnitPrice" [placeholder]="'materials.unitPrice' | translate" required />
-          <input type="number" min="0" [(ngModel)]="stockQuantity" name="stockQuantity" [placeholder]="'materials.quantity' | translate" required />
+          <div class="field">
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="stockLengthMm"
+              name="stockLengthMm"
+              [placeholder]="'materials.lengthMm' | translate"
+              [attr.aria-invalid]="!!stockFieldErrors().lengthMm"
+            />
+            <app-form-field-error [message]="stockFieldErrors().lengthMm ?? null" />
+          </div>
+          <div class="field">
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="stockUnitPrice"
+              name="stockUnitPrice"
+              [placeholder]="'materials.unitPrice' | translate"
+              [attr.aria-invalid]="!!stockFieldErrors().unitPrice"
+            />
+            <app-form-field-error [message]="stockFieldErrors().unitPrice ?? null" />
+          </div>
+          <div class="field">
+            <input
+              type="number"
+              min="0"
+              [(ngModel)]="stockQuantity"
+              name="stockQuantity"
+              [placeholder]="'materials.quantity' | translate"
+              [attr.aria-invalid]="!!stockFieldErrors().availableQuantity"
+            />
+            <app-form-field-error [message]="stockFieldErrors().availableQuantity ?? null" />
+          </div>
           <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
         </form>
 

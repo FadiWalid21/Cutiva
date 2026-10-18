@@ -1,13 +1,14 @@
-
 using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Domain.Entities;
+using CuttingOptimizer.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace CuttingOptimizer.Infrastructure.Persistence;
 
 public class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options), IApplicationDbContext
+    : IdentityDbContext<ApplicationUser>(options), IApplicationDbContext
 {
     public DbSet<Workshop> Workshops => Set<Workshop>();
 

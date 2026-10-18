@@ -3,11 +3,13 @@ using CuttingOptimizer.Application.Features.ProjectSections.Commands.CreateProje
 using CuttingOptimizer.Application.Features.ProjectSections.Queries.GetProjectSections;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/projects/{projectId:guid}/sections")]
 public sealed class ProjectSectionsController(

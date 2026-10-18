@@ -5,11 +5,13 @@ using CuttingOptimizer.Application.Features.RequiredCuts.Commands.UpdateRequired
 using CuttingOptimizer.Application.Features.RequiredCuts.Queries.GetRequiredCuts;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/required-cuts")]
 public sealed class RequiredCutsController(

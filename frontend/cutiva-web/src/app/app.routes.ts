@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/guards/auth.guard';
 import { Shell } from './layout/shell/shell';
 import { Dashboard } from './features/dashboard/dashboard';
 import { ProjectCreate } from './features/projects/project-create/project-create';
@@ -8,11 +9,24 @@ import { PlanGenerate } from './features/cutting-plans/plan-generate/plan-genera
 import { PlanDetail } from './features/cutting-plans/plan-detail/plan-detail';
 import { MaterialsPage } from './features/materials/materials-page/materials-page';
 import { SettingsPage } from './features/settings/settings-page/settings-page';
+import { Login } from './features/auth/login/login';
+import { Signup } from './features/auth/signup/signup';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    canActivate: [guestGuard],
+    component: Login,
+  },
+  {
+    path: 'signup',
+    canActivate: [guestGuard],
+    component: Signup,
+  },
+  {
     path: '',
     component: Shell,
+    canActivate: [authGuard],
     children: [
       { path: '', component: Dashboard },
       { path: 'projects/new', component: ProjectCreate },

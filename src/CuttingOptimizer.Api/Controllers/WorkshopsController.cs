@@ -8,11 +8,13 @@ using CuttingOptimizer.Application.Features.Workshops.Queries.GetWorkshopById;
 using CuttingOptimizer.Application.Features.Workshops.Queries.GetWorkshops;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public sealed class WorkshopsController(

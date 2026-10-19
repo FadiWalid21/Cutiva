@@ -45,6 +45,10 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "outputPath": {
+              "base": "dist/cutiva-web",
+              "browser": ""
+            },
             "assets": [
               {
                 "glob": "**/*",

@@ -23,6 +23,9 @@ public sealed class LoginHandler(IAuthService authService)
             result.AccessToken,
             result.ExpiresAtUtc,
             result.Email,
-            result.DisplayName));
+            result.DisplayName,
+            result.Roles,
+            result.WorkshopId,
+            result.Subscription));
     }
 }

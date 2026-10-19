@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
 
+import { SectionAccessory } from './accessories.api';
+
 export interface ProjectSection {
   id: string;
   projectId: string;
@@ -10,11 +12,19 @@ export interface ProjectSection {
   sectorCode: string;
   sectorName: string;
   name: string;
+  heightMm: number | null;
+  widthMm: number | null;
+  unitQuantity: number | null;
+  accessories: SectionAccessory[];
 }
 
 export interface CreateProjectSectionBody {
   sectorId: string;
   name: string;
+  heightMm: number;
+  widthMm: number;
+  unitQuantity: number;
+  accessories?: { accessoryId: string; quantity: number }[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,12 +42,27 @@ export class ProjectSectionsApi {
   create(
     projectId: string,
     body: CreateProjectSectionBody,
-  ): Observable<{ id: string; projectId: string; sectorId: string; name: string }> {
+  ): Observable<{
+    id: string;
+    projectId: string;
+    sectorId: string;
+    name: string;
+    heightMm: number;
+    widthMm: number;
+    unitQuantity: number;
+  }> {
     return this.http.post<{
       id: string;
       projectId: string;
       sectorId: string;
       name: string;
+      heightMm: number;
+      widthMm: number;
+      unitQuantity: number;
     }>(this.base(projectId), body);
+  }
+
+  delete(projectId: string, sectionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.base(projectId)}/${sectionId}`);
   }
 }

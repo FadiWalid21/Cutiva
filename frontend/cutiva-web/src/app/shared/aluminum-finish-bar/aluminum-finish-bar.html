@@ -1,0 +1,45 @@
+<div class="finish-bar">
+  <div class="finish-bar__row" role="group" [attr.aria-label]="'preview.finishLabel' | translate">
+    <span class="finish-bar__label">{{ 'preview.finishLabel' | translate }}</span>
+    <div class="finish-bar__swatches">
+      @for (finish of finishService.finishes; track finish.id) {
+        <button
+          type="button"
+          class="finish-bar__swatch"
+          [class.is-active]="finishService.finishId() === finish.id"
+          [style.--swatch]="finish.mid"
+          [style.--swatch-light]="finish.light"
+          [style.--swatch-dark]="finish.dark"
+          [attr.title]="finish.labelKey | translate"
+          [attr.aria-label]="finish.labelKey | translate"
+          [attr.aria-pressed]="finishService.finishId() === finish.id"
+          (click)="selectFinish(finish.id)"
+        ></button>
+      }
+    </div>
+    <span class="finish-bar__name">{{
+      finishService.finish().labelKey | translate
+    }}</span>
+  </div>
+
+  <div class="finish-bar__row" role="group" [attr.aria-label]="'preview.glassLabel' | translate">
+    <span class="finish-bar__label">{{ 'preview.glassLabel' | translate }}</span>
+    <div class="finish-bar__swatches">
+      @for (tint of glassService.tints; track tint.id) {
+        <button
+          type="button"
+          class="finish-bar__swatch finish-bar__swatch--glass"
+          [class.is-active]="glassService.tintId() === tint.id"
+          [style.--swatch]="tint.mid"
+          [style.--swatch-light]="tint.top"
+          [style.--swatch-dark]="tint.bottom"
+          [attr.title]="tint.labelKey | translate"
+          [attr.aria-label]="tint.labelKey | translate"
+          [attr.aria-pressed]="glassService.tintId() === tint.id"
+          (click)="selectGlass(tint.id)"
+        ></button>
+      }
+    </div>
+    <span class="finish-bar__name">{{ glassService.tint().labelKey | translate }}</span>
+  </div>
+</div>

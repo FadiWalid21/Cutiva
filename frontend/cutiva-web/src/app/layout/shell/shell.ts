@@ -2,15 +2,22 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  computed,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MotionService } from '../../core/motion/motion.service';
 import { AuthService } from '../../core/services/auth.service';
+import { FeatureFlagsService } from '../../core/services/feature-flags.service';
 import { AppLanguage, LanguageService } from '../../core/services/language.service';
+import { PwaInstallService } from '../../core/services/pwa-install.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { WorkshopContextService } from '../../core/services/workshop-context.service';
+
+const SIDEBAR_KEY = 'cutiva.sidebarCollapsed';
 
 @Component({
   selector: 'app-shell',
@@ -20,34 +27,76 @@ import { WorkshopContextService } from '../../core/services/workshop-context.ser
 })
 export class Shell implements AfterViewInit {
   private readonly languageService = inject(LanguageService);
+  private readonly themeService = inject(ThemeService);
   private readonly auth = inject(AuthService);
   private readonly motion = inject(MotionService);
+  readonly pwa = inject(PwaInstallService);
   readonly workshopContext = inject(WorkshopContextService);
+  readonly features = inject(FeatureFlagsService);
+  readonly canManageCatalog = this.auth.canManageCatalog;
 
   private readonly shellRoot = viewChild<ElementRef<HTMLElement>>('shellRoot');
   private readonly navLinks = viewChild<ElementRef<HTMLElement>>('navLinks');
 
   readonly currentLanguage = this.languageService.currentLanguage;
+  readonly theme = this.themeService.theme;
   readonly currentUser = this.auth.currentUser;
+  readonly subscription = computed(() => this.auth.currentUser()?.subscription ?? null);
+  readonly subscriptionWarn = computed(() => {
+    const sub = this.subscription();
+    if (!sub) return true;
+    if (sub.status !== 'Active') return true;
+    return sub.daysRemaining <= 7;
+  });
+  readonly seatsLabel = computed(() => {
+    const sub = this.subscription();
+    if (!sub || sub.seatUsed == null) return null;
+    return {
+      used: sub.seatUsed,
+      max: sub.maxUsers ?? null,
+    };
+  });
+  readonly showInstall = this.pwa.showInstallControl;
+  readonly mobileNavOpen = signal(false);
+  readonly collapsed = signal(localStorage.getItem(SIDEBAR_KEY) === '1');
+  /** Fixed monogram for collapsed brand (CUTIVA → C). */
+  readonly brandMono = 'C';
 
   ngAfterViewInit(): void {
     this.motion.pageEnter(this.shellRoot()?.nativeElement ?? null);
     const nav = this.navLinks()?.nativeElement;
-    if (nav) {
+    if (nav && !this.collapsed()) {
       this.motion.staggerIn(nav.querySelectorAll('a'));
     }
   }
 
-  setLanguage(lang: AppLanguage): void {
-    this.languageService.setLanguage(lang);
+  toggleSidebar(): void {
+    const next = !this.collapsed();
+    this.collapsed.set(next);
+    localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0');
   }
 
-  onWorkshopChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.workshopContext.selectWorkshop(select.value);
+  setLanguage(lang: AppLanguage): void {
+    void this.languageService.setLanguage(lang);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   logout(): void {
     this.auth.logout();
+  }
+
+  installApp(): void {
+    void this.pwa.promptInstall();
+  }
+
+  toggleMobileNav(): void {
+    this.mobileNavOpen.update((v) => !v);
+  }
+
+  closeMobileNav(): void {
+    this.mobileNavOpen.set(false);
   }
 }

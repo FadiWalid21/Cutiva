@@ -7,9 +7,9 @@ namespace CuttingOptimizer.Application.Features.Sectors.Commands.CreateSector;
 
 public sealed class CreateSectorCommandHandler(
     IApplicationDbContext dbContext)
-    : IRequestHandler<CreateSectorCommand, Guid?>
+    : IRequestHandler<CreateSectorCommand, CreateSectorOutcome>
 {
-    public async Task<Guid?> Handle(
+    public async Task<CreateSectorOutcome> Handle(
         CreateSectorCommand request,
         CancellationToken cancellationToken)
     {
@@ -21,19 +21,32 @@ public sealed class CreateSectorCommandHandler(
                 cancellationToken);
 
         if (codeExists)
-            return null;
+            return new CreateSectorOutcome(CreateSectorStatus.CodeAlreadyExists);
+
+        if (request.MaterialId.HasValue)
+        {
+            var materialOk = await dbContext.Materials
+                .AsNoTracking()
+                .AnyAsync(
+                    material => material.Id == request.MaterialId.Value,
+                    cancellationToken);
+
+            if (!materialOk)
+                return new CreateSectorOutcome(CreateSectorStatus.MaterialNotFound);
+        }
 
         var sector = new Sector
         {
             Id = Guid.NewGuid(),
             Code = code,
-            Name = request.Name.Trim()
+            Name = request.Name.Trim(),
+            MaterialId = request.MaterialId
         };
 
         dbContext.Sectors.Add(sector);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return sector.Id;
+        return new CreateSectorOutcome(CreateSectorStatus.Created, sector.Id);
     }
 }

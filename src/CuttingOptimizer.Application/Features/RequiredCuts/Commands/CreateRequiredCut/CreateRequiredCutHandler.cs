@@ -13,22 +13,18 @@ public sealed class CreateRequiredCutHandler(
         CreateRequiredCutCommand request,
         CancellationToken cancellationToken)
     {
-        var section = await context.ProjectSections
+        var sectionExists = await context.ProjectSections
             .AsNoTracking()
-            .Where(x => x.Id == request.ProjectSectionId)
-            .Select(x => new { x.Id, x.SectorId })
-            .FirstOrDefaultAsync(cancellationToken);
+            .AnyAsync(x => x.Id == request.ProjectSectionId, cancellationToken);
 
-        if (section is null)
+        if (!sectionExists)
             return null;
 
-        var materialMatchesSector = await context.Materials
-            .AnyAsync(
-                x => x.Id == request.MaterialId
-                     && x.SectorId == section.SectorId,
-                cancellationToken);
+        var materialExists = await context.Materials
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == request.MaterialId, cancellationToken);
 
-        if (!materialMatchesSector)
+        if (!materialExists)
             return null;
 
         var requiredCut = new RequiredCut

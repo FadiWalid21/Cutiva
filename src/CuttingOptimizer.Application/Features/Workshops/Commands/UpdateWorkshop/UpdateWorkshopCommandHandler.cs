@@ -21,6 +21,10 @@ public sealed class UpdateWorkshopCommandHandler(
             return false;
 
         workshop.Name = request.Name.Trim();
+        workshop.ProductionPricePerM2 =
+            request.ProductionPricePerM2 is > 0
+                ? request.ProductionPricePerM2
+                : null;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

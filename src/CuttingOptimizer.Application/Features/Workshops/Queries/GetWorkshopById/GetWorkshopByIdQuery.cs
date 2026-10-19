@@ -7,4 +7,5 @@ public sealed record GetWorkshopByIdQuery(Guid Id)
 
 public sealed record WorkshopDto(
     Guid Id,
-    string Name);
+    string Name,
+    decimal? ProductionPricePerM2);

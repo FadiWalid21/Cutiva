@@ -1,0 +1,36 @@
+@if (pwa.showBanner()) {
+  <div class="pwa-banner" role="region" [attr.aria-label]="'pwa.bannerTitle' | translate">
+    <div class="pwa-banner__copy">
+      <img class="pwa-banner__icon" src="/icons/icon-192.png" alt="" width="36" height="36" />
+      <div>
+        <strong>{{ 'pwa.bannerTitle' | translate }}</strong>
+        <span>{{ 'pwa.bannerBody' | translate }}</span>
+      </div>
+    </div>
+    <div class="pwa-banner__actions">
+      <button type="button" class="pwa-banner__primary" (click)="install()">
+        {{ 'pwa.install' | translate }}
+      </button>
+      <button type="button" class="pwa-banner__ghost" (click)="hide()">
+        {{ 'pwa.hide' | translate }}
+      </button>
+    </div>
+  </div>
+}
+
+@if (pwa.helpKind(); as kind) {
+  <div class="pwa-ios" role="dialog" aria-modal="true" (click)="closeHelp()">
+    <div class="pwa-ios__card" (click)="$event.stopPropagation()">
+      @if (kind === 'ios') {
+        <h3>{{ 'pwa.iosTitle' | translate }}</h3>
+        <p>{{ 'pwa.iosBody' | translate }}</p>
+      } @else {
+        <h3>{{ 'pwa.desktopTitle' | translate }}</h3>
+        <p>{{ 'pwa.desktopBody' | translate }}</p>
+      }
+      <button type="button" class="pwa-banner__primary" (click)="closeHelp()">
+        {{ 'pwa.iosGotIt' | translate }}
+      </button>
+    </div>
+  </div>
+}

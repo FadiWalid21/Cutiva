@@ -16,6 +16,17 @@ public sealed class GetStockBarsHandler(
             .AsNoTracking()
             .AsQueryable();
 
+        // Default: market catalog only (materials page). Pass isRemnant=true for warehouse leftovers.
+        if (request.IsRemnant.HasValue)
+        {
+            query = query.Where(
+                stockBar => stockBar.IsRemnant == request.IsRemnant.Value);
+        }
+        else
+        {
+            query = query.Where(stockBar => !stockBar.IsRemnant);
+        }
+
         if (request.MaterialId.HasValue)
         {
             query = query.Where(
@@ -48,7 +59,8 @@ public sealed class GetStockBarsHandler(
                 stockBar.LengthMm,
                 stockBar.UnitPrice,
                 stockBar.AvailableQuantity,
-                stockBar.IsActive))
+                stockBar.IsActive,
+                stockBar.IsRemnant))
             .ToListAsync(cancellationToken);
     }
 }

@@ -2,6 +2,7 @@
 export interface WorkshopSummary {
   id: string;
   name: string;
+  productionPricePerM2?: number | null;
 }
 
 export interface PagedWorkshopsResponse {
@@ -15,7 +16,7 @@ export interface PagedWorkshopsResponse {
 export interface WorkshopDashboardResponse {
   kpis: WorkshopDashboardKpisDto;
   recentProjects: DashboardRecentProjectDto[];
-  projectedLeftovers: ProjectedLeftoverDto[];
+  remnantInventory: RemnantInventoryItemDto[];
 }
 
 export interface WorkshopDashboardKpisDto {
@@ -35,14 +36,10 @@ export interface DashboardRecentProjectDto {
   lastPlanAtUtc: string;
 }
 
-export interface ProjectedLeftoverDto {
-  cuttingPlanId: string;
-  cuttingPlanBarId: string;
+export interface RemnantInventoryItemDto {
   stockBarId: string;
   materialId: string;
   materialName: string;
-  remainingLengthMm: number;
-  sourceBarLengthMm: number;
-  planCreatedAtUtc: string;
-  isProjected: boolean;
+  lengthMm: number;
+  availableQuantity: number;
 }

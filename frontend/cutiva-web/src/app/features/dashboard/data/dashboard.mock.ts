@@ -8,24 +8,20 @@ export const DASHBOARD_MOCK: DashboardSnapshot = {
     stockBarsUsed: 126,
     totalMaterialCost: 8420,
   },
-  projectedLeftovers: [
+  remnantInventory: [
     {
       id: 'rem-1',
-      cuttingPlanId: 'plan-1',
-      lengthMm: 207,
-      percentOfBar: 3.4,
-      sourceBarLabel: '6000 mm',
+      materialId: 'mat-1',
       materialName: 'Aluminum 6063-T6',
-      isProjected: true,
+      lengthMm: 2070,
+      quantity: 1,
     },
     {
       id: 'rem-2',
-      cuttingPlanId: 'plan-2',
-      lengthMm: 480,
-      percentOfBar: 8,
-      sourceBarLabel: '6000 mm',
+      materialId: 'mat-2',
       materialName: 'Aluminum Profile 40×40',
-      isProjected: true,
+      lengthMm: 4800,
+      quantity: 2,
     },
   ],
   recentProjects: [

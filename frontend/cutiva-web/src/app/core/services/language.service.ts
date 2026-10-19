@@ -1,5 +1,6 @@
 import { DOCUMENT, Injectable, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export type AppLanguage = (typeof environment.supportedLanguages)[number];
@@ -13,17 +14,17 @@ export class LanguageService {
 
   readonly currentLanguage = signal<AppLanguage>(environment.defaultLanguage as AppLanguage);
 
-  init(): void {
+  async init(): Promise<void> {
     const saved = this.readStoredLanguage();
-    this.setLanguage(saved ?? (environment.defaultLanguage as AppLanguage));
+    await this.setLanguage(saved ?? (environment.defaultLanguage as AppLanguage));
   }
 
-  setLanguage(lang: AppLanguage): void {
-    this.translate.use(lang);
+  async setLanguage(lang: AppLanguage): Promise<void> {
     this.currentLanguage.set(lang);
     this.document.documentElement.lang = lang;
     this.document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem(STORAGE_KEY, lang);
+    await firstValueFrom(this.translate.use(lang));
   }
 
   private readStoredLanguage(): AppLanguage | null {

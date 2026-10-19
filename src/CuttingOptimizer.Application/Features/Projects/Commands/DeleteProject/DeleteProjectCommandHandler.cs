@@ -21,6 +21,34 @@ public sealed class DeleteProjectCommandHandler(
         if (project is null)
             return false;
 
+        var plans = await dbContext.CuttingPlans
+            .Where(plan => plan.ProjectId == project.Id)
+            .ToListAsync(cancellationToken);
+
+        if (plans.Count > 0)
+            dbContext.CuttingPlans.RemoveRange(plans);
+
+        var sectionIds = await dbContext.ProjectSections
+            .Where(section => section.ProjectId == project.Id)
+            .Select(section => section.Id)
+            .ToListAsync(cancellationToken);
+
+        if (sectionIds.Count > 0)
+        {
+            var cuts = await dbContext.RequiredCuts
+                .Where(cut => sectionIds.Contains(cut.ProjectSectionId))
+                .ToListAsync(cancellationToken);
+
+            if (cuts.Count > 0)
+                dbContext.RequiredCuts.RemoveRange(cuts);
+
+            var sections = await dbContext.ProjectSections
+                .Where(section => section.ProjectId == project.Id)
+                .ToListAsync(cancellationToken);
+
+            dbContext.ProjectSections.RemoveRange(sections);
+        }
+
         dbContext.Projects.Remove(project);
 
         await dbContext.SaveChangesAsync(cancellationToken);

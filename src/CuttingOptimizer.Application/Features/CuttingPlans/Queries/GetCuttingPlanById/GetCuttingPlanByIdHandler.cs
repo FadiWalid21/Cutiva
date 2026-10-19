@@ -17,6 +17,8 @@ public sealed class GetCuttingPlanByIdHandler(
             .AsNoTracking()
             .Include(p => p.Bars)
                 .ThenInclude(b => b.Pieces)
+            .Include(p => p.Bars)
+                .ThenInclude(b => b.StockBar)
             .Include(p => p.UnallocatedPieces)
             .FirstOrDefaultAsync(
                 p => p.Id == request.Id,

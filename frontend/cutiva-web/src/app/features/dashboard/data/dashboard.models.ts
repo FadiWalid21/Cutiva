@@ -1,4 +1,4 @@
-export type ProjectStatus = 'optimized' | 'inProgress';
+export type ProjectStatus = 'optimized' | 'inProgress' | 'incomplete';
 
 export interface DashboardKpis {
   materialEfficiencyPercent: number;
@@ -7,14 +7,12 @@ export interface DashboardKpis {
   totalMaterialCost: number;
 }
 
-export interface ProjectedLeftoverItem {
+export interface RemnantInventoryItem {
   id: string;
-  cuttingPlanId: string;
-  lengthMm: number;
-  percentOfBar: number;
-  sourceBarLabel: string;
+  materialId: string;
   materialName: string;
-  isProjected: boolean;
+  lengthMm: number;
+  quantity: number;
 }
 
 export interface RecentProject {
@@ -29,6 +27,6 @@ export interface RecentProject {
 
 export interface DashboardSnapshot {
   kpis: DashboardKpis;
-  projectedLeftovers: ProjectedLeftoverItem[];
+  remnantInventory: RemnantInventoryItem[];
   recentProjects: RecentProject[];
 }

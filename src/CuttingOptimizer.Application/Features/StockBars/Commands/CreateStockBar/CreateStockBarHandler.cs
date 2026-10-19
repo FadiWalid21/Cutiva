@@ -27,7 +27,9 @@ public sealed class CreateStockBarHandler(
             MaterialId = request.MaterialId,
             LengthMm = request.LengthMm,
             UnitPrice = request.UnitPrice,
-            AvailableQuantity = request.AvailableQuantity
+            AvailableQuantity = request.AvailableQuantity,
+            IsRemnant = false,
+            IsActive = true
         };
 
         context.StockBars.Add(stockBar);

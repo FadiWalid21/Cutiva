@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+using CuttingOptimizer.Domain.Enums;
 
 namespace CuttingOptimizer.Api.Contracts.Materials;
-
 
 public sealed record CreateMaterialRequest(
     [Required]
@@ -17,4 +17,24 @@ public sealed record CreateMaterialRequest(
     string Name,
 
     [StringLength(500)]
-    string? Description);
+    string? Description,
+
+    MaterialCategory Category = MaterialCategory.Aluminum,
+
+    [Range(typeof(decimal), "0.01", "9999")]
+    decimal? ThicknessMm = null);
+
+public sealed record UpdateMaterialRequest(
+    [Required]
+    [StringLength(150, MinimumLength = 1)]
+    string Name,
+
+    [StringLength(500)]
+    string? Description,
+
+    MaterialCategory Category = MaterialCategory.Aluminum,
+
+    [Range(typeof(decimal), "0.01", "9999")]
+    decimal? ThicknessMm = null,
+
+    bool IsActive = true);

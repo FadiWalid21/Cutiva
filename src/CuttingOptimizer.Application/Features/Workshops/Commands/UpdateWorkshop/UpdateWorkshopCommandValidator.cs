@@ -17,5 +17,10 @@ public sealed class UpdateWorkshopCommandValidator
             .WithMessage(_ => localizer["WorkshopNameRequired"])
             .MaximumLength(150)
             .WithMessage(_ => localizer["WorkshopNameMaxLength"]);
+
+        RuleFor(x => x.ProductionPricePerM2)
+            .GreaterThan(0)
+            .When(x => x.ProductionPricePerM2.HasValue);
     }
 }
+

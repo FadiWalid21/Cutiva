@@ -5,7 +5,10 @@ public sealed record CuttingPlanDto(
     Guid WorkshopId,
     Guid MaterialId,
     Guid? ProjectId,
+    Guid? ComparisonGroupId,
+    string StrategyCode,
     int KerfMm,
+    bool UseRemnants,
     bool IsComplete,
     string Status,
     DateTime? ApprovedAtUtc,
@@ -26,6 +29,7 @@ public sealed record CuttingPlanBarDto(
     decimal UnitPrice,
     int KerfMm,
     int RemainingLengthMm,
+    bool IsRemnant,
     IReadOnlyList<CuttingPlanPieceDto> Pieces);
 
 public sealed record CuttingPlanPieceDto(

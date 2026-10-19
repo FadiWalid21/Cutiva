@@ -7,40 +7,73 @@ namespace CuttingOptimizer.Application.Features.ProjectSections.Commands.CreateP
 
 public sealed class CreateProjectSectionCommandHandler(
     IApplicationDbContext dbContext)
-    : IRequestHandler<CreateProjectSectionCommand, Guid?>
+    : IRequestHandler<CreateProjectSectionCommand, CreateProjectSectionResult>
 {
-    public async Task<Guid?> Handle(
+    public async Task<CreateProjectSectionResult> Handle(
         CreateProjectSectionCommand request,
         CancellationToken cancellationToken)
     {
-        var projectExists = await dbContext.Projects
-            .AnyAsync(
-                project => project.Id == request.ProjectId,
-                cancellationToken);
+        var project = await dbContext.Projects
+            .AsNoTracking()
+            .Where(p => p.Id == request.ProjectId)
+            .Select(p => new { p.Id, p.WorkshopId })
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (!projectExists)
-            return null;
+        if (project is null)
+            return new CreateProjectSectionNotFound();
 
         var sectorExists = await dbContext.Sectors
-            .AnyAsync(
-                sector => sector.Id == request.SectorId,
-                cancellationToken);
+            .AsNoTracking()
+            .AnyAsync(s => s.Id == request.SectorId, cancellationToken);
 
         if (!sectorExists)
-            return null;
+            return new CreateProjectSectionNotFound();
+
+        var accessoryInputs = (request.Accessories ?? [])
+            .Where(a => a.Quantity > 0)
+            .GroupBy(a => a.AccessoryId)
+            .Select(g => new { AccessoryId = g.Key, Quantity = g.Sum(x => x.Quantity) })
+            .ToList();
+
+        if (accessoryInputs.Count > 0)
+        {
+            var ids = accessoryInputs.Select(a => a.AccessoryId).ToList();
+            var validCount = await dbContext.Accessories
+                .CountAsync(
+                    a => ids.Contains(a.Id)
+                         && a.WorkshopId == project.WorkshopId
+                         && a.IsActive,
+                    cancellationToken);
+
+            if (validCount != ids.Count)
+                return new CreateProjectSectionInvalidAccessories();
+        }
 
         var section = new ProjectSection
         {
             Id = Guid.NewGuid(),
             ProjectId = request.ProjectId,
             SectorId = request.SectorId,
-            Name = request.Name.Trim()
+            Name = request.Name.Trim(),
+            HeightMm = request.HeightMm,
+            WidthMm = request.WidthMm,
+            UnitQuantity = request.UnitQuantity
         };
 
         dbContext.ProjectSections.Add(section);
 
+        foreach (var line in accessoryInputs)
+        {
+            dbContext.ProjectSectionAccessories.Add(new ProjectSectionAccessory
+            {
+                ProjectSectionId = section.Id,
+                AccessoryId = line.AccessoryId,
+                Quantity = line.Quantity
+            });
+        }
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return section.Id;
+        return new CreateProjectSectionSucceeded(section.Id);
     }
 }

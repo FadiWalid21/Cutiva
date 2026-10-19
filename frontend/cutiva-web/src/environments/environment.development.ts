@@ -5,4 +5,8 @@ export const environment = {
   useDashboardMock: false,
   defaultLanguage: 'en',
   supportedLanguages: ['en', 'ar'] as const,
+  features: {
+    resourcesV2: true,
+    productTemplates: true,
+  },
 };

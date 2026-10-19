@@ -1,4 +1,5 @@
 using CuttingOptimizer.Application.Abstractions;
+using CuttingOptimizer.Application.Features.Accessories;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +31,19 @@ public sealed class GetProjectSectionsQueryHandler(
                 section.SectorId,
                 section.Sector.Code,
                 section.Sector.Name,
-                section.Name))
+                section.Name,
+                section.HeightMm,
+                section.WidthMm,
+                section.UnitQuantity,
+                section.Accessories
+                    .OrderBy(a => a.Accessory.Name)
+                    .Select(a => new SectionAccessoryDto(
+                        a.AccessoryId,
+                        a.Accessory.Name,
+                        a.Accessory.UnitPrice,
+                        a.Quantity,
+                        a.Accessory.UnitPrice * a.Quantity))
+                    .ToList()))
             .ToListAsync(cancellationToken);
     }
 }

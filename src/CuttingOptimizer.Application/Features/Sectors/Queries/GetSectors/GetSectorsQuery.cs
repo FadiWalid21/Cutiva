@@ -8,4 +8,7 @@ public sealed record GetSectorsQuery()
 public sealed record SectorDto(
     Guid Id,
     string Code,
-    string Name);
+    string Name,
+    Guid? MaterialId,
+    string? MaterialCode,
+    string? MaterialName);

@@ -1,0 +1,71 @@
+.admin-page {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 60rem;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+
+    h1 {
+      margin: 0;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+
+  article {
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface);
+    display: grid;
+    gap: 0.35rem;
+
+    span {
+      color: var(--color-muted);
+      font-size: 0.82rem;
+    }
+
+    strong {
+      font-size: 1.4rem;
+    }
+  }
+}
+
+.plan-counts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+  }
+}
+
+.page__muted,
+.page__error {
+  margin: 0;
+}
+
+.page__error {
+  color: var(--color-danger);
+}

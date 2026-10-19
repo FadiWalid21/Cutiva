@@ -1,70 +1,273 @@
-<div class="app-shell" #shellRoot>
-  <aside class="sidebar glass">
-    <div class="sidebar__brand">
-      <span class="sidebar__logo">{{ 'app.name' | translate }}</span>
-      <span class="sidebar__tagline">{{ 'app.tagline' | translate }}</span>
+<div
+  class="app-shell"
+  #shellRoot
+  [class.is-collapsed]="collapsed()"
+  [class.is-mobile-nav-open]="mobileNavOpen()"
+>
+  <button
+    type="button"
+    class="app-shell__menu"
+    (click)="toggleMobileNav()"
+    [attr.aria-label]="(mobileNavOpen() ? 'shell.collapse' : 'shell.expand') | translate"
+  >
+    <span></span><span></span><span></span>
+  </button>
+  <div class="app-shell__scrim" (click)="closeMobileNav()" aria-hidden="true"></div>
+
+  <aside class="sidebar glass" (click)="closeMobileNav()">
+    <div class="sidebar__top">
+      <button
+        type="button"
+        class="sidebar__brand-btn"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="(collapsed() ? 'shell.expand' : 'shell.collapse') | translate"
+        [attr.aria-expanded]="!collapsed()"
+        [title]="(collapsed() ? 'shell.expand' : 'shell.collapse') | translate"
+      >
+        <span class="sidebar__brand-row" aria-hidden="true">
+          <span class="sidebar__logo-full">{{ 'app.name' | translate }}</span>
+          <span class="sidebar__mark">
+            <span class="sidebar__logo-mono">{{ brandMono }}</span>
+            <svg
+              class="sidebar__chevron"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.25"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14.5 6.5 9 12l5.5 5.5" />
+            </svg>
+          </span>
+        </span>
+        @if (!collapsed()) {
+          <span class="sidebar__tagline">{{ 'app.tagline' | translate }}</span>
+        }
+      </button>
     </div>
 
-    <p class="sidebar__section">{{ 'nav.operations' | translate }}</p>
+    @if (!collapsed()) {
+      <p class="sidebar__section">{{ 'nav.operations' | translate }}</p>
+    }
 
     <nav class="sidebar__nav" aria-label="Main" #navLinks>
       <a
-        routerLink="/"
+        routerLink="/dashboard"
         routerLinkActive="is-active"
         [routerLinkActiveOptions]="{ exact: true }"
+        [title]="'nav.dashboard' | translate"
       >
-        {{ 'nav.dashboard' | translate }}
+        <span class="sidebar__icon" aria-hidden="true">⌂</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.dashboard' | translate }}</span>
+        }
       </a>
-      <a routerLink="/projects/new" class="sidebar__cta" routerLinkActive="is-active">
-        + {{ 'nav.newProject' | translate }}
+      <a
+        routerLink="/projects/new"
+        class="sidebar__cta"
+        routerLinkActive="is-active"
+        [title]="'nav.newProject' | translate"
+      >
+        <span class="sidebar__icon" aria-hidden="true">+</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.newProject' | translate }}</span>
+        }
       </a>
-      <a routerLink="/projects" routerLinkActive="is-active">{{ 'nav.projects' | translate }}</a>
-      <a routerLink="/materials" routerLinkActive="is-active">{{ 'nav.materials' | translate }}</a>
-      <a routerLink="/cutting-plans/new" routerLinkActive="is-active">{{ 'nav.cuttingPlans' | translate }}</a>
-      <a routerLink="/settings" routerLinkActive="is-active">{{ 'nav.settings' | translate }}</a>
+      <a routerLink="/projects" routerLinkActive="is-active" [title]="'nav.projects' | translate">
+        <span class="sidebar__icon" aria-hidden="true">▣</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.projects' | translate }}</span>
+        }
+      </a>
+      @if (canManageCatalog()) {
+        @if (features.resourcesV2) {
+          <a
+            routerLink="/resources"
+            routerLinkActive="is-active"
+            [title]="'glossary.resources' | translate"
+          >
+            <span class="sidebar__icon" aria-hidden="true">▦</span>
+            @if (!collapsed()) {
+              <span>{{ 'glossary.resources' | translate }}</span>
+            }
+          </a>
+        } @else {
+          <a
+            routerLink="/materials"
+            routerLinkActive="is-active"
+            [title]="'nav.materials' | translate"
+          >
+            <span class="sidebar__icon" aria-hidden="true">▦</span>
+            @if (!collapsed()) {
+              <span>{{ 'nav.materials' | translate }}</span>
+            }
+          </a>
+        }
+        @if (features.productTemplates) {
+          <a
+            routerLink="/product-templates"
+            routerLinkActive="is-active"
+            [title]="'glossary.productRecipes' | translate"
+          >
+            <span class="sidebar__icon" aria-hidden="true">◫</span>
+            @if (!collapsed()) {
+              <span>{{ 'glossary.productRecipes' | translate }}</span>
+            }
+          </a>
+        }
+      }
+      <a
+        routerLink="/cutting-plans/new"
+        routerLinkActive="is-active"
+        [title]="'nav.cuttingPlans' | translate"
+      >
+        <span class="sidebar__icon" aria-hidden="true">◎</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.cuttingPlans' | translate }}</span>
+        }
+      </a>
+      <a routerLink="/quotes" routerLinkActive="is-active" [title]="'nav.quotes' | translate">
+        <span class="sidebar__icon" aria-hidden="true">▤</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.quotes' | translate }}</span>
+        }
+      </a>
+      <a routerLink="/settings" routerLinkActive="is-active" [title]="'nav.settings' | translate">
+        <span class="sidebar__icon" aria-hidden="true">⚙</span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.settings' | translate }}</span>
+        }
+      </a>
     </nav>
 
     <div class="sidebar__footer">
-      @if (currentUser(); as user) {
+      @if (!collapsed()) {
+        <div class="sidebar__workshop">
+          <span class="sidebar__workshop-label">{{ 'workshop.label' | translate }}</span>
+          @if (workshopContext.loading()) {
+            <span class="sidebar__workshop-status">{{ 'workshop.loading' | translate }}</span>
+          } @else if (workshopContext.error()) {
+            <span class="sidebar__workshop-status is-error">{{
+              workshopContext.error()! | translate
+            }}</span>
+          } @else if (!workshopContext.hasWorkshops()) {
+            <span class="sidebar__workshop-status">{{ 'workshop.empty' | translate }}</span>
+          } @else {
+            <span class="sidebar__workshop-name">{{
+              workshopContext.selectedWorkshop()?.name
+            }}</span>
+          }
+          @if (subscription(); as sub) {
+            <span
+              class="sidebar__plan"
+              [class.is-warn]="subscriptionWarn()"
+            >
+              {{
+                'shell.planBadge'
+                  | translate
+                    : { plan: sub.planName, days: sub.daysRemaining }
+              }}
+            </span>
+          } @else {
+            <span class="sidebar__plan is-warn">{{ 'shell.planMissing' | translate }}</span>
+          }
+          @if (seatsLabel(); as seats) {
+            <span class="sidebar__seats">
+              @if (seats.max == null) {
+                {{ 'shell.seatsUnlimited' | translate: { used: seats.used } }}
+              } @else {
+                {{ 'shell.seatsBadge' | translate: { used: seats.used, max: seats.max } }}
+              }
+            </span>
+          }
+        </div>
+      }
+
+      @if (showInstall()) {
+        <button type="button" class="sidebar__install" (click)="installApp()">
+          @if (!collapsed()) {
+            {{ 'shell.installApp' | translate }}
+          } @else {
+            ↓
+          }
+        </button>
+      }
+
+      <div class="sidebar__prefs">
+        <button
+          type="button"
+          class="sidebar__icon-btn"
+          (click)="toggleTheme()"
+          [attr.aria-label]="
+            (theme() === 'light' ? 'theme.dark' : 'theme.light') | translate
+          "
+          [attr.aria-pressed]="theme() === 'dark'"
+          [title]="(theme() === 'light' ? 'theme.dark' : 'theme.light') | translate"
+        >
+          @if (theme() === 'light') {
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M12 3.5a1 1 0 0 1 1 1V6a1 1 0 1 1-2 0V4.5a1 1 0 0 1 1-1Zm0 12.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7.5-3.5a1 1 0 0 1-1 1H17a1 1 0 1 1 0-2h1.5a1 1 0 0 1 1 1ZM7 12a1 1 0 0 1-1 1H4.5a1 1 0 1 1 0-2H6a1 1 0 0 1 1 1Zm9.95 5.45a1 1 0 0 1-1.4 0l-1.06-1.06a1 1 0 0 1 1.4-1.42l1.06 1.06a1 1 0 0 1 0 1.42ZM8.51 8.51a1 1 0 0 1-1.4 0L6.05 7.45a1 1 0 0 1 1.4-1.42l1.06 1.06a1 1 0 0 1 0 1.42Zm0 6.98a1 1 0 0 1 0 1.42l-1.06 1.06a1 1 0 1 1-1.4-1.42l1.06-1.06a1 1 0 0 1 1.4 0Zm8.48-8.48a1 1 0 0 1 0-1.42l1.06-1.06a1 1 0 1 1 1.4 1.42l-1.06 1.06a1 1 0 0 1-1.4 0ZM12 17a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V18a1 1 0 0 1 1-1Z"
+              />
+            </svg>
+          } @else {
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M14.3 3.2a1 1 0 0 1 1.1 1.45A7.5 7.5 0 1 0 19.3 14.6a1 1 0 0 1 1.5 1.05A9.5 9.5 0 1 1 13.1 3.05a1 1 0 0 1 1.2.15Z"
+              />
+            </svg>
+          }
+        </button>
+
+        <div class="sidebar__lang-pills" role="group" [attr.aria-label]="'language.label' | translate">
+          <button
+            type="button"
+            class="sidebar__lang-pill"
+            [class.is-active]="currentLanguage() === 'en'"
+            (click)="setLanguage('en')"
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            class="sidebar__lang-pill"
+            [class.is-active]="currentLanguage() === 'ar'"
+            (click)="setLanguage('ar')"
+          >
+            ع
+          </button>
+        </div>
+      </div>
+
+      @if (!collapsed() && currentUser(); as user) {
         <div class="sidebar__user">
           <span class="sidebar__user-name">{{ user.displayName || user.email }}</span>
           <span class="sidebar__user-email">{{ user.email }}</span>
         </div>
       }
 
-      <label class="sidebar__lang">
-        <span>{{ 'language.label' | translate }}</span>
-        <select
-          [value]="currentLanguage()"
-          (change)="setLanguage($any($event.target).value)"
-        >
-          <option value="en">{{ 'language.en' | translate }}</option>
-          <option value="ar">{{ 'language.ar' | translate }}</option>
-        </select>
-      </label>
-
-      <label class="sidebar__workshop">
-        <span class="sidebar__workshop-label">{{ 'workshop.label' | translate }}</span>
-        @if (workshopContext.loading()) {
-          <span class="sidebar__workshop-status">{{ 'workshop.loading' | translate }}</span>
-        } @else if (workshopContext.error()) {
-          <span class="sidebar__workshop-status">{{ workshopContext.error()! | translate }}</span>
-        } @else if (!workshopContext.hasWorkshops()) {
-          <span class="sidebar__workshop-status">{{ 'workshop.empty' | translate }}</span>
+      <button
+        type="button"
+        class="sidebar__logout"
+        (click)="logout()"
+        [attr.aria-label]="'auth.logout' | translate"
+        [title]="'auth.logout' | translate"
+      >
+        @if (collapsed()) {
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M10 4a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0V6H6v12h3v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5Zm5.3 4.3a1 1 0 0 1 1.4 0l3 3a1 1 0 0 1 0 1.4l-3 3a1 1 0 1 1-1.4-1.4L16.58 13H11a1 1 0 1 1 0-2h5.58l-1.28-1.3a1 1 0 0 1 0-1.4Z"
+            />
+          </svg>
         } @else {
-          <select
-            [value]="workshopContext.selectedWorkshopId() ?? ''"
-            (change)="onWorkshopChange($event)"
-          >
-            @for (workshop of workshopContext.workshops(); track workshop.id) {
-              <option [value]="workshop.id">{{ workshop.name }}</option>
-            }
-          </select>
+          {{ 'auth.logout' | translate }}
         }
-      </label>
-
-      <button type="button" class="btn btn--ghost sidebar__logout" (click)="logout()">
-        {{ 'auth.logout' | translate }}
       </button>
     </div>
   </aside>

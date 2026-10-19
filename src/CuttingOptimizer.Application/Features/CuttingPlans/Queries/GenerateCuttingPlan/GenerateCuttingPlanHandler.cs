@@ -2,8 +2,6 @@ using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Application.Abstractions.Optimization;
 using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Services.Optimization;
-using CuttingOptimizer.Domain.Entities;
-using CuttingOptimizer.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +9,10 @@ namespace CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCut
 
 public sealed class GenerateCuttingPlanHandler(
     IApplicationDbContext context,
-    ICuttingPlanOptimizer optimizer)
-    : IRequestHandler<GenerateCuttingPlanQuery, CuttingPlanDto?>
+    ICuttingPlanAlternativesGenerator alternativesGenerator)
+    : IRequestHandler<GenerateCuttingPlanQuery, CuttingPlanComparisonDto?>
 {
-    public async Task<CuttingPlanDto?> Handle(
+    public async Task<CuttingPlanComparisonDto?> Handle(
         GenerateCuttingPlanQuery request,
         CancellationToken cancellationToken)
     {
@@ -75,87 +73,108 @@ public sealed class GenerateCuttingPlanHandler(
                 cut.Quantity))
             .ToList();
 
-        var stockOptions = await context.StockBars
+        // Disable free catalog SKUs so they never enter FFD as "market price 0".
+        var freeCatalog = await context.StockBars
+            .Where(stockBar =>
+                stockBar.MaterialId == request.MaterialId
+                && stockBar.IsActive
+                && !stockBar.IsRemnant
+                && stockBar.UnitPrice <= 0)
+            .ToListAsync(cancellationToken);
+
+        if (freeCatalog.Count > 0)
+        {
+            foreach (var bar in freeCatalog)
+                bar.IsActive = false;
+
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        // Catalog: unlimited supply. Remnants: limited qty, preferred when allowed.
+        var stockQuery = context.StockBars
             .AsNoTracking()
             .Where(stockBar =>
                 stockBar.MaterialId == request.MaterialId
                 && stockBar.IsActive
-                && stockBar.AvailableQuantity > 0)
+                && (
+                    !stockBar.IsRemnant
+                    || stockBar.AvailableQuantity > 0));
+
+        if (!request.UseRemnants)
+            stockQuery = stockQuery.Where(stockBar => !stockBar.IsRemnant);
+
+        // Catalog bars must be priced; free catalog SKUs look like remnants in the buy list.
+        stockQuery = stockQuery.Where(stockBar =>
+            stockBar.IsRemnant || stockBar.UnitPrice > 0);
+
+        var stockOptions = await stockQuery
             .Select(stockBar => new OptimizationStockOption(
                 stockBar.Id,
                 stockBar.LengthMm,
-                stockBar.UnitPrice,
-                stockBar.AvailableQuantity))
+                stockBar.IsRemnant ? 0m : stockBar.UnitPrice,
+                stockBar.IsRemnant
+                    ? stockBar.AvailableQuantity
+                    : int.MaxValue / 4,
+                stockBar.IsRemnant))
             .ToListAsync(cancellationToken);
 
-        var result = optimizer.Optimize(new CuttingOptimizationInput(
+        var candidates = alternativesGenerator.Generate(
             request.KerfMm,
             requiredCuts,
-            stockOptions));
+            stockOptions,
+            request.UseRemnants);
 
-        var totalPieceLengthMm = result.Bars
-            .SelectMany(bar => bar.Pieces)
-            .Sum(piece => piece.LengthMm);
-
-        var totalStockLengthMm = result.Bars.Sum(bar => bar.LengthMm);
+        var comparisonGroupId = Guid.NewGuid();
         var createdAtUtc = DateTime.UtcNow;
+        var summaries = new List<CuttingPlanAlternativeSummaryDto>();
 
-        var plan = new CuttingPlan
+        foreach (var candidate in candidates)
         {
-            WorkshopId = workshopId,
-            MaterialId = request.MaterialId,
-            ProjectId = projectId,
-            KerfMm = request.KerfMm,
-            IsComplete = result.IsComplete,
-            Status = CuttingPlanStatus.Draft,
-            TotalPieceLengthMm = totalPieceLengthMm,
-            TotalStockLengthMm = totalStockLengthMm,
-            TotalBarsUsed = result.TotalBarsUsed,
-            TotalMaterialCost = result.TotalMaterialCost,
-            TotalKerfMm = result.TotalKerfMm,
-            TotalLeftoverMm = result.TotalLeftoverMm,
-            CreatedAtUtc = createdAtUtc,
-            StrategyNote = result.StrategyNote
-        };
+            var plan = CuttingPlanMapper.FromResult(
+                candidate.Result,
+                workshopId,
+                request.MaterialId,
+                projectId,
+                request.KerfMm,
+                comparisonGroupId,
+                candidate.StrategyCode,
+                createdAtUtc,
+                request.UseRemnants);
 
-        foreach (var bar in result.Bars)
-        {
-            var planBar = new CuttingPlanBar
-            {
-                StockBarId = bar.StockBarId,
-                LengthMm = bar.LengthMm,
-                UnitPrice = bar.UnitPrice,
-                KerfMm = bar.KerfMm,
-                RemainingLengthMm = bar.RemainingLengthMm
-            };
-
-            foreach (var piece in bar.Pieces)
-            {
-                planBar.Pieces.Add(new CuttingPlanPiece
-                {
-                    RequiredCutId = piece.RequiredCutId,
-                    Name = piece.Name,
-                    LengthMm = piece.LengthMm
-                });
-            }
-
-            plan.Bars.Add(planBar);
+            context.CuttingPlans.Add(plan);
+            summaries.Add(CuttingPlanMapper.ToSummary(plan, candidate.BarsSummary));
         }
 
-        foreach (var piece in result.UnallocatedPieces)
-        {
-            plan.UnallocatedPieces.Add(new CuttingPlanUnallocatedPiece
-            {
-                RequiredCutId = piece.RequiredCutId,
-                Name = piece.Name,
-                LengthMm = piece.LengthMm
-            });
-        }
-
-        // Calculation-only persistence: inventory quantities are not changed.
-        context.CuttingPlans.Add(plan);
         await context.SaveChangesAsync(cancellationToken);
 
-        return CuttingPlanMapper.ToDto(plan);
+        var ordered = OrderAlternatives(summaries);
+        var complete = ordered.Where(a => a.IsComplete).ToList();
+
+        Guid? recommendedCost = complete
+            .OrderBy(a => a.TotalMaterialCost)
+            .ThenBy(a => a.WastePercent)
+            .Select(a => (Guid?)a.CuttingPlanId)
+            .FirstOrDefault();
+
+        Guid? recommendedWaste = complete
+            .OrderBy(a => a.WastePercent)
+            .ThenBy(a => a.TotalMaterialCost)
+            .Select(a => (Guid?)a.CuttingPlanId)
+            .FirstOrDefault();
+
+        return new CuttingPlanComparisonDto(
+            comparisonGroupId,
+            recommendedCost,
+            recommendedWaste,
+            ordered);
     }
+
+    internal static IReadOnlyList<CuttingPlanAlternativeSummaryDto> OrderAlternatives(
+        IReadOnlyList<CuttingPlanAlternativeSummaryDto> summaries) =>
+        summaries
+            .OrderByDescending(a => a.IsComplete)
+            .ThenBy(a => a.TotalMaterialCost)
+            .ThenBy(a => a.WastePercent)
+            .ThenBy(a => a.StrategyCode)
+            .ToList();
 }

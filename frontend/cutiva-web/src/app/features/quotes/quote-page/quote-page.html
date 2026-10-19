@@ -1,0 +1,391 @@
+<section class="quote-editor">
+  @if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (error() && !quote()) {
+    <p class="page__error">
+      @if (isI18nKey(error()!)) {
+        {{ error()! | translate }}
+      } @else {
+        {{ error()! }}
+      }
+    </p>
+    <a routerLink="/quotes" class="btn btn--ghost">{{ 'quote.backToList' | translate }}</a>
+  } @else if (quote(); as q) {
+    <header class="quote-editor__header no-print">
+      <div>
+        <a class="back" routerLink="/quotes">← {{ 'quote.backToList' | translate }}</a>
+        <h1>{{ 'quote.title' | translate }}</h1>
+        <p>
+          {{ q.projectName }}
+          @if (q.customerName) {
+            · {{ q.customerName }}
+          }
+        </p>
+      </div>
+      <div class="quote-editor__actions">
+        <button type="button" class="btn btn--ghost" (click)="exportPdf()">
+          {{ 'quote.exportPdf' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="saving()"
+          (click)="save()"
+        >
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </header>
+
+    @if (notice()) {
+      <p class="page__ok no-print">{{ notice()! | translate }}</p>
+    }
+    @if (error()) {
+      <p class="page__error no-print">
+        @if (isI18nKey(error()!)) {
+          {{ error()! | translate }}
+        } @else {
+          {{ error()! }}
+        }
+      </p>
+    }
+
+    <div class="quote-editor__grid no-print">
+      <section class="card panel">
+        <h2>{{ 'preview.title' | translate }}</h2>
+        <app-aluminum-finish-bar />
+        @if (previewSections().length === 0) {
+          <p class="page__muted">{{ 'preview.emptyProject' | translate }}</p>
+        } @else {
+          <div class="preview-grid">
+            @for (section of previewSections(); track section.sectionId) {
+              <app-frame-preview
+                [label]="section.name"
+                [sectorCode]="section.sectorCode"
+                [sectorName]="section.sectorName"
+                [heightMm]="section.heightMm"
+                [widthMm]="section.widthMm"
+                [quantity]="section.unitQuantity"
+              />
+            }
+          </div>
+        }
+      </section>
+
+      <section class="card panel">
+        <h2>{{ 'quote.pricing' | translate }}</h2>
+        <dl class="totals">
+          @if (q.cuttingPlanId || q.materialCost > 0) {
+            @if (q.cuttingPlanId && q.materialCode) {
+              <div>
+                <dt>{{ 'quote.materialUsed' | translate }}</dt>
+                <dd>{{ q.materialCode }} — {{ q.materialName }}</dd>
+              </div>
+            }
+            <div>
+              <dt>{{ 'quote.materialCost' | translate }}</dt>
+              <dd>{{ q.materialCost | number: '1.0-2' }}</dd>
+            </div>
+          }
+          <div>
+            <dt>{{ 'quote.productionCost' | translate }}</dt>
+            <dd>{{ q.productionCost | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.glassTotal' | translate }}</dt>
+            <dd>{{ q.glassTotal | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.accessoriesTotal' | translate }}</dt>
+            <dd>{{ q.accessoriesTotal | number: '1.0-2' }}</dd>
+          </div>
+        </dl>
+
+        @if (q.glassLines.length > 0) {
+          <ul class="accessory-lines">
+            @for (line of q.glassLines; track $index) {
+              <li>
+                <span>
+                  {{ line.name }}
+                  {{ formatCm(line.widthMm) }}×{{ formatCm(line.heightMm) }}
+                  ×{{ line.paneQuantity }}
+                </span>
+                <strong>{{ line.lineTotal | number: '1.0-2' }}</strong>
+              </li>
+            }
+          </ul>
+        }
+
+        <p class="production-hint">
+          @if (q.productionPricePerM2 != null && q.productionPricePerM2 > 0) {
+            {{
+              'quote.productionFormula'
+                | translate
+                  : {
+                      area: (q.productionAreaM2 | number: '1.0-4'),
+                      rate: (q.productionPricePerM2 | number: '1.0-2'),
+                      cost: (q.productionCost | number: '1.0-2'),
+                    }
+            }}
+          } @else {
+            {{ 'quote.productionRateMissing' | translate }}
+            <a routerLink="/settings">{{ 'quote.goSettings' | translate }}</a>
+          }
+        </p>
+
+        @if (q.accessories.length > 0) {
+          <ul class="accessory-lines">
+            @for (line of q.accessories; track line.accessoryId) {
+              <li>
+                <span>{{ line.name }} ×{{ line.quantity }}</span>
+                <strong>{{ line.lineTotal | number: '1.0-2' }}</strong>
+              </li>
+            }
+          </ul>
+        }
+
+        <div class="surcharges">
+          <div class="surcharges__head">
+            <h3>{{ 'quote.surcharges' | translate }}</h3>
+            <button type="button" class="btn btn--ghost" (click)="addLine()">
+              {{ 'quote.addSurcharge' | translate }}
+            </button>
+          </div>
+          <p class="hint">{{ 'quote.surchargesHint' | translate }}</p>
+
+          @for (line of draftLines(); track $index; let i = $index) {
+            <div class="surcharge-row">
+              <label>
+                <span>{{ 'quote.reason' | translate }}</span>
+                <input
+                  [ngModel]="line.reason"
+                  (ngModelChange)="updateReason(i, $event)"
+                  [name]="'reason-' + i"
+                />
+              </label>
+              <label>
+                <span>{{ 'quote.amount' | translate }}</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  [ngModel]="line.amount"
+                  (ngModelChange)="updateAmount(i, $event)"
+                  [name]="'amount-' + i"
+                />
+              </label>
+              <button type="button" class="link-danger" (click)="removeLine(i)">
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+
+        <label class="notes">
+          <span>{{ 'quote.notes' | translate }}</span>
+          <textarea [(ngModel)]="notes" name="notes" rows="2"></textarea>
+        </label>
+
+        <dl class="totals totals--grand">
+          <div>
+            <dt>{{ 'quote.materialCost' | translate }}</dt>
+            <dd>{{ q.materialCost | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.productionCost' | translate }}</dt>
+            <dd>{{ q.productionCost | number: '1.0-2' }}</dd>
+          </div>
+          @if (q.productionPricePerM2 != null && q.productionPricePerM2 > 0) {
+            <div class="production-hint production-hint--inline">
+              {{
+                'quote.productionFormula'
+                  | translate
+                    : {
+                        area: (q.productionAreaM2 | number: '1.0-4'),
+                        rate: (q.productionPricePerM2 | number: '1.0-2'),
+                        cost: (q.productionCost | number: '1.0-2'),
+                      }
+              }}
+            </div>
+          }
+          <div>
+            <dt>{{ 'quote.glassTotal' | translate }}</dt>
+            <dd>{{ q.glassTotal | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.accessoriesTotal' | translate }}</dt>
+            <dd>{{ q.accessoriesTotal | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.surchargesTotal' | translate }}</dt>
+            <dd>{{ draftSurchargeTotal() | number: '1.0-2' }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'quote.grandTotal' | translate }}</dt>
+            <dd>{{ draftTotal() | number: '1.0-2' }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <!-- Print-only invoice document -->
+    <article id="quoteInvoice" class="invoice" aria-hidden="true">
+      <header class="invoice__head">
+        <div>
+          <p class="invoice__brand">{{ 'app.name' | translate }}</p>
+          <h1>{{ 'quote.invoiceTitle' | translate }}</h1>
+        </div>
+        <div class="invoice__meta">
+          <strong>{{ q.workshopName }}</strong>
+          <span>{{ q.createdAtUtc | date: 'mediumDate' }}</span>
+        </div>
+      </header>
+
+      <section class="invoice__parties">
+        <div>
+          <h2>{{ 'quote.invoiceProject' | translate }}</h2>
+          <p>{{ q.projectName }}</p>
+        </div>
+        <div>
+          <h2>{{ 'quote.invoiceCustomer' | translate }}</h2>
+          <p>{{ q.customerName || '—' }}</p>
+        </div>
+        <div>
+          <h2>{{ 'quote.materialUsed' | translate }}</h2>
+          <p>{{ q.materialCode }} — {{ q.materialName }}</p>
+        </div>
+      </section>
+
+      <section class="invoice__block">
+        <h2>{{ 'quote.invoiceElements' | translate }}</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>{{ 'quote.colElement' | translate }}</th>
+              <th>{{ 'quote.colType' | translate }}</th>
+              <th>{{ 'quote.colSize' | translate }}</th>
+              <th>{{ 'quote.colQty' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (section of q.sections; track section.sectionId) {
+              <tr>
+                <td>{{ section.name }}</td>
+                <td>{{ section.sectorName }}</td>
+                <td>
+                  @if (section.widthMm && section.heightMm) {
+                    {{ formatCm(section.widthMm) }} × {{ formatCm(section.heightMm) }}
+                    {{ 'common.cm' | translate }}
+                  } @else {
+                    —
+                  }
+                </td>
+                <td>{{ section.unitQuantity ?? 1 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+
+      @if (previewSections().length > 0) {
+        <section class="invoice__block invoice__previews">
+          <h2>{{ 'preview.title' | translate }}</h2>
+          <div class="preview-grid">
+            @for (section of previewSections(); track section.sectionId) {
+              <app-frame-preview
+                [compact]="true"
+                [label]="section.name"
+                [sectorCode]="section.sectorCode"
+                [sectorName]="section.sectorName"
+                [heightMm]="section.heightMm"
+                [widthMm]="section.widthMm"
+                [quantity]="section.unitQuantity"
+              />
+            }
+          </div>
+        </section>
+      }
+
+      <section class="invoice__block">
+        <h2>{{ 'quote.pricing' | translate }}</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td>{{ 'quote.materialCost' | translate }}</td>
+              <td class="num">{{ q.materialCost | number: '1.0-2' }}</td>
+            </tr>
+            <tr>
+              <td>
+                {{ 'quote.productionCost' | translate }}
+                @if (q.productionPricePerM2 != null && q.productionPricePerM2 > 0) {
+                  <small class="production-hint production-hint--print">
+                    {{
+                      'quote.productionFormula'
+                        | translate
+                          : {
+                              area: (q.productionAreaM2 | number: '1.0-4'),
+                              rate: (q.productionPricePerM2 | number: '1.0-2'),
+                              cost: (q.productionCost | number: '1.0-2'),
+                            }
+                    }}
+                  </small>
+                }
+              </td>
+              <td class="num">{{ q.productionCost | number: '1.0-2' }}</td>
+            </tr>
+            @if (q.glassLines.length > 0) {
+              @for (line of q.glassLines; track $index) {
+                <tr>
+                  <td>
+                    {{ line.name }}
+                    {{ formatCm(line.widthMm) }}×{{ formatCm(line.heightMm) }}
+                    ×{{ line.paneQuantity }}
+                  </td>
+                  <td class="num">{{ line.lineTotal | number: '1.0-2' }}</td>
+                </tr>
+              }
+              <tr>
+                <td>{{ 'quote.glassTotal' | translate }}</td>
+                <td class="num">{{ q.glassTotal | number: '1.0-2' }}</td>
+              </tr>
+            }
+            @if (q.accessories.length > 0) {
+              @for (line of q.accessories; track line.accessoryId) {
+                <tr>
+                  <td>
+                    {{ line.name }} ×{{ line.quantity }}
+                  </td>
+                  <td class="num">{{ line.lineTotal | number: '1.0-2' }}</td>
+                </tr>
+              }
+              <tr>
+                <td>{{ 'quote.accessoriesTotal' | translate }}</td>
+                <td class="num">{{ q.accessoriesTotal | number: '1.0-2' }}</td>
+              </tr>
+            }
+            @for (line of q.surcharges; track line.id) {
+              <tr>
+                <td>{{ line.reason }}</td>
+                <td class="num">{{ line.amount | number: '1.0-2' }}</td>
+              </tr>
+            }
+            <tr class="invoice__grand">
+              <td>{{ 'quote.grandTotal' | translate }}</td>
+              <td class="num">{{ q.grandTotal | number: '1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      @if (q.notes) {
+        <section class="invoice__block">
+          <h2>{{ 'quote.notes' | translate }}</h2>
+          <p>{{ q.notes }}</p>
+        </section>
+      }
+
+      <footer class="invoice__foot">
+        <p>{{ 'quote.invoiceFooter' | translate }}</p>
+      </footer>
+    </article>
+  }
+</section>

@@ -10,4 +10,6 @@ public sealed record CreateSectorRequest(
 
     [Required]
     [StringLength(100, MinimumLength = 1)]
-    string Name);
+    string Name,
+
+    Guid? MaterialId = null);

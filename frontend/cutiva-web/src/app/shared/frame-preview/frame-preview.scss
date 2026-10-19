@@ -1,0 +1,84 @@
+.frame-preview {
+  margin: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-elevated);
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.frame-preview--compact {
+  padding: 0.55rem;
+}
+
+.frame-preview__cap {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+
+  strong {
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+}
+
+.frame-preview__canvas {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 10rem;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255, 255, 255, 0.06), transparent),
+    rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-sm);
+}
+
+.frame-preview--compact .frame-preview__canvas {
+  min-height: 7rem;
+}
+
+svg {
+  width: 100%;
+  max-width: 13rem;
+  height: auto;
+}
+
+.frame-preview__shine {
+  fill: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.frame-preview__dim {
+  fill: var(--color-muted);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.frame-preview__qty {
+  position: absolute;
+  top: 0.35rem;
+  inset-inline-end: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+}
+
+.frame-preview__empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  padding: 1rem 0.25rem;
+}

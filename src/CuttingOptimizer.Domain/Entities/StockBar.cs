@@ -14,5 +14,10 @@ public class StockBar
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>
+    /// Workshop remnant leftover (limited qty). False = market catalog length.
+    /// </summary>
+    public bool IsRemnant { get; set; }
+
     public Material Material { get; set; } = null!;
 }

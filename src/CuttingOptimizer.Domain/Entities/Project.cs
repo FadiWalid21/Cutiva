@@ -14,4 +14,7 @@ public class Project
 
     public ICollection<ProjectSection> Sections { get; set; }
         = new List<ProjectSection>();
+
+    public ICollection<ProjectItem> Items { get; set; }
+        = new List<ProjectItem>();
 }

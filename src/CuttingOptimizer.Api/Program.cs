@@ -1,11 +1,14 @@
 using System.Globalization;
+using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 using CuttingOptimizer.Api.Exceptions;
 using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Application.Abstractions.Auth;
 using CuttingOptimizer.Application.Abstractions.Optimization;
 using CuttingOptimizer.Application.Behaviors;
 using CuttingOptimizer.Application.Features.Workshops.Commands.CreateWorkshop;
+using CuttingOptimizer.Application.Options;
 using CuttingOptimizer.Application.Services.Optimization;
 using CuttingOptimizer.Infrastructure.Auth;
 using CuttingOptimizer.Infrastructure.Identity;
@@ -21,7 +24,12 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter());
+    });
 builder.Services.AddOpenApi();
 
 builder.Services.AddLocalization();
@@ -39,6 +47,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
         new AcceptLanguageHeaderRequestCultureProvider()
     ];
 });
+
+builder.Services.Configure<FeaturesOptions>(
+    builder.Configuration.GetSection(FeaturesOptions.SectionName));
 
 builder.Services.Configure<JwtOptions>(
     builder.Configuration.GetSection(JwtOptions.SectionName));
@@ -95,7 +106,8 @@ builder.Services
             ValidAudience = jwtOptions.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtOptions.Key)),
-            ClockSkew = TimeSpan.FromMinutes(1)
+            ClockSkew = TimeSpan.FromMinutes(1),
+            RoleClaimType = ClaimTypes.Role
         };
     });
 
@@ -109,9 +121,22 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
+builder.Services.Configure<CuttingOptimizer.Infrastructure.Email.BrevoOptions>(
+    builder.Configuration.GetSection(
+        CuttingOptimizer.Infrastructure.Email.BrevoOptions.SectionName));
+
+builder.Services.AddHttpClient<
+    CuttingOptimizer.Application.Abstractions.Email.IEmailSender,
+    CuttingOptimizer.Infrastructure.Email.BrevoEmailSender>();
+
 builder.Services.AddSingleton<ICuttingPlanOptimizer, CuttingPlanOptimizer>();
+builder.Services.AddSingleton<ICuttingPlanAlternativesGenerator, CuttingPlanAlternativesGenerator>();
 builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IAuthService, IdentityAuthService>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddScoped<
+    CuttingOptimizer.Application.Abstractions.Admin.IAdminClientService,
+    CuttingOptimizer.Infrastructure.Admin.AdminClientService>();
 
 builder.Services.AddMediatR(configuration =>
     configuration.RegisterServicesFromAssembly(
@@ -148,5 +173,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await CuttingOptimizer.Infrastructure.Persistence.IdentityDataSeeder.SeedAllAsync(
+    app.Services);
 
 app.Run();

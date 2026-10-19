@@ -12,7 +12,17 @@ public class CuttingPlan
 
     public Guid? ProjectId { get; set; }
 
+    public Guid? ComparisonGroupId { get; set; }
+
+    public string StrategyCode { get; set; } = string.Empty;
+
     public int KerfMm { get; set; }
+
+    /// <summary>
+    /// When true, optimizer may use remnant warehouse stock (usually priced at 0).
+    /// When false, only market catalog lengths are used.
+    /// </summary>
+    public bool UseRemnants { get; set; } = true;
 
     public bool IsComplete { get; set; }
 

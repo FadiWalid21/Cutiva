@@ -3,7 +3,7 @@ namespace CuttingOptimizer.Application.Features.Dashboard;
 public sealed record WorkshopDashboardDto(
     WorkshopDashboardKpisDto Kpis,
     IReadOnlyList<DashboardRecentProjectDto> RecentProjects,
-    IReadOnlyList<ProjectedLeftoverDto> ProjectedLeftovers);
+    IReadOnlyList<RemnantInventoryItemDto> RemnantInventory);
 
 public sealed record WorkshopDashboardKpisDto(
     double MaterialEfficiencyPercent,
@@ -21,15 +21,11 @@ public sealed record DashboardRecentProjectDto(
     DateTime LastPlanAtUtc);
 
 /// <summary>
-/// Leftover length projected by a saved cutting plan. Not real inventory.
+/// Usable remnant stock from approved cutting plans.
 /// </summary>
-public sealed record ProjectedLeftoverDto(
-    Guid CuttingPlanId,
-    Guid CuttingPlanBarId,
+public sealed record RemnantInventoryItemDto(
     Guid StockBarId,
     Guid MaterialId,
     string MaterialName,
-    int RemainingLengthMm,
-    int SourceBarLengthMm,
-    DateTime PlanCreatedAtUtc,
-    bool IsProjected);
+    int LengthMm,
+    int AvailableQuantity);

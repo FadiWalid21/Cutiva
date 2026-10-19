@@ -18,7 +18,10 @@ public sealed class GetSectorsQueryHandler(
             .Select(sector => new SectorDto(
                 sector.Id,
                 sector.Code,
-                sector.Name))
+                sector.Name,
+                sector.MaterialId,
+                sector.Material != null ? sector.Material.Code : null,
+                sector.Material != null ? sector.Material.Name : null))
             .ToListAsync(cancellationToken);
     }
 }

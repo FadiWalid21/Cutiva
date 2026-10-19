@@ -40,7 +40,10 @@ public sealed class CreateMaterialCommandHandler(
             Name = request.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(request.Description)
                 ? null
-                : request.Description.Trim()
+                : request.Description.Trim(),
+            Category = request.Category,
+            ThicknessMm = request.ThicknessMm,
+            IsActive = true
         };
 
         dbContext.Materials.Add(material);

@@ -1,0 +1,67 @@
+<section class="admin-page">
+  <h1>{{ 'admin.plansTitle' | translate }}</h1>
+  <p class="hint">{{ 'admin.plansHint' | translate }}</p>
+
+  @if (notice()) {
+    <p class="page__ok">{{ notice()! | translate }}</p>
+  }
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  }
+
+  <div class="plans">
+    @for (p of drafts(); track p.id) {
+      <article class="card">
+        <header>
+          <h2>{{ p.code }}</h2>
+          <label class="active">
+            <input type="checkbox" [(ngModel)]="p.isActive" [name]="'active-' + p.id" />
+            {{ 'admin.planActive' | translate }}
+          </label>
+        </header>
+
+        <label>
+          <span>{{ 'admin.planName' | translate }}</span>
+          <input [(ngModel)]="p.name" [name]="'name-' + p.id" />
+        </label>
+        <label>
+          <span>{{ 'admin.paymentAmount' | translate }}</span>
+          <input type="number" min="0" step="1" [(ngModel)]="p.priceSar" [name]="'price-' + p.id" />
+        </label>
+        <label>
+          <span>{{ 'admin.durationDays' | translate }}</span>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="p.durationDays"
+            [name]="'days-' + p.id"
+          />
+        </label>
+        <label class="unlimited">
+          <input type="checkbox" [(ngModel)]="p.unlimited" [name]="'unl-' + p.id" />
+          {{ 'admin.unlimited' | translate }}
+        </label>
+        @if (!p.unlimited) {
+          <label>
+            <span>{{ 'admin.seats' | translate }}</span>
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="p.maxUsers"
+              [name]="'seats-' + p.id"
+            />
+          </label>
+        }
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="savingId() === p.id"
+          (click)="save(p)"
+        >
+          {{ 'common.save' | translate }}
+        </button>
+      </article>
+    }
+  </div>
+</section>

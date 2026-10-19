@@ -3,6 +3,36 @@
   gap: 1rem;
 }
 
+.preview-panel {
+  padding: 1.15rem;
+}
+
+.preview-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 0.9rem;
+  align-items: flex-start;
+
+  h2 {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.85rem;
+  }
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.75rem;
+}
+
 .detail__header {
   padding: 1.25rem;
   display: flex;
@@ -32,9 +62,15 @@
   font-size: 0.85rem;
 }
 
+.continuity-inline {
+  margin: 0.45rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .kpi-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
   gap: 0.75rem;
 }
 
@@ -53,12 +89,78 @@
   }
 }
 
+.verdict {
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border);
+
+  strong {
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+}
+
+.verdict--ok {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+
+  strong {
+    color: var(--color-accent);
+  }
+}
+
+.verdict--warn {
+  background: color-mix(in srgb, #c45c26 8%, transparent);
+  border-color: color-mix(in srgb, #c45c26 40%, transparent);
+
+  strong {
+    color: #9a4a1a;
+  }
+}
+
 .block {
   padding: 1.25rem;
 
   h2 {
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.35rem;
     font-size: 1.05rem;
+  }
+}
+
+.block__hint {
+  margin: 0 0 0.85rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.block--warn {
+  border: 1px solid color-mix(in srgb, #c45c26 40%, var(--color-border));
+}
+
+.unallocated-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
   }
 }
 
@@ -72,6 +174,13 @@
     gap: 0.2rem;
     margin-bottom: 0.5rem;
 
+    strong {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
     span {
       color: var(--color-muted);
       font-size: 0.85rem;
@@ -82,6 +191,10 @@
     margin: 0;
     padding-inline-start: 1.1rem;
     color: var(--color-muted);
+  }
+
+  &--remnant {
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
   }
 }
 
@@ -100,5 +213,99 @@
 @media (max-width: 900px) {
   .kpi-row {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+.buy-list__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+}
+
+.buy-list__source {
+  margin-top: 0.35rem !important;
+  font-weight: 500;
+  color: var(--color-text) !important;
+}
+
+.buy-list__section {
+  margin-top: 1rem;
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+.buy-list {
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .badge--remnant {
+    color: color-mix(in srgb, var(--color-accent) 90%, var(--color-text));
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+  }
+
+  .badge--market {
+    color: var(--color-muted);
+    background: color-mix(in srgb, var(--color-border) 55%, transparent);
+  }
+
+  tr.is-remnant td {
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  }
+}
+
+.buy-list__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+
+  strong {
+    color: var(--color-text);
+    font-size: 1.05rem;
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.buy-list table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: start;
+    padding: 0.65rem 0.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  th {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 }

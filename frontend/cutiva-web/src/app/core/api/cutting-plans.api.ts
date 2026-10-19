@@ -17,6 +17,7 @@ export interface CuttingPlanBar {
   unitPrice: number;
   kerfMm: number;
   remainingLengthMm: number;
+  isRemnant: boolean;
   pieces: CuttingPlanPiece[];
 }
 
@@ -25,7 +26,10 @@ export interface CuttingPlan {
   workshopId: string;
   materialId: string;
   projectId: string | null;
+  comparisonGroupId: string | null;
+  strategyCode: string;
   kerfMm: number;
+  useRemnants: boolean;
   isComplete: boolean;
   status?: CuttingPlanStatus;
   approvedAtUtc?: string | null;
@@ -41,10 +45,33 @@ export interface CuttingPlan {
   strategyNote: string;
 }
 
+export interface CuttingPlanAlternativeSummary {
+  cuttingPlanId: string;
+  strategyCode: string;
+  isComplete: boolean;
+  totalBarsUsed: number;
+  totalMaterialCost: number;
+  totalPieceLengthMm: number;
+  totalStockLengthMm: number;
+  totalLeftoverMm: number;
+  wastePercent: number;
+  barsSummary: string;
+  strategyNote: string;
+}
+
+export interface CuttingPlanComparison {
+  comparisonGroupId: string;
+  recommendedCostPlanId: string | null;
+  recommendedWastePlanId: string | null;
+  alternatives: CuttingPlanAlternativeSummary[];
+}
+
 export interface GenerateCuttingPlanBody {
   materialId: string;
   kerfMm: number;
   requiredCutIds: string[];
+  /** Always send true|false so the API never falls back unexpectedly. */
+  useRemnants: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -52,8 +79,14 @@ export class CuttingPlansApi {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${API_BASE_URL}/api/cutting-plans`;
 
-  generate(body: GenerateCuttingPlanBody): Observable<CuttingPlan> {
-    return this.http.post<CuttingPlan>(this.baseUrl, body);
+  generate(body: GenerateCuttingPlanBody): Observable<CuttingPlanComparison> {
+    return this.http.post<CuttingPlanComparison>(this.baseUrl, body);
+  }
+
+  getComparison(groupId: string): Observable<CuttingPlanComparison> {
+    return this.http.get<CuttingPlanComparison>(
+      `${this.baseUrl}/comparisons/${groupId}`,
+    );
   }
 
   getById(id: string): Observable<CuttingPlan> {

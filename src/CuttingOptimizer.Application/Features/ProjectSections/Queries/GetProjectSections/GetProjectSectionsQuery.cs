@@ -1,3 +1,4 @@
+using CuttingOptimizer.Application.Features.Accessories;
 using MediatR;
 
 namespace CuttingOptimizer.Application.Features.ProjectSections.Queries.GetProjectSections;
@@ -11,4 +12,8 @@ public sealed record ProjectSectionDto(
     Guid SectorId,
     string SectorCode,
     string SectorName,
-    string Name);
+    string Name,
+    int? HeightMm,
+    int? WidthMm,
+    int? UnitQuantity,
+    IReadOnlyList<SectionAccessoryDto> Accessories);

@@ -11,5 +11,6 @@ public sealed record StockBarDto(
     int LengthMm,
     decimal UnitPrice,
     int AvailableQuantity,
-    bool IsActive
+    bool IsActive,
+    bool IsRemnant
 );

@@ -22,6 +22,103 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Accessory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasDefaultValue("Piece");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("WorkshopId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkshopId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Accessories", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ClientQuote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CuttingPlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CuttingPlanId");
+
+                    b.HasIndex("ProjectId", "CuttingPlanId")
+                        .IsUnique();
+
+                    b.ToTable("ClientQuotes", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ClientQuoteSurcharge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("ClientQuoteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientQuoteId");
+
+                    b.ToTable("ClientQuoteSurcharges", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
                 {
                     b.Property<Guid>("Id")
@@ -30,6 +127,9 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTime?>("ApprovedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ComparisonGroupId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
@@ -50,6 +150,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
+
+                    b.Property<string>("StrategyCode")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.Property<string>("StrategyNote")
                         .IsRequired()
@@ -75,10 +180,15 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Property<int>("TotalStockLengthMm")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("UseRemnants")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("WorkshopId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ComparisonGroupId");
 
                     b.HasIndex("MaterialId");
 
@@ -188,11 +298,83 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("CuttingPlanUnallocatedPieces", (string)null);
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassSpec", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid>("GlassTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<decimal>("PricePerSqm")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<decimal>("ThicknessMm")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GlassTypeId");
+
+                    b.ToTable("GlassSpecs", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_GlassSpecs_PricePerSqm", "\"PricePerSqm\" >= 0");
+
+                            t.HasCheckConstraint("CK_GlassSpecs_ThicknessMm", "\"ThicknessMm\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("WorkshopId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkshopId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("GlassTypes", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasDefaultValue("Aluminum");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -203,6 +385,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -211,12 +398,123 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SectorId")
                         .HasColumnType("uuid");
 
+                    b.Property<decimal?>("ThicknessMm")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SectorId", "Code")
                         .IsUnique();
 
                     b.ToTable("Materials", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.PasswordResetOtp", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTime?>("ConsumedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "ExpiresAtUtc");
+
+                    b.ToTable("PasswordResetOtps", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProductType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsSeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Kind");
+
+                    b.ToTable("ProductTypes", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProductVariant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsSeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int?>("OverlapMm")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProductTypeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("SashCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductTypeId", "Code")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Project", b =>
@@ -244,11 +542,194 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CalculationSnapshotJson")
+                        .HasColumnType("text");
+
+                    b.Property<int>("HeightMm")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("LastCalculatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WidthMm")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectItems", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ProjectItems_HeightMm", "\"HeightMm\" > 0");
+
+                            t.HasCheckConstraint("CK_ProjectItems_Quantity", "\"Quantity\" > 0");
+
+                            t.HasCheckConstraint("CK_ProjectItems_WidthMm", "\"WidthMm\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemAccessoryChoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("QuantityOverride")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("TemplateAccessorySlotId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessoryId");
+
+                    b.HasIndex("TemplateAccessorySlotId");
+
+                    b.HasIndex("ProjectItemId", "TemplateAccessorySlotId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectItemAccessoryChoices", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemGlassChoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("GlassSpecId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TemplateGlassSlotId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GlassSpecId");
+
+                    b.HasIndex("TemplateGlassSlotId");
+
+                    b.HasIndex("ProjectItemId", "TemplateGlassSlotId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectItemGlassChoices", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemInspection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("InspectedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("InspectedBy")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("LocationLabel")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int?>("MeasuredHeightMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("MeasuredWidthMm")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<Guid>("ProjectItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectItemId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectItemInspections", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemPartChoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("TemplatePartId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("TemplatePartId");
+
+                    b.HasIndex("ProjectItemId", "TemplatePartId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectItemPartChoices", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectSection", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("HeightMm")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -261,13 +742,51 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SectorId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("UnitQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WidthMm")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SectorId");
 
                     b.HasIndex("ProjectId", "SectorId");
 
-                    b.ToTable("ProjectSections");
+                    b.ToTable("ProjectSections", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ProjectSections_HeightMm", "\"HeightMm\" IS NULL OR \"HeightMm\" > 0");
+
+                            t.HasCheckConstraint("CK_ProjectSections_UnitQuantity", "\"UnitQuantity\" IS NULL OR \"UnitQuantity\" > 0");
+
+                            t.HasCheckConstraint("CK_ProjectSections_WidthMm", "\"WidthMm\" IS NULL OR \"WidthMm\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectSectionAccessory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProjectSectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessoryId");
+
+                    b.HasIndex("ProjectSectionId", "AccessoryId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectSectionAccessories", (string)null);
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.RequiredCut", b =>
@@ -293,9 +812,18 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SourcePartRole")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid?>("SourceProjectItemId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MaterialId");
+
+                    b.HasIndex("SourceProjectItemId");
 
                     b.HasIndex("ProjectSectionId", "MaterialId");
 
@@ -318,6 +846,9 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid?>("MaterialId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -327,6 +858,8 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("MaterialId");
 
                     b.ToTable("Sectors");
                 });
@@ -345,6 +878,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsRemnant")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<int>("LengthMm")
                         .HasColumnType("integer");
 
@@ -359,6 +897,8 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("MaterialId", "IsActive");
 
+                    b.HasIndex("MaterialId", "IsRemnant", "IsActive");
+
                     b.ToTable("StockBars", null, t =>
                         {
                             t.HasCheckConstraint("CK_StockBars_AvailableQuantity", "\"AvailableQuantity\" >= 0");
@@ -367,6 +907,201 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                             t.HasCheckConstraint("CK_StockBars_UnitPrice", "\"UnitPrice\" >= 0");
                         });
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<int>("DurationDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(30);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxUsers")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("PriceSar")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("SubscriptionPlans", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateAccessorySlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DefaultAccessoryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("QuantityRule")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefaultAccessoryId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("TemplateAccessorySlots", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateGlassSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("HeightCoefH")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<decimal>("HeightCoefW")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int>("OffsetHMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("OffsetWMm")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PaneCount")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("UseSashWidthDivision")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("WidthCoefH")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<decimal>("WidthCoefW")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("TemplateGlassSlots", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplatePart", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DefaultAluminumMaterialId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<decimal>("HeightCoef")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<int>("OffsetMm")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QtyPerUnit")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<bool>("UseSashWidthDivision")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("WidthCoef")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DefaultAluminumMaterialId");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.ToTable("TemplateParts", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplatePartAllowedMaterial", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("MaterialId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TemplatePartId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("TemplatePartId", "MaterialId")
+                        .IsUnique();
+
+                    b.ToTable("TemplatePartAllowedMaterials", (string)null);
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Workshop", b =>
@@ -380,9 +1115,71 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
 
+                    b.Property<decimal?>("ProductionPricePerM2")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Workshops");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopSubscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal?>("PaymentAmount")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)");
+
+                    b.Property<DateTime?>("PaymentConfirmedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentCurrency")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<string>("PaymentNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("WorkshopId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId");
+
+                    b.HasIndex("WorkshopId");
+
+                    b.HasIndex("WorkshopId", "Status");
+
+                    b.ToTable("WorkshopSubscriptions", (string)null);
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Infrastructure.Identity.ApplicationUser", b =>
@@ -398,13 +1195,17 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("text");
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrimaryContact")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")
@@ -440,6 +1241,9 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<Guid?>("WorkshopId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -448,6 +1252,8 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("WorkshopId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -584,6 +1390,46 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Accessory", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
+                        .WithMany("Accessories")
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workshop");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ClientQuote", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.CuttingPlan", "CuttingPlan")
+                        .WithMany()
+                        .HasForeignKey("CuttingPlanId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CuttingPlan");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ClientQuoteSurcharge", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ClientQuote", "ClientQuote")
+                        .WithMany("Surcharges")
+                        .HasForeignKey("ClientQuoteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClientQuote");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
@@ -667,6 +1513,28 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("RequiredCut");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassSpec", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.GlassType", "GlassType")
+                        .WithMany("Specs")
+                        .HasForeignKey("GlassTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GlassType");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassType", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
+                        .WithMany("GlassTypes")
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workshop");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Sector", "Sector")
@@ -678,6 +1546,17 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Sector");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProductVariant", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProductType", "ProductType")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductType");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Project", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
@@ -687,6 +1566,117 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Workshop");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItem", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Project", "Project")
+                        .WithMany("Items")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemAccessoryChoice", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Accessory", "Accessory")
+                        .WithMany()
+                        .HasForeignKey("AccessoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectItem", "ProjectItem")
+                        .WithMany("AccessoryChoices")
+                        .HasForeignKey("ProjectItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.TemplateAccessorySlot", "TemplateAccessorySlot")
+                        .WithMany()
+                        .HasForeignKey("TemplateAccessorySlotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+
+                    b.Navigation("ProjectItem");
+
+                    b.Navigation("TemplateAccessorySlot");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemGlassChoice", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.GlassSpec", "GlassSpec")
+                        .WithMany()
+                        .HasForeignKey("GlassSpecId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectItem", "ProjectItem")
+                        .WithMany("GlassChoices")
+                        .HasForeignKey("ProjectItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.TemplateGlassSlot", "TemplateGlassSlot")
+                        .WithMany()
+                        .HasForeignKey("TemplateGlassSlotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GlassSpec");
+
+                    b.Navigation("ProjectItem");
+
+                    b.Navigation("TemplateGlassSlot");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemInspection", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectItem", "ProjectItem")
+                        .WithOne("Inspection")
+                        .HasForeignKey("CuttingOptimizer.Domain.Entities.ProjectItemInspection", "ProjectItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProjectItem");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItemPartChoice", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectItem", "ProjectItem")
+                        .WithMany("PartChoices")
+                        .HasForeignKey("ProjectItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.TemplatePart", "TemplatePart")
+                        .WithMany()
+                        .HasForeignKey("TemplatePartId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("ProjectItem");
+
+                    b.Navigation("TemplatePart");
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectSection", b =>
@@ -708,6 +1698,25 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Sector");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectSectionAccessory", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Accessory", "Accessory")
+                        .WithMany("SectionLinks")
+                        .HasForeignKey("AccessoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectSection", "ProjectSection")
+                        .WithMany("Accessories")
+                        .HasForeignKey("ProjectSectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+
+                    b.Navigation("ProjectSection");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.RequiredCut", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
@@ -722,9 +1731,26 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProjectItem", "SourceProjectItem")
+                        .WithMany()
+                        .HasForeignKey("SourceProjectItemId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Material");
 
                     b.Navigation("ProjectSection");
+
+                    b.Navigation("SourceProjectItem");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Sector", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Material");
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.StockBar", b =>
@@ -736,6 +1762,91 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Material");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateAccessorySlot", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Accessory", "DefaultAccessory")
+                        .WithMany()
+                        .HasForeignKey("DefaultAccessoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("AccessorySlots")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DefaultAccessory");
+
+                    b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateGlassSlot", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("GlassSlots")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplatePart", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Material", "DefaultAluminumMaterial")
+                        .WithMany()
+                        .HasForeignKey("DefaultAluminumMaterialId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.ProductVariant", "ProductVariant")
+                        .WithMany("Parts")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DefaultAluminumMaterial");
+
+                    b.Navigation("ProductVariant");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplatePartAllowedMaterial", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Material", "Material")
+                        .WithMany()
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.TemplatePart", "TemplatePart")
+                        .WithMany("AllowedMaterials")
+                        .HasForeignKey("TemplatePartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Material");
+
+                    b.Navigation("TemplatePart");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopSubscription", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.SubscriptionPlan", "Plan")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
+                        .WithMany("Subscriptions")
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plan");
+
+                    b.Navigation("Workshop");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -789,6 +1900,16 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Accessory", b =>
+                {
+                    b.Navigation("SectionLinks");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ClientQuote", b =>
+                {
+                    b.Navigation("Surcharges");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.CuttingPlan", b =>
                 {
                     b.Navigation("Bars");
@@ -801,6 +1922,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Pieces");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassType", b =>
+                {
+                    b.Navigation("Specs");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Material", b =>
                 {
                     b.Navigation("RequiredCuts");
@@ -808,13 +1934,42 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("StockBars");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProductType", b =>
+                {
+                    b.Navigation("Variants");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProductVariant", b =>
+                {
+                    b.Navigation("AccessorySlots");
+
+                    b.Navigation("GlassSlots");
+
+                    b.Navigation("Parts");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Project", b =>
                 {
+                    b.Navigation("Items");
+
                     b.Navigation("Sections");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectItem", b =>
+                {
+                    b.Navigation("AccessoryChoices");
+
+                    b.Navigation("GlassChoices");
+
+                    b.Navigation("Inspection");
+
+                    b.Navigation("PartChoices");
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.ProjectSection", b =>
                 {
+                    b.Navigation("Accessories");
+
                     b.Navigation("RequiredCuts");
                 });
 
@@ -823,9 +1978,25 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("ProjectSections");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Navigation("Subscriptions");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplatePart", b =>
+                {
+                    b.Navigation("AllowedMaterials");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.Workshop", b =>
                 {
+                    b.Navigation("Accessories");
+
+                    b.Navigation("GlassTypes");
+
                     b.Navigation("Projects");
+
+                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,10 +1,10 @@
-<section class="page card">
+<section class="page card generate">
   <header class="page__header">
     <div>
       <h1>{{ 'plans.generateTitle' | translate }}</h1>
       <p>{{ 'plans.generateSubtitle' | translate }}</p>
     </div>
-    <a routerLink="/" class="btn btn--ghost">{{ 'common.cancel' | translate }}</a>
+    <a routerLink="/dashboard" class="btn btn--ghost">{{ 'common.cancel' | translate }}</a>
   </header>
 
   @if (!workshopContext.hasWorkshops()) {
@@ -12,80 +12,205 @@
   } @else if (loading()) {
     <p class="page__muted">{{ 'common.loading' | translate }}</p>
   } @else {
-    <form class="form" (ngSubmit)="generate()">
-      <label>
-        <span>{{ 'plans.project' | translate }}</span>
-        <select
-          [(ngModel)]="projectId"
-          name="projectId"
-          (ngModelChange)="onProjectOrMaterialChange()"
-          required
-        >
-          @for (project of projects(); track project.id) {
-            <option [value]="project.id">{{ project.name }}</option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>{{ 'plans.material' | translate }}</span>
-        <select
-          [(ngModel)]="materialId"
-          name="materialId"
-          (ngModelChange)="onProjectOrMaterialChange()"
-          required
-        >
-          @for (material of materials(); track material.id) {
-            <option [value]="material.id">
-              {{ material.code }} — {{ material.name }}
-            </option>
-          }
-        </select>
-      </label>
-
-      <label>
-        <span>{{ 'plans.kerfMm' | translate }}</span>
-        <input type="number" min="0" [(ngModel)]="kerfMm" name="kerfMm" required />
-      </label>
-
-      <fieldset>
-        <legend>{{ 'plans.requiredCuts' | translate }}</legend>
-        @if (cuts().length === 0) {
-          <p class="page__muted">{{ 'plans.noCuts' | translate }}</p>
-        } @else {
-          <ul class="cut-list">
-            @for (cut of cuts(); track cut.id) {
-              <li>
-                <label>
-                  <input
-                    type="checkbox"
-                    [checked]="isSelected(cut.id)"
-                    (change)="toggleCut(cut.id, $any($event.target).checked)"
-                  />
-                  <span>
-                    {{ cut.name }} · {{ cut.lengthMm }} mm × {{ cut.quantity }}
-                    ({{ cut.projectSectionName }})
-                  </span>
-                </label>
-              </li>
+    <div class="generate__layout">
+      <form class="form generate__form" (ngSubmit)="generate()">
+        <label>
+          <span>{{ 'plans.project' | translate }}</span>
+          <select
+            [(ngModel)]="projectId"
+            name="projectId"
+            (ngModelChange)="onProjectOrMaterialChange()"
+            required
+          >
+            @for (project of projects(); track project.id) {
+              <option [value]="project.id">{{ project.name }}</option>
             }
-          </ul>
-        }
-      </fieldset>
+          </select>
+        </label>
 
-      @if (error()) {
-        <p class="page__error">
-          @if (isI18nKey(error()!)) {
-            {{ error()! | translate }}
+        <label>
+          <span>{{ 'plans.material' | translate }}</span>
+          <select
+            [(ngModel)]="materialId"
+            name="materialId"
+            (ngModelChange)="onProjectOrMaterialChange()"
+            required
+          >
+            @for (material of materials(); track material.id) {
+              <option [value]="material.id">
+                {{ material.code }} — {{ material.name }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>{{ 'plans.kerfCm' | translate }}</span>
+          <input type="number" min="0" step="0.1" [(ngModel)]="kerfCm" name="kerfCm" required />
+        </label>
+
+        <fieldset>
+          <legend>{{ 'plans.requiredCuts' | translate }}</legend>
+          @if (cuts().length === 0) {
+            <p class="page__muted">{{ 'plans.noCuts' | translate }}</p>
           } @else {
-            {{ error()! }}
+            <ul class="cut-list">
+              @for (cut of cuts(); track cut.id) {
+                <li>
+                  <label>
+                    <input
+                      type="checkbox"
+                      [checked]="isSelected(cut.id)"
+                      (change)="toggleCut(cut.id, $any($event.target).checked)"
+                    />
+                    <span>
+                      {{ cut.name }} · {{ formatCm(cut.lengthMm) }}
+                      {{ 'common.cm' | translate }} × {{ cut.quantity }}
+                      ({{ cut.projectSectionName }})
+                    </span>
+                  </label>
+                </li>
+              }
+            </ul>
           }
-        </p>
-      }
+        </fieldset>
 
-      <button type="submit" class="btn btn--primary" [disabled]="saving()">
-        {{ 'plans.generate' | translate }}
-      </button>
-    </form>
+        <p class="continuity-note">{{ 'plans.continuityRule' | translate }}</p>
+
+        <label class="remnant-toggle">
+          <input
+            type="checkbox"
+            [(ngModel)]="useRemnants"
+            name="useRemnants"
+            (ngModelChange)="onUseRemnantsChange()"
+          />
+          <span>
+            <strong>{{ 'plans.useRemnants' | translate }}</strong>
+            <small>{{ 'plans.useRemnantsHint' | translate }}</small>
+            @if (usableRemnantCount() > 0) {
+              <small class="remnant-toggle__status remnant-toggle__status--ok">
+                {{
+                  'plans.remnantsAvailable' | translate: { count: usableRemnantCount() }
+                }}
+              </small>
+            } @else {
+              <small class="remnant-toggle__status remnant-toggle__status--warn">
+                {{ 'plans.noUsableRemnantsAffectingCost' | translate }}
+              </small>
+            }
+          </span>
+        </label>
+
+        @if (needsRegenerate()) {
+          <p class="page__notice">{{ 'plans.needsRegenerate' | translate }}</p>
+        }
+
+        @if (error()) {
+          <p class="page__error">
+            @if (isI18nKey(error()!)) {
+              {{ error()! | translate }}
+            } @else {
+              {{ error()! }}
+            }
+          </p>
+        }
+
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          {{ 'plans.generate' | translate }}
+        </button>
+      </form>
+
+      <aside class="generate__preview card">
+        <header>
+          <h2>{{ 'preview.title' | translate }}</h2>
+          <p>{{ 'preview.subtitle' | translate }}</p>
+        </header>
+        <app-aluminum-finish-bar />
+        @if (previewSections().length === 0) {
+          <p class="page__muted">{{ 'preview.emptyProject' | translate }}</p>
+        } @else {
+          <div class="preview-grid">
+            @for (section of previewSections(); track section.id) {
+              <app-frame-preview
+                [label]="section.name"
+                [sectorCode]="section.sectorCode"
+                [sectorName]="section.sectorName"
+                [heightMm]="section.heightMm"
+                [widthMm]="section.widthMm"
+                [quantity]="section.unitQuantity"
+              />
+            }
+          </div>
+        }
+      </aside>
+    </div>
+
+    @if (comparison(); as cmp) {
+      <section class="compare">
+        <header class="compare__header">
+          <h2>{{ 'plans.compareTitle' | translate }}</h2>
+          <p>{{ 'plans.compareSubtitle' | translate }}</p>
+        </header>
+
+        <div class="compare__grid">
+          @for (alt of cmp.alternatives; track alt.cuttingPlanId) {
+            <article
+              class="alt-card"
+              [class.alt-card--ok]="alt.isComplete"
+              [class.alt-card--bad]="!alt.isComplete"
+            >
+              <div class="alt-card__badges">
+                @if (isBestCost(alt)) {
+                  <span class="chip chip--cost">{{ 'plans.badgeCheapest' | translate }}</span>
+                }
+                @if (isBestWaste(alt)) {
+                  <span class="chip chip--waste">{{ 'plans.badgeLeastWaste' | translate }}</span>
+                }
+                @if (!alt.isComplete) {
+                  <span class="chip chip--bad">{{ 'plans.badgeUnusable' | translate }}</span>
+                } @else {
+                  <span class="chip chip--ok">{{ 'plans.badgeUsable' | translate }}</span>
+                }
+              </div>
+
+              <h3>
+                {{
+                  strategyLabelKey(alt.strategyCode)
+                    | translate: { length: strategyLengthCm(alt.strategyCode) }
+                }}
+              </h3>
+              <p class="alt-card__summary">{{ alt.barsSummary }}</p>
+
+              <dl class="alt-card__stats">
+                <div>
+                  <dt>{{ 'plans.cost' | translate }}</dt>
+                  <dd>{{ alt.totalMaterialCost | number: '1.0-2' }}</dd>
+                </div>
+                <div>
+                  <dt>{{ 'plans.wastePercent' | translate }}</dt>
+                  <dd>{{ alt.wastePercent | number: '1.0-1' }}%</dd>
+                </div>
+                <div>
+                  <dt>{{ 'plans.barsUsed' | translate }}</dt>
+                  <dd>{{ alt.totalBarsUsed }}</dd>
+                </div>
+              </dl>
+
+              @if (!alt.isComplete) {
+                <p class="alt-card__warn">{{ 'plans.altIncompleteHint' | translate }}</p>
+              }
+
+              <button
+                type="button"
+                class="btn btn--primary"
+                (click)="openPlan(alt.cuttingPlanId)"
+              >
+                {{ 'plans.viewAlternative' | translate }}
+              </button>
+            </article>
+          }
+        </div>
+      </section>
+    }
   }
 </section>

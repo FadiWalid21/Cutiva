@@ -291,6 +291,24 @@ Examples:
 - Invalid material or section references.
 - Incompatible material/sector combinations.
 
+### FR-13 — Resources catalog (P1 — V2)
+The system shall manage workshop resources in three categories without breaking the existing materials/stock UI:
+- **Aluminum:** extend global `Material` + `StockBar` with category (default Aluminum), optional thickness, soft deactivate (`IsActive`).
+- **Glass:** workshop-scoped `GlassType` / `GlassSpec` (thickness + price per m²). No 2D glass nesting in this release.
+- **Accessories:** extend workshop `Accessory` with optional brand and unit (piece / set / meter). Soft deactivate when linked.
+
+### FR-14 — Product templates (P1 — V2)
+The system shall store window/door product templates as data (not code): product type → variant → aluminum parts (roles + structured length formulas) → optional glass slots → accessory slots. Seeded placeholders are editable. No string-expression evaluation.
+
+### FR-15 — Project items and inspection (P1 — V2)
+A project may contain product items (variant, W×H×qty, per-role materials, glass/accessory choices). Optional site inspection records measured dimensions and notes; when status is Done, measured sizes drive calculation.
+
+### FR-16 — Project cost calculation (P1 — V2)
+`POST /api/projects/{id}/calculate` shall explode BOM, pack aluminum via the existing optimizer (unchanged), price glass by exact m², price accessories by quantity rules, allocate shared bar cost by piece-length share (waste included proportionally), regenerate only sourced RequiredCuts, and snapshot formulas/prices on each item.
+
+### FR-17 — Quote lines from product costing (P1 — V2)
+Client quotes shall include glass and product-accessory lines (and aluminum from plan or product snapshot) derived from item calculation snapshots, while preserving the legacy section-accessory quote path.
+
 ## 9. Non-Functional Requirements
 
 ### NFR-01 — Architecture
@@ -324,7 +342,7 @@ Operational errors should be diagnosable through existing logging and exception 
 6. Unit price cannot be negative.
 7. Inactive stock is not eligible for a new plan.
 8. Allocated bars cannot exceed available quantities.
-9. A required cut's material must be compatible with its project section's sector.
+9. A required cut's material must be compatible with its project section's sector. (Manual path: not strictly enforced yet. Product calculate auto-creates a generated section per item using the cut material's sector.)
 10. Kerf must be included according to the agreed convention.
 11. Unallocated demand must be reported explicitly.
 12. Generating a plan is a calculation only; it does not reserve or consume inventory in the initial release.
@@ -363,15 +381,15 @@ The exact cutting-plan endpoint, request/response DTOs, and persisted-versus-req
 
 These items require business confirmation:
 
-1. Is the first customer workflow aluminum windows and doors, or a broader aluminum fabrication process?
-2. What does `Sector` mean in the workshop's terminology?
+1. Is the first customer workflow aluminum windows and doors, or a broader aluminum fabrication process? **Resolved for V2: windows + doors via templates; broader types later.**
+2. What does `Sector` mean in the workshop's terminology? **Working definition: global element-type / material classification bucket — not a physical workshop zone. Confirm with users.**
 3. Is kerf constant per machine, configurable per plan, or configurable per material/profile?
 4. Should kerf be charged between pieces only, or also at the start/end of a bar based on machine practice?
-5. Are stock lengths and prices fixed per material record, or can multiple stock options exist for one material?
-6. Is optimization run per section, project, or material batch?
-7. What takes priority: minimum cost, minimum waste, minimum bars, or a weighted combination?
+5. Are stock lengths and prices fixed per material record, or can multiple stock options exist for one material? **Resolved: multiple StockBar lengths/prices per Material.**
+6. Is optimization run per section, project, or material batch? **Resolved for V2 calculate: per Material across the project (shared bars), then per existing plan UI for manual cuts.**
+7. What takes priority: minimum cost, minimum waste, minimum bars, or a weighted combination? **Default: minimum cost, then minimum waste (alternatives still expose both).**
 8. Is leftover material waste, reusable inventory, or both depending on a minimum reusable length?
-9. Which currency is used for `UnitPrice`? Are taxes or purchase costs included?
+9. Which currency is used for `UnitPrice`? Are taxes or purchase costs included? **Resolved for MVP: plain decimal, no tax/currency code.**
 10. Should users be able to override a generated plan manually?
 11. What should happen if there is insufficient stock to satisfy all required pieces?
 12. What are the expected maximum job size and acceptable response time?

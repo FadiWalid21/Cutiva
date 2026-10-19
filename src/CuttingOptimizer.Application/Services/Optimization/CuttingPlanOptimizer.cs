@@ -4,35 +4,13 @@ namespace CuttingOptimizer.Application.Services.Optimization;
 
 /// <summary>
 /// Cost-aware First-Fit Decreasing (FFD) cutting planner.
+/// Prefers workshop remnant bars (limited qty) before market catalog (unlimited).
+/// Each piece is placed on a single bar (no splicing).
 /// </summary>
-/// <remarks>
-/// <para>
-/// <b>Kerf convention:</b> lengths are in millimeters. For a bar with
-/// <c>n</c> assigned pieces, kerf is charged only between consecutive pieces:
-/// <c>totalKerf = max(n - 1, 0) * kerfMm</c> (none at the bar ends).
-/// Used length = sum(piece lengths) + totalKerf.
-/// Remaining length = stockLengthMm - usedLength.
-/// A piece fits an open bar only when remaining length is at least
-/// <c>pieceLength + (barAlreadyHasPieces ? kerfMm : 0)</c>.
-/// Kerf must be supplied by the caller; this service never assumes a default.
-/// </para>
-/// <para>
-/// <b>Objectives (local greedy choices):</b> when opening a new bar, prefer
-/// lower unit price, then lower leftover after placing the piece.
-/// This heuristic does <b>not</b> guarantee a globally optimal solution
-/// for total cost or leftover.
-/// </para>
-/// <para>
-/// Offcut reuse and inventory mutation are out of scope.
-/// </para>
-/// </remarks>
 public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
 {
-    private const string StrategyNote =
-        "Cost-aware First-Fit Decreasing heuristic. "
-        + "Does not guarantee a globally optimal plan. "
-        + "Kerf is charged between consecutive pieces only (n-1 gaps). "
-        + "Inventory is not reserved or consumed.";
+    private const string ContinuityNote =
+        "Each piece is cut from a single bar; splicing pieces is not allowed. ";
 
     public CuttingOptimizationResult Optimize(CuttingOptimizationInput input)
     {
@@ -46,12 +24,24 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
                 "KerfMm must be greater than or equal to zero.");
         }
 
+        var stockOptions = input.StockOptions
+            .Where(option =>
+            {
+                if (option.IsRemnant)
+                    return input.UseRemnants;
+
+                return input.AllowedCatalogStockBarIds is null
+                    || input.AllowedCatalogStockBarIds.Contains(option.StockBarId);
+            })
+            .ToList();
+
         var pieces = ExpandAndSortPieces(input.RequiredCuts);
-        var remainingQty = input.StockOptions.ToDictionary(
+        var stockById = stockOptions.ToDictionary(option => option.StockBarId);
+        var remainingQty = stockOptions.ToDictionary(
             option => option.StockBarId,
-            option => option.AvailableQuantity);
-        var stockById = input.StockOptions.ToDictionary(
-            option => option.StockBarId);
+            option => option.IsRemnant
+                ? option.AvailableQuantity
+                : int.MaxValue / 4);
 
         var openBars = new List<OpenBar>();
         var unallocated = new List<UnallocatedPiece>();
@@ -63,9 +53,10 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
 
             if (TryOpenNewBar(
                     openBars,
-                    remainingQty,
                     stockById,
-                    piece))
+                    remainingQty,
+                    piece,
+                    input.BarOpenPreference))
                 continue;
 
             unallocated.Add(new UnallocatedPiece(
@@ -93,7 +84,23 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
 
         var totalKerfMm = bars.Sum(bar => bar.KerfMm);
         var totalLeftoverMm = bars.Sum(bar => bar.RemainingLengthMm);
+        // Remnants are priced 0 — only market catalog bars contribute to buy cost.
         var totalMaterialCost = bars.Sum(bar => bar.UnitPrice);
+
+        var preferenceNote = input.BarOpenPreference == BarOpenPreference.LeastLeftover
+            ? "Bar open preference: least leftover, then unit price. "
+            : "Bar open preference: cheapest unit price, then leftover. ";
+
+        var remnantNote = input.UseRemnants
+            ? "Remnant inventory is preferred before buying market bars. "
+            : "Market purchase only — remnant warehouse stock was not used. ";
+
+        var strategyNote =
+            ContinuityNote
+            + remnantNote
+            + preferenceNote
+            + "Cost-aware FFD heuristic; not globally optimal. "
+            + "Market catalog lengths are unlimited supply.";
 
         return new CuttingOptimizationResult(
             IsComplete: unallocated.Count == 0,
@@ -103,7 +110,7 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
             TotalLeftoverMm: totalLeftoverMm,
             Bars: bars,
             UnallocatedPieces: unallocated,
-            StrategyNote: StrategyNote);
+            StrategyNote: strategyNote);
     }
 
     private static List<PieceCandidate> ExpandAndSortPieces(
@@ -155,35 +162,27 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
 
     private static bool TryOpenNewBar(
         List<OpenBar> openBars,
-        Dictionary<Guid, int> remainingQty,
         Dictionary<Guid, OptimizationStockOption> stockById,
-        PieceCandidate piece)
+        Dictionary<Guid, int> remainingQty,
+        PieceCandidate piece,
+        BarOpenPreference preference)
     {
-        OptimizationStockOption? best = null;
-        var bestLeftover = int.MaxValue;
+        var remnantPick = PickBestOption(
+            stockById.Values.Where(o =>
+                o.IsRemnant
+                && remainingQty[o.StockBarId] > 0
+                && o.LengthMm >= piece.LengthMm),
+            piece,
+            preference);
 
-        foreach (var option in stockById.Values)
-        {
-            if (remainingQty[option.StockBarId] <= 0)
-                continue;
-
-            if (option.LengthMm < piece.LengthMm)
-                continue;
-
-            var leftover = option.LengthMm - piece.LengthMm;
-
-            if (best is null
-                || option.UnitPrice < best.UnitPrice
-                || (option.UnitPrice == best.UnitPrice
-                    && leftover < bestLeftover)
-                || (option.UnitPrice == best.UnitPrice
-                    && leftover == bestLeftover
-                    && option.StockBarId.CompareTo(best.StockBarId) < 0))
-            {
-                best = option;
-                bestLeftover = leftover;
-            }
-        }
+        var best = remnantPick
+            ?? PickBestOption(
+                stockById.Values.Where(o =>
+                    !o.IsRemnant
+                    && remainingQty[o.StockBarId] > 0
+                    && o.LengthMm >= piece.LengthMm),
+                piece,
+                preference);
 
         if (best is null)
             return false;
@@ -204,6 +203,47 @@ public sealed class CuttingPlanOptimizer : ICuttingPlanOptimizer
 
         openBars.Add(openBar);
         return true;
+    }
+
+    private static OptimizationStockOption? PickBestOption(
+        IEnumerable<OptimizationStockOption> options,
+        PieceCandidate piece,
+        BarOpenPreference preference)
+    {
+        OptimizationStockOption? best = null;
+        var bestLeftover = int.MaxValue;
+        var bestPrice = decimal.MaxValue;
+
+        foreach (var option in options)
+        {
+            var leftover = option.LengthMm - piece.LengthMm;
+            var isBetter = preference switch
+            {
+                BarOpenPreference.LeastLeftover =>
+                    best is null
+                    || leftover < bestLeftover
+                    || (leftover == bestLeftover && option.UnitPrice < bestPrice)
+                    || (leftover == bestLeftover
+                        && option.UnitPrice == bestPrice
+                        && option.StockBarId.CompareTo(best!.StockBarId) < 0),
+                _ =>
+                    best is null
+                    || option.UnitPrice < bestPrice
+                    || (option.UnitPrice == bestPrice && leftover < bestLeftover)
+                    || (option.UnitPrice == bestPrice
+                        && leftover == bestLeftover
+                        && option.StockBarId.CompareTo(best!.StockBarId) < 0)
+            };
+
+            if (!isBetter)
+                continue;
+
+            best = option;
+            bestLeftover = leftover;
+            bestPrice = option.UnitPrice;
+        }
+
+        return best;
     }
 
     private sealed class OpenBar(

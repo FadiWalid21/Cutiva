@@ -11,6 +11,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.pwa-banner--update {
+  background: linear-gradient(120deg, #0b0e0f, #134e4a 50%, #1f8f82);
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+
 .pwa-banner__copy {
   display: flex;
   align-items: center;

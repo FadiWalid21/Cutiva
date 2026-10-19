@@ -1,4 +1,22 @@
-@if (pwa.showBanner()) {
+@if (updates.updateAvailable()) {
+  <div class="pwa-banner pwa-banner--update" role="region" [attr.aria-label]="'pwa.updateTitle' | translate">
+    <div class="pwa-banner__copy">
+      <img class="pwa-banner__icon" src="/icons/icon-192.png" alt="" width="36" height="36" />
+      <div>
+        <strong>{{ 'pwa.updateTitle' | translate }}</strong>
+        <span>{{ 'pwa.updateBody' | translate }}</span>
+      </div>
+    </div>
+    <div class="pwa-banner__actions">
+      <button type="button" class="pwa-banner__primary" (click)="applyUpdate()">
+        {{ 'pwa.updateNow' | translate }}
+      </button>
+      <button type="button" class="pwa-banner__ghost" (click)="deferUpdate()">
+        {{ 'pwa.updateLater' | translate }}
+      </button>
+    </div>
+  </div>
+} @else if (pwa.showBanner()) {
   <div class="pwa-banner" role="region" [attr.aria-label]="'pwa.bannerTitle' | translate">
     <div class="pwa-banner__copy">
       <img class="pwa-banner__icon" src="/icons/icon-192.png" alt="" width="36" height="36" />

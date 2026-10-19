@@ -24,7 +24,7 @@ import {
   LandingTier,
   STORY_SCENES,
   StorySceneId,
-  mapPublicPlansToTiers,
+  mapPricingDisplayToTiers,
 } from './landing.pricing';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -81,8 +81,8 @@ export class LandingPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.plansApi.list().subscribe({
-      next: (plans) => this.tiers.set(mapPublicPlansToTiers(plans)),
+    this.plansApi.display().subscribe({
+      next: (display) => this.tiers.set(mapPricingDisplayToTiers(display)),
       error: () => this.tiers.set(LANDING_TIERS_FALLBACK),
     });
   }

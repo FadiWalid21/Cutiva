@@ -13,7 +13,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.5rem, 4vw, 3rem);
+  padding-top: calc(clamp(1.5rem, 4vw, 3rem) + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(clamp(1.5rem, 4vw, 3rem) + env(safe-area-inset-bottom, 0px));
+  padding-inline: max(clamp(1.5rem, 4vw, 3rem), env(safe-area-inset-left, 0px))
+    max(clamp(1.5rem, 4vw, 3rem), env(safe-area-inset-right, 0px));
   overflow: hidden;
   color: var(--auth-ink);
 }
@@ -52,19 +55,13 @@
 }
 
 .auth__mono {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   width: 3rem;
   height: 3rem;
   border-radius: 12px;
-  background: linear-gradient(145deg, var(--auth-accent), var(--auth-accent-deep));
-  color: #fff;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: 0.04em;
-  box-shadow: 0 10px 28px rgba(31, 143, 130, 0.35);
+  object-fit: contain;
+  flex-shrink: 0;
+  box-shadow: 0 10px 28px rgba(31, 143, 130, 0.28);
 }
 
 .auth__mark {

@@ -17,7 +17,8 @@ public sealed class GetWorkshopByIdQueryHandler(
             .Where(workshop => workshop.Id == request.Id)
             .Select(workshop => new WorkshopDto(
                 workshop.Id,
-                workshop.Name))
+                workshop.Name,
+                workshop.ProductionPricePerM2))
             .FirstOrDefaultAsync(cancellationToken);
     }
 }

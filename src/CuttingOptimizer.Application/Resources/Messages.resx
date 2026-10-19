@@ -20,6 +20,19 @@
   <data name="MaterialNotFoundSimple" xml:space="preserve"><value>The specified material was not found.</value></data>
   <data name="StockBarOrMaterialNotFound" xml:space="preserve"><value>Stock bar or material was not found.</value></data>
   <data name="StockBarNotFound" xml:space="preserve"><value>Stock bar not found.</value></data>
+  <data name="StockBarInUse" xml:space="preserve"><value>Cannot delete a stock length that is used in a cutting plan.</value></data>
+  <data name="QuoteNotFound" xml:space="preserve"><value>Quote, project, or cutting plan was not found.</value></data>
+  <data name="QuotePlanNotApproved" xml:space="preserve"><value>Confirm the cutting plan before creating a client quote.</value></data>
+  <data name="AccessoryNotFound" xml:space="preserve"><value>Accessory not found.</value></data>
+  <data name="AccessoryDuplicateName" xml:space="preserve"><value>An accessory with this name already exists in the workshop.</value></data>
+  <data name="AccessoryDeactivated" xml:space="preserve"><value>Accessory is in use and was deactivated instead of deleted.</value></data>
+  <data name="AccessoryInvalidForWorkshop" xml:space="preserve"><value>One or more accessories are invalid for this workshop.</value></data>
+  <data name="GlassTypeNotFound" xml:space="preserve"><value>Glass type not found.</value></data>
+  <data name="GlassTypeDuplicateName" xml:space="preserve"><value>A glass type with this name already exists in the workshop.</value></data>
+  <data name="GlassSpecNotFound" xml:space="preserve"><value>Glass specification not found.</value></data>
+  <data name="GlassMaterialInvalid" xml:space="preserve"><value>Choose a valid glass material with a price per m².</value></data>
+  <data name="GlassMaterialRequiredForHopper" xml:space="preserve"><value>Hopper openings require a glass material.</value></data>
+  <data name="QuoteNoBillableLines" xml:space="preserve"><value>Add glass or accessories to the project before creating a quote without a cutting plan.</value></data>
   <data name="RequiredCutSectionOrMaterialNotFound" xml:space="preserve"><value>Project section or matching material was not found.</value></data>
   <data name="RequiredCutUpdateNotFound" xml:space="preserve"><value>Required cut, project section, or matching material was not found.</value></data>
   <data name="RequiredCutNotFound" xml:space="preserve"><value>Required cut not found.</value></data>
@@ -27,7 +40,25 @@
   <data name="CuttingPlanByIdNotFound" xml:space="preserve"><value>Cutting plan not found.</value></data>
   <data name="CuttingPlanAlreadyApproved" xml:space="preserve"><value>This cutting plan is already approved.</value></data>
   <data name="CuttingPlanInsufficientStock" xml:space="preserve"><value>Not enough active stock to approve this cutting plan.</value></data>
+  <data name="CuttingPlanIncomplete" xml:space="preserve"><value>Cannot confirm an incomplete plan. Some pieces are longer than every market length for this material.</value></data>
   <data name="WorkshopDashboardNotFound" xml:space="preserve"><value>Workshop not found.</value></data>
+  <data name="ProductVariantNotFound" xml:space="preserve"><value>Product variant not found.</value></data>
+  <data name="TemplatePartNotFound" xml:space="preserve"><value>Template part not found.</value></data>
+  <data name="TemplateGlassSlotNotFound" xml:space="preserve"><value>Template glass slot not found.</value></data>
+  <data name="TemplateAccessorySlotNotFound" xml:space="preserve"><value>Template accessory slot not found.</value></data>
+  <data name="ProjectItemNotFound" xml:space="preserve"><value>Project item not found.</value></data>
+  <data name="ProjectHasNoItems" xml:space="preserve"><value>Add at least one project item before calculating.</value></data>
+  <data name="InvalidAluminumMaterial" xml:space="preserve"><value>Choose an active aluminum material.</value></data>
+  <data name="InvalidGlassSpec" xml:space="preserve"><value>Choose a glass specification that belongs to this workshop.</value></data>
+  <data name="InvalidAccessory" xml:space="preserve"><value>Choose an active accessory that belongs to this workshop.</value></data>
+  <data name="TemplatePartNotInVariant" xml:space="preserve"><value>One or more parts do not belong to the selected product variant.</value></data>
+  <data name="GlassSlotNotInVariant" xml:space="preserve"><value>One or more glass slots do not belong to the selected product variant.</value></data>
+  <data name="AccessorySlotNotInVariant" xml:space="preserve"><value>One or more accessory slots do not belong to the selected product variant.</value></data>
+  <data name="RequiredGlassSlotMissing" xml:space="preserve"><value>A required glass slot is missing a glass specification.</value></data>
+  <data name="MissingPartChoice" xml:space="preserve"><value>Every template part needs an aluminum material choice.</value></data>
+  <data name="DuplicatePartChoice" xml:space="preserve"><value>Duplicate part material choices are not allowed.</value></data>
+  <data name="DuplicateGlassChoice" xml:space="preserve"><value>Duplicate glass slot choices are not allowed.</value></data>
+  <data name="DuplicateAccessoryChoice" xml:space="preserve"><value>Duplicate accessory slot choices are not allowed.</value></data>
 
   <data name="AuthEmailRequired" xml:space="preserve"><value>Email is required.</value></data>
   <data name="AuthEmailInvalid" xml:space="preserve"><value>Enter a valid email address.</value></data>
@@ -49,6 +80,11 @@
   <data name="SectorIdRequired" xml:space="preserve"><value>Sector ID is required.</value></data>
   <data name="SectionNameRequired" xml:space="preserve"><value>Section name is required.</value></data>
   <data name="SectionNameMaxLength" xml:space="preserve"><value>Section name must not exceed 200 characters.</value></data>
+  <data name="SectionHeightRequired" xml:space="preserve"><value>Height must be greater than zero.</value></data>
+  <data name="SectionWidthRequired" xml:space="preserve"><value>Width must be greater than zero.</value></data>
+  <data name="SectionUnitQuantityRequired" xml:space="preserve"><value>Unit quantity must be greater than zero.</value></data>
+  <data name="SectionNotFound" xml:space="preserve"><value>Project section not found.</value></data>
+  <data name="SectionInUse" xml:space="preserve"><value>Cannot delete a section whose cuts are used in a cutting plan.</value></data>
   <data name="MaterialRequired" xml:space="preserve"><value>Material is required.</value></data>
   <data name="ProjectSectionRequired" xml:space="preserve"><value>Project section is required.</value></data>
   <data name="NameRequiredMax150" xml:space="preserve"><value>Name is required and cannot exceed 150 characters.</value></data>

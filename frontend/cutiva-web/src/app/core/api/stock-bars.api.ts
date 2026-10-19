@@ -15,6 +15,7 @@ export interface StockBar {
   unitPrice: number;
   availableQuantity: number;
   isActive: boolean;
+  isRemnant: boolean;
 }
 
 export interface CreateStockBarBody {
@@ -40,6 +41,7 @@ export class StockBarsApi {
     materialId?: string;
     sectorId?: string;
     isActive?: boolean;
+    isRemnant?: boolean;
   }): Observable<StockBar[]> {
     let params = new HttpParams();
     if (filters?.materialId) {
@@ -50,6 +52,9 @@ export class StockBarsApi {
     }
     if (filters?.isActive !== undefined) {
       params = params.set('isActive', String(filters.isActive));
+    }
+    if (filters?.isRemnant !== undefined) {
+      params = params.set('isRemnant', String(filters.isRemnant));
     }
     return this.http.get<StockBar[]>(this.baseUrl, { params });
   }
@@ -62,7 +67,13 @@ export class StockBarsApi {
     return this.http.put<void>(`${this.baseUrl}/${id}`, body);
   }
 
-  deactivate(id: string): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${id}/deactivate`, {});
+  setAvailability(id: string, isActive: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.baseUrl}/${id}/availability`, {
+      isActive,
+    });
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

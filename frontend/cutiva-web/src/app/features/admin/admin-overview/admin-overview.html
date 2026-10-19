@@ -1,0 +1,47 @@
+<section class="admin-page">
+  <header>
+    <h1>{{ 'admin.overviewTitle' | translate }}</h1>
+    <a routerLink="/admin/clients" class="btn btn--primary">{{ 'admin.manageClients' | translate }}</a>
+  </header>
+
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  } @else if (summary(); as s) {
+    <div class="kpi-grid">
+      <article>
+        <span>{{ 'admin.kpi.totalClients' | translate }}</span>
+        <strong>{{ s.totalClients }}</strong>
+      </article>
+      <article>
+        <span>{{ 'admin.kpi.active' | translate }}</span>
+        <strong>{{ s.activeSubscriptions }}</strong>
+      </article>
+      <article>
+        <span>{{ 'admin.kpi.expired' | translate }}</span>
+        <strong>{{ s.expiredSubscriptions }}</strong>
+      </article>
+      <article>
+        <span>{{ 'admin.kpi.suspended' | translate }}</span>
+        <strong>{{ s.suspendedSubscriptions }}</strong>
+      </article>
+      <article>
+        <span>{{ 'admin.kpi.expiring' | translate }}</span>
+        <strong>{{ s.expiringIn7Days }}</strong>
+      </article>
+    </div>
+
+    <h2>{{ 'admin.byPlan' | translate }}</h2>
+    <ul class="plan-counts">
+      @for (row of s.byPlan; track row.planCode) {
+        <li>
+          <span>{{ row.planName }}</span>
+          <strong>{{ row.count }}</strong>
+        </li>
+      } @empty {
+        <li>{{ 'admin.noActivePlans' | translate }}</li>
+      }
+    </ul>
+  } @else {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  }
+</section>

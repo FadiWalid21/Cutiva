@@ -35,8 +35,15 @@ export class WorkshopsApi {
     return this.http.post<{ id: string }>(this.baseUrl, { name });
   }
 
-  update(id: string, name: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${id}`, { name });
+  update(
+    id: string,
+    name: string,
+    productionPricePerM2?: number | null,
+  ): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}`, {
+      name,
+      productionPricePerM2: productionPricePerM2 ?? null,
+    });
   }
 
   delete(id: string): Observable<void> {

@@ -1,0 +1,276 @@
+<figure
+  class="frame-preview"
+  [class.frame-preview--door]="kind() === 'door'"
+  [class.frame-preview--hopper]="kind() === 'hopper'"
+  [class.frame-preview--structure]="isStructure()"
+  [class.frame-preview--compact]="compact()"
+>
+  <figcaption class="frame-preview__cap">
+    <strong>{{ label() }}</strong>
+    @if (sectorName()) {
+      <span>{{ sectorName() }}</span>
+    }
+  </figcaption>
+
+  @if (hasSize()) {
+    <div class="frame-preview__canvas">
+      <svg
+        [attr.viewBox]="'0 0 ' + geometry().viewW + ' ' + geometry().viewH"
+        role="img"
+        [attr.aria-label]="label()"
+      >
+        <defs>
+          <linearGradient [attr.id]="gradientId()" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" [attr.stop-color]="finish().light" />
+            <stop offset="45%" [attr.stop-color]="finish().mid" />
+            <stop offset="100%" [attr.stop-color]="finish().dark" />
+          </linearGradient>
+          <linearGradient [attr.id]="gradientId() + '-glass'" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop
+              offset="0%"
+              [attr.stop-color]="glass().top"
+              [attr.stop-opacity]="glassStops().topOpacity"
+            />
+            <stop
+              offset="55%"
+              [attr.stop-color]="glass().mid"
+              [attr.stop-opacity]="glassStops().midOpacity"
+            />
+            <stop
+              offset="100%"
+              [attr.stop-color]="glass().bottom"
+              [attr.stop-opacity]="glassStops().bottomOpacity"
+            />
+          </linearGradient>
+          <linearGradient [attr.id]="gradientId() + '-panel'" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" [attr.stop-color]="finish().light" stop-opacity="0.95" />
+            <stop offset="100%" [attr.stop-color]="finish().dark" stop-opacity="0.95" />
+          </linearGradient>
+        </defs>
+
+        <!-- Outer aluminum frame -->
+        <rect
+          [attr.x]="geometry().x"
+          [attr.y]="geometry().y"
+          [attr.width]="geometry().w"
+          [attr.height]="geometry().h"
+          rx="2.5"
+          [attr.fill]="'url(#' + gradientId() + ')'"
+          stroke="rgba(0,0,0,0.22)"
+          stroke-width="0.8"
+        />
+
+        @if (kind() === 'hopper') {
+          <!-- Awning / hopper: glass sash hinged at top, tilted out at bottom -->
+          <rect
+            [attr.x]="geometry().innerX"
+            [attr.y]="geometry().innerY"
+            [attr.width]="geometry().innerW"
+            [attr.height]="geometry().innerH"
+            rx="1"
+            fill="rgba(20,30,40,0.12)"
+          />
+          <polygon
+            [attr.points]="geometry().hopperPoints"
+            [attr.fill]="'url(#' + gradientId() + '-glass)'"
+            stroke="rgba(255,255,255,0.4)"
+            stroke-width="0.7"
+          />
+          @if (isDouble()) {
+            <line
+              [attr.x1]="geometry().innerX + 8"
+              [attr.y1]="geometry().hingeY + geometry().innerH * 0.35"
+              [attr.x2]="geometry().innerX + geometry().innerW - 8"
+              [attr.y2]="geometry().hingeY + geometry().innerH * 0.35 - 4"
+              stroke="rgba(255,255,255,0.55)"
+              [attr.stroke-width]="geometry().iguGap"
+              opacity="0.75"
+            />
+          }
+          <!-- Top hinge line -->
+          <line
+            [attr.x1]="geometry().hingeX1"
+            [attr.y1]="geometry().hingeY"
+            [attr.x2]="geometry().hingeX2"
+            [attr.y2]="geometry().hingeY"
+            [attr.stroke]="finish().dark"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            opacity="0.85"
+          />
+        } @else if (kind() === 'window') {
+          <rect
+            [attr.x]="geometry().innerX"
+            [attr.y]="geometry().innerY"
+            [attr.width]="geometry().innerW"
+            [attr.height]="geometry().innerH"
+            rx="1"
+            [attr.fill]="'url(#' + gradientId() + '-glass)'"
+            stroke="rgba(255,255,255,0.35)"
+            [attr.stroke-width]="isStructure() ? 1.2 : 0.6"
+          />
+          @if (isDouble()) {
+            <rect
+              [attr.x]="geometry().innerX + geometry().iguGap"
+              [attr.y]="geometry().innerY + geometry().iguGap"
+              [attr.width]="geometry().innerW - geometry().iguGap * 2"
+              [attr.height]="geometry().innerH - geometry().iguGap * 2"
+              rx="0.5"
+              fill="none"
+              stroke="rgba(255,255,255,0.45)"
+              stroke-width="0.7"
+            />
+          }
+          <polygon
+            class="frame-preview__shine"
+            [attr.points]="
+              geometry().innerX +
+              2 +
+              ',' +
+              (geometry().innerY + 2) +
+              ' ' +
+              (geometry().innerX + geometry().innerW * 0.42) +
+              ',' +
+              (geometry().innerY + 2) +
+              ' ' +
+              (geometry().innerX + 2) +
+              ',' +
+              (geometry().innerY + geometry().innerH * 0.55)
+            "
+          />
+          <rect
+            [attr.x]="geometry().midX - geometry().mullionW / 2"
+            [attr.y]="geometry().innerY"
+            [attr.width]="geometry().mullionW"
+            [attr.height]="geometry().innerH"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.15)"
+            stroke-width="0.4"
+          />
+          <g
+            [attr.transform]="
+              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
+            "
+          >
+            <rect
+              [attr.x]="-geometry().winBaseW / 2"
+              [attr.y]="-geometry().winBaseH / 2"
+              [attr.width]="geometry().winBaseW"
+              [attr.height]="geometry().winBaseH"
+              [attr.rx]="geometry().winBaseW * 0.28"
+              [attr.fill]="finish().dark"
+              opacity="0.92"
+            />
+            <rect
+              [attr.x]="geometry().winLeverX"
+              [attr.y]="-geometry().winLeverH / 2"
+              [attr.width]="geometry().winLeverW"
+              [attr.height]="geometry().winLeverH"
+              [attr.rx]="geometry().winLeverH * 0.45"
+              [attr.fill]="finish().light"
+              stroke="rgba(0,0,0,0.28)"
+              stroke-width="0.35"
+            />
+          </g>
+        } @else {
+          <!-- Door: structure glass when Structure; solid panel otherwise -->
+          @if (isStructure()) {
+            <rect
+              [attr.x]="geometry().innerX"
+              [attr.y]="geometry().innerY"
+              [attr.width]="geometry().innerW"
+              [attr.height]="geometry().innerH"
+              rx="1"
+              [attr.fill]="'url(#' + gradientId() + '-glass)'"
+              stroke="rgba(0,0,0,0.28)"
+              stroke-width="1.1"
+            />
+            <rect
+              [attr.x]="geometry().innerX + 3"
+              [attr.y]="geometry().innerY + 3"
+              [attr.width]="geometry().innerW - 6"
+              [attr.height]="geometry().innerH - 6"
+              rx="0.5"
+              fill="none"
+              [attr.stroke]="finish().dark"
+              stroke-width="1.4"
+              opacity="0.35"
+            />
+          } @else {
+            <rect
+              [attr.x]="geometry().innerX"
+              [attr.y]="geometry().innerY"
+              [attr.width]="geometry().innerW"
+              [attr.height]="geometry().innerH"
+              rx="1"
+              [attr.fill]="'url(#' + gradientId() + '-panel)'"
+              stroke="rgba(0,0,0,0.2)"
+              stroke-width="0.5"
+            />
+            <line
+              [attr.x1]="geometry().innerX + 3"
+              [attr.y1]="geometry().midY"
+              [attr.x2]="geometry().innerX + geometry().innerW - 3"
+              [attr.y2]="geometry().midY"
+              [attr.stroke]="finish().dark"
+              stroke-width="1.2"
+              opacity="0.45"
+            />
+          }
+          <g
+            [attr.transform]="
+              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
+            "
+          >
+            <circle
+              [attr.r]="geometry().doorKnobR"
+              [attr.fill]="finish().dark"
+              stroke="rgba(0,0,0,0.2)"
+              stroke-width="0.35"
+            />
+            <rect
+              [attr.x]="geometry().doorLeverX"
+              [attr.y]="-geometry().doorLeverH / 2"
+              [attr.width]="geometry().doorLeverW"
+              [attr.height]="geometry().doorLeverH"
+              [attr.rx]="geometry().doorLeverH * 0.48"
+              [attr.fill]="finish().light"
+              stroke="rgba(0,0,0,0.3)"
+              stroke-width="0.35"
+            />
+          </g>
+        }
+
+        <text
+          class="frame-preview__dim"
+          [attr.x]="geometry().widthLabelX"
+          [attr.y]="geometry().widthLabelY"
+          text-anchor="middle"
+        >
+          {{ formatCm(widthMm()!) }} {{ 'common.cm' | translate }}
+        </text>
+
+        <text
+          class="frame-preview__dim"
+          [attr.x]="geometry().heightLabelX"
+          [attr.y]="geometry().heightLabelY"
+          text-anchor="middle"
+          [attr.transform]="
+            'rotate(-90 ' +
+            geometry().heightLabelX +
+            ' ' +
+            geometry().heightLabelY +
+            ')'
+          "
+        >
+          {{ formatCm(heightMm()!) }} {{ 'common.cm' | translate }}
+        </text>
+      </svg>
+      @if (qty() > 1) {
+        <span class="frame-preview__qty">×{{ qty() }}</span>
+      }
+    </div>
+  } @else {
+    <p class="frame-preview__empty">{{ 'preview.noSize' | translate }}</p>
+  }
+</figure>

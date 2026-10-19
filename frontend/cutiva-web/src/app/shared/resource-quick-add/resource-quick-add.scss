@@ -1,0 +1,67 @@
+.quick-add {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 14, 16, 0.45);
+}
+
+.quick-add__panel {
+  width: min(420px, 100%);
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 1.1rem 1.2rem 1.25rem;
+}
+
+.quick-add__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+}
+
+.quick-add__error {
+  margin: 0 0 0.75rem;
+  color: var(--color-danger-text);
+  font-size: 0.9rem;
+}
+
+.quick-add__form {
+  display: grid;
+  gap: 0.75rem;
+
+  label {
+    display: grid;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+
+  input,
+  select {
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.6rem;
+  }
+}
+
+.quick-add__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}

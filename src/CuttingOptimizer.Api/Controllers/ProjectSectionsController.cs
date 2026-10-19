@@ -1,5 +1,7 @@
 using CuttingOptimizer.Api.Contracts.ProjectSections;
+using CuttingOptimizer.Application.Features.Accessories;
 using CuttingOptimizer.Application.Features.ProjectSections.Commands.CreateProjectSection;
+using CuttingOptimizer.Application.Features.ProjectSections.Commands.DeleteProjectSection;
 using CuttingOptimizer.Application.Features.ProjectSections.Queries.GetProjectSections;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
@@ -22,30 +24,46 @@ public sealed class ProjectSectionsController(
         [FromBody] CreateProjectSectionRequest request,
         CancellationToken cancellationToken)
     {
-        var sectionId = await sender.Send(
+        var accessories = (request.Accessories ?? [])
+            .Select(a => new SectionAccessoryInput(a.AccessoryId, a.Quantity))
+            .ToList();
+
+        var result = await sender.Send(
             new CreateProjectSectionCommand(
                 projectId,
                 request.SectorId,
-                request.Name),
+                request.Name,
+                request.HeightMm,
+                request.WidthMm,
+                request.UnitQuantity,
+                accessories),
             cancellationToken);
 
-        if (sectionId is null)
+        return result switch
         {
-            return NotFound(new
+            CreateProjectSectionSucceeded ok => Created(
+                $"/api/projects/{projectId}/sections/{ok.SectionId}",
+                new
+                {
+                    id = ok.SectionId,
+                    projectId,
+                    request.SectorId,
+                    request.Name,
+                    request.HeightMm,
+                    request.WidthMm,
+                    request.UnitQuantity,
+                    accessories
+                }),
+            CreateProjectSectionNotFound => NotFound(new
             {
                 message = localizer["ProjectOrSectorNotFound"].Value
-            });
-        }
-
-        return Created(
-            $"/api/projects/{projectId}/sections/{sectionId}",
-            new
+            }),
+            CreateProjectSectionInvalidAccessories => BadRequest(new
             {
-                id = sectionId,
-                projectId,
-                request.SectorId,
-                request.Name
-            });
+                message = localizer["AccessoryInvalidForWorkshop"].Value
+            }),
+            _ => StatusCode(500)
+        };
     }
 
     [HttpGet]
@@ -66,5 +84,30 @@ public sealed class ProjectSectionsController(
         }
 
         return Ok(sections);
+    }
+
+    [HttpDelete("{sectionId:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid projectId,
+        Guid sectionId,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeleteProjectSectionCommand(projectId, sectionId),
+            cancellationToken);
+
+        return result switch
+        {
+            DeleteProjectSectionResult.Deleted => NoContent(),
+            DeleteProjectSectionResult.NotFound => NotFound(new
+            {
+                message = localizer["SectionNotFound"].Value
+            }),
+            DeleteProjectSectionResult.InUse => Conflict(new
+            {
+                message = localizer["SectionInUse"].Value
+            }),
+            _ => StatusCode(500)
+        };
     }
 }

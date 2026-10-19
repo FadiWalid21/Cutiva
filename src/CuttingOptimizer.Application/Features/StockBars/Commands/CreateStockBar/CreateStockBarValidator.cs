@@ -14,7 +14,7 @@ public sealed class CreateStockBarValidator
             .GreaterThan(0);
 
         RuleFor(x => x.UnitPrice)
-            .GreaterThanOrEqualTo(0);
+            .GreaterThan(0);
 
         RuleFor(x => x.AvailableQuantity)
             .GreaterThanOrEqualTo(0);

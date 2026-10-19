@@ -34,26 +34,34 @@ public sealed class SectorsController(
         [FromBody] CreateSectorRequest request,
         CancellationToken cancellationToken)
     {
-        var sectorId = await sender.Send(
-            new CreateSectorCommand(request.Code, request.Name),
+        var outcome = await sender.Send(
+            new CreateSectorCommand(
+                request.Code,
+                request.Name,
+                request.MaterialId),
             cancellationToken);
 
-        if (sectorId is null)
+        return outcome.Status switch
         {
-            return Conflict(new
+            CreateSectorStatus.Created => Created(
+                $"/api/sectors/{outcome.Id}",
+                new
+                {
+                    id = outcome.Id,
+                    code = request.Code.Trim().ToUpperInvariant(),
+                    name = request.Name.Trim(),
+                    materialId = request.MaterialId
+                }),
+            CreateSectorStatus.CodeAlreadyExists => Conflict(new
             {
                 message = localizer["SectorCodeExists"].Value
-            });
-        }
-
-        return Created(
-            $"/api/sectors/{sectorId}",
-            new
+            }),
+            CreateSectorStatus.MaterialNotFound => BadRequest(new
             {
-                id = sectorId,
-                code = request.Code.Trim().ToUpperInvariant(),
-                request.Name
-            });
+                message = localizer["MaterialNotFound"].Value
+            }),
+            _ => StatusCode(500)
+        };
     }
 
     [HttpPut("{id:guid}")]
@@ -63,7 +71,11 @@ public sealed class SectorsController(
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new UpdateSectorCommand(id, request.Code, request.Name),
+            new UpdateSectorCommand(
+                id,
+                request.Code,
+                request.Name,
+                request.MaterialId),
             cancellationToken);
 
         return result switch
@@ -76,6 +88,10 @@ public sealed class SectorsController(
             UpdateSectorResult.CodeAlreadyExists => Conflict(new
             {
                 message = localizer["SectorCodeExists"].Value
+            }),
+            UpdateSectorResult.MaterialNotFound => BadRequest(new
+            {
+                message = localizer["MaterialNotFound"].Value
             }),
             _ => StatusCode(500)
         };

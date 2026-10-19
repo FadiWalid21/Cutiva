@@ -20,21 +20,18 @@ public sealed class UpdateRequiredCutHandler(
         if (requiredCut is null)
             return false;
 
-        var sectionSectorId = await context.ProjectSections
-            .Where(x => x.Id == request.ProjectSectionId)
-            .Select(x => (Guid?)x.SectorId)
-            .FirstOrDefaultAsync(cancellationToken);
+        var sectionExists = await context.ProjectSections
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == request.ProjectSectionId, cancellationToken);
 
-        if (sectionSectorId is null)
+        if (!sectionExists)
             return false;
 
-        var materialMatchesSector = await context.Materials
-            .AnyAsync(
-                x => x.Id == request.MaterialId
-                     && x.SectorId == sectionSectorId.Value,
-                cancellationToken);
+        var materialExists = await context.Materials
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == request.MaterialId, cancellationToken);
 
-        if (!materialMatchesSector)
+        if (!materialExists)
             return false;
 
         requiredCut.ProjectSectionId = request.ProjectSectionId;

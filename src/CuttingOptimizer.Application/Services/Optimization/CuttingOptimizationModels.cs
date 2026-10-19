@@ -1,9 +1,18 @@
 namespace CuttingOptimizer.Application.Services.Optimization;
 
+public enum BarOpenPreference
+{
+    CheapestUnitPrice = 0,
+    LeastLeftover = 1
+}
+
 public sealed record CuttingOptimizationInput(
     int KerfMm,
     IReadOnlyList<OptimizationRequiredCut> RequiredCuts,
-    IReadOnlyList<OptimizationStockOption> StockOptions);
+    IReadOnlyList<OptimizationStockOption> StockOptions,
+    BarOpenPreference BarOpenPreference = BarOpenPreference.CheapestUnitPrice,
+    IReadOnlySet<Guid>? AllowedCatalogStockBarIds = null,
+    bool UseRemnants = true);
 
 public sealed record OptimizationRequiredCut(
     Guid RequiredCutId,
@@ -15,7 +24,8 @@ public sealed record OptimizationStockOption(
     Guid StockBarId,
     int LengthMm,
     decimal UnitPrice,
-    int AvailableQuantity);
+    int AvailableQuantity,
+    bool IsRemnant);
 
 public sealed record CuttingOptimizationResult(
     bool IsComplete,

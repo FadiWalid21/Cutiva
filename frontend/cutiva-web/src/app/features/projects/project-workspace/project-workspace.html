@@ -5,131 +5,781 @@
       <h1>{{ projectName() || ('projects.workspaceTitle' | translate) }}</h1>
       <p>{{ 'projects.workspaceSubtitle' | translate }}</p>
     </div>
-    <a routerLink="/cutting-plans/new" class="btn btn--primary">
-      {{ 'plans.generateCta' | translate }}
+    <a
+      class="btn btn--primary"
+      [routerLink]="['/cutting-plans/new']"
+      [queryParams]="{ projectId: projectId() }"
+    >
+      {{ 'projects.calcBuy' | translate }}
     </a>
   </header>
 
-  @if (error()) {
+  @if (error(); as err) {
     <p class="page__error">
-      @if (isI18nKey(error()!)) {
-        {{ error()! | translate }}
+      @if (isI18nKey(err)) {
+        {{ err | translate }}
       } @else {
-        {{ error()! }}
+        {{ err }}
       }
     </p>
   }
 
-  <div class="workspace__grid">
+  @if (features.productTemplates) {
     <article class="card panel">
-      <h2>{{ 'projects.sections' | translate }}</h2>
-      <form class="inline-form" (ngSubmit)="addSection()">
-        <input
-          [(ngModel)]="sectionName"
-          name="sectionName"
-          [placeholder]="'projects.sectionName' | translate"
-          required
-        />
-        <select [(ngModel)]="sectionSectorId" name="sectionSectorId" required>
-          @for (sector of sectors(); track sector.id) {
-            <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
-          }
-        </select>
-        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
-      </form>
+      <div class="panel__head-row">
+        <div>
+          <h2>{{ 'projectItems.title' | translate }}</h2>
+          <p class="panel__hint">{{ 'projectItems.subtitle' | translate }}</p>
+        </div>
+        <div class="calc-controls">
+          <label class="field-inline">
+            <span>{{ 'calculate.kerfMm' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.1"
+              [(ngModel)]="kerfCm"
+              name="kerfCm"
+            />
+          </label>
+          <label class="field-inline field-inline--check">
+            <input type="checkbox" [(ngModel)]="useRemnants" name="useRemnants" />
+            <span>{{ 'calculate.useRemnants' | translate }}</span>
+          </label>
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="calculating() || productItems().length === 0"
+            (click)="runCalculate()"
+          >
+            {{ 'calculate.run' | translate }}
+          </button>
+        </div>
+      </div>
 
-      @if (sections().length === 0) {
-        <p class="page__muted">{{ 'projects.noSections' | translate }}</p>
-      } @else {
-        <ul class="list">
-          @for (section of sections(); track section.id) {
-            <li>
-              <button
-                type="button"
-                class="list__item"
-                [class.is-active]="selectedSectionId() === section.id"
-                (click)="selectSection(section.id)"
-              >
-                <strong>{{ section.name }}</strong>
-                <span>{{ section.sectorCode }}</span>
-              </button>
-            </li>
-          }
-        </ul>
-      }
-    </article>
-
-    <article class="card panel">
-      <h2>{{ 'projects.cuts' | translate }}</h2>
-      @if (!selectedSectionId()) {
-        <p class="page__muted">{{ 'projects.selectSection' | translate }}</p>
-      } @else {
-        <form class="inline-form" (ngSubmit)="addCut()">
-          <input
-            [(ngModel)]="cutName"
-            name="cutName"
-            [placeholder]="'projects.cutName' | translate"
+      <form class="add-form item-wizard" (ngSubmit)="saveProductItem()" novalidate>
+        <label>
+          <span>{{ 'projectItems.productType' | translate }}</span>
+          <select
+            [(ngModel)]="itemTypeId"
+            name="itemTypeId"
+            (ngModelChange)="onTypePicked()"
             required
-          />
-          <select [(ngModel)]="cutMaterialId" name="cutMaterialId" required>
-            @for (material of materials(); track material.id) {
-              <option [value]="material.id">
-                {{ material.code }} — {{ material.name }}
-              </option>
+          >
+            @for (type of productTypes(); track type.id) {
+              <option [value]="type.id">{{ type.name }}</option>
             }
           </select>
-          <input
-            type="number"
-            min="1"
-            [(ngModel)]="cutLengthMm"
-            name="cutLengthMm"
-            [placeholder]="'projects.lengthMm' | translate"
-            required
-          />
-          <input
-            type="number"
-            min="1"
-            [(ngModel)]="cutQuantity"
-            name="cutQuantity"
-            [placeholder]="'projects.quantity' | translate"
-            required
-          />
-          <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
-        </form>
+        </label>
 
-        @if (cuts().length === 0) {
-          <p class="page__muted">{{ 'projects.noCuts' | translate }}</p>
-        } @else {
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>{{ 'projects.cutName' | translate }}</th>
-                  <th>{{ 'projects.material' | translate }}</th>
-                  <th>{{ 'projects.lengthMm' | translate }}</th>
-                  <th>{{ 'projects.quantity' | translate }}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (cut of cuts(); track cut.id) {
-                  <tr>
-                    <td>{{ cut.name }}</td>
-                    <td>{{ cut.materialCode }}</td>
-                    <td>{{ cut.lengthMm }}</td>
-                    <td>{{ cut.quantity }}</td>
-                    <td>
-                      <button type="button" class="btn btn--ghost" (click)="removeCut(cut)">
-                        {{ 'common.delete' | translate }}
-                      </button>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+        <label>
+          <span>{{ 'projectItems.variant' | translate }}</span>
+          <select
+            [(ngModel)]="itemVariantId"
+            name="itemVariantId"
+            (ngModelChange)="onVariantPicked($event)"
+            required
+          >
+            @for (v of variantsForSelectedType(); track v.id) {
+              <option [value]="v.id">{{ v.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>{{ 'projectItems.label' | translate }}</span>
+          <input [(ngModel)]="itemLabel" name="itemLabel" required />
+        </label>
+
+        <label>
+          <span>{{ 'projectItems.widthCm' | translate }}</span>
+          <input
+            type="number"
+            min="0.1"
+            step="0.1"
+            [(ngModel)]="itemWidthCm"
+            name="itemWidthCm"
+            required
+          />
+        </label>
+
+        <label>
+          <span>{{ 'projectItems.heightCm' | translate }}</span>
+          <input
+            type="number"
+            min="0.1"
+            step="0.1"
+            [(ngModel)]="itemHeightCm"
+            name="itemHeightCm"
+            required
+          />
+        </label>
+
+        <label>
+          <span>{{ 'projectItems.quantity' | translate }}</span>
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="itemQty"
+            name="itemQty"
+            required
+          />
+        </label>
+
+        <div class="wizard-block wizard-block--preview">
+          <h3>{{ 'projectItems.visualPreview' | translate }}</h3>
+          <p class="panel__hint">{{ 'projectItems.visualPreviewHint' | translate }}</p>
+          <div class="draft-preview">
+            <app-frame-preview
+              [label]="itemLabel.trim() || itemPreviewKindLabel()"
+              [sectorCode]="itemPreviewKindCode()"
+              [sectorName]="itemPreviewKindLabel()"
+              [heightMm]="itemPreviewHeightMm()"
+              [widthMm]="itemPreviewWidthMm()"
+              [quantity]="itemQty"
+              [compact]="true"
+            />
+          </div>
+        </div>
+
+        @if (partChoices.length) {
+          <div class="wizard-block">
+            <h3>{{ 'projectItems.materials' | translate }}</h3>
+            @for (part of partChoices; track part.templatePartId; let i = $index) {
+              <label>
+                <span>{{ part.displayName }}</span>
+                <select
+                  [ngModel]="part.materialId"
+                  (ngModelChange)="onPartMaterialSelect(i, $event)"
+                  [name]="'part-mat-' + i"
+                  required
+                >
+                  @for (m of aluminumMaterials(); track m.id) {
+                    <option [value]="m.id">{{ m.code }} — {{ m.name }}</option>
+                  }
+                  @if (canManageCatalog()) {
+                    <option value="__add__">
+                      {{ 'glossary.addNew' | translate }}
+                    </option>
+                  }
+                </select>
+              </label>
+            }
           </div>
         }
+
+        @if (glassChoices.length) {
+          <div class="wizard-block">
+            <h3>{{ 'projectItems.glass' | translate }}</h3>
+            @for (glass of glassChoices; track glass.templateGlassSlotId; let i = $index) {
+              <label>
+                <span>
+                  {{ glass.slotName }}
+                  @if (glass.required) {
+                    *
+                  }
+                </span>
+                <select
+                  [ngModel]="glass.glassSpecId"
+                  (ngModelChange)="onGlassSpecSelect(i, $event)"
+                  [name]="'glass-' + i"
+                  [required]="glass.required"
+                >
+                  <option value="">—</option>
+                  @for (spec of flatGlassSpecs; track spec.id) {
+                    <option [value]="spec.id">{{ spec.label }}</option>
+                  }
+                  @if (canManageCatalog()) {
+                    <option value="__add__">
+                      {{ 'glossary.addNew' | translate }}
+                    </option>
+                  }
+                </select>
+              </label>
+            }
+          </div>
+        }
+
+        @if (accessoryChoices.length) {
+          <div class="wizard-block">
+            <h3>{{ 'projectItems.accessories' | translate }}</h3>
+            @for (acc of accessoryChoices; track acc.templateAccessorySlotId; let i = $index) {
+              <div class="wizard-block__row">
+                <label>
+                  <span>{{ acc.slotName }}</span>
+                  <select
+                    [ngModel]="acc.accessoryId"
+                    (ngModelChange)="onAccessoryChoiceSelect(i, $event)"
+                    [name]="'acc-choice-' + i"
+                  >
+                    <option value="">—</option>
+                    @for (item of catalog(); track item.id) {
+                      <option [value]="item.id">
+                        {{ item.name }} ({{ item.unitPrice }})
+                      </option>
+                    }
+                    @if (canManageCatalog()) {
+                      <option value="__add__">
+                        {{ 'glossary.addNew' | translate }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>{{ 'projectItems.qtyOverride' | translate }}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    [(ngModel)]="acc.quantityOverride"
+                    [name]="'acc-ov-' + i"
+                  />
+                </label>
+              </div>
+            }
+          </div>
+        }
+
+        <details class="site-survey">
+          <summary>
+            <span>{{ 'projectItems.inspection' | translate }}</span>
+            <small>{{ 'projectItems.inspectionHint' | translate }}</small>
+          </summary>
+          <div class="site-survey__body wizard-block">
+            <label>
+              <span>{{ 'projectItems.location' | translate }}</span>
+              <input [(ngModel)]="inspectionLocation" name="inspectionLocation" />
+            </label>
+            <label>
+              <span>{{ 'projectItems.measuredW' | translate }}</span>
+              <input
+                type="number"
+                [(ngModel)]="inspectionMeasuredWCm"
+                name="inspectionMeasuredWCm"
+              />
+            </label>
+            <label>
+              <span>{{ 'projectItems.measuredH' | translate }}</span>
+              <input
+                type="number"
+                [(ngModel)]="inspectionMeasuredHCm"
+                name="inspectionMeasuredHCm"
+              />
+            </label>
+            <label>
+              <span>{{ 'projectItems.inspectedBy' | translate }}</span>
+              <input [(ngModel)]="inspectionBy" name="inspectionBy" />
+            </label>
+            <label>
+              <span>{{ 'projectItems.notes' | translate }}</span>
+              <input [(ngModel)]="inspectionNotes" name="inspectionNotes" />
+            </label>
+            <label>
+              <span>{{ 'projectItems.status' | translate }}</span>
+              <select [(ngModel)]="inspectionStatus" name="inspectionStatus">
+                <option value="Pending">{{
+                  'projectItems.statusPending' | translate
+                }}</option>
+                <option value="Done">{{
+                  'projectItems.statusDone' | translate
+                }}</option>
+              </select>
+            </label>
+          </div>
+        </details>
+
+        <div class="wizard-actions">
+          <button
+            type="submit"
+            class="btn btn--primary"
+            [disabled]="itemSaving()"
+          >
+            {{
+              (editingItemId() ? 'projectItems.update' : 'projectItems.add')
+                | translate
+            }}
+          </button>
+          @if (editingItemId()) {
+            <button type="button" class="btn btn--ghost" (click)="resetItemWizard()">
+              {{ 'common.cancel' | translate }}
+            </button>
+          }
+        </div>
+      </form>
+
+      <h3 class="items-list-title">{{ 'projectItems.list' | translate }}</h3>
+      @if (productItems().length === 0) {
+        <p class="page__muted">{{ 'projectItems.empty' | translate }}</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'projectItems.label' | translate }}</th>
+                <th>{{ 'projectItems.variant' | translate }}</th>
+                <th>{{ 'projectItems.size' | translate }}</th>
+                <th>{{ 'projectItems.quantity' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of productItems(); track item.id) {
+                <tr>
+                  <td>{{ item.label }}</td>
+                  <td>{{ item.productVariantName }}</td>
+                  <td>{{ itemSizeLabel(item) }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td class="row-actions">
+                    <button
+                      type="button"
+                      class="btn btn--ghost"
+                      (click)="editProductItem(item)"
+                    >
+                      {{ 'common.edit' | translate }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn--ghost"
+                      (click)="duplicateProductItem(item)"
+                    >
+                      {{ 'projectItems.duplicate' | translate }}
+                    </button>
+                    <button
+                      type="button"
+                      class="link-danger"
+                      (click)="deleteProductItem(item)"
+                    >
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (calculateResult(); as calc) {
+        <div class="calc-results">
+          <h3>{{ 'calculate.results' | translate }}</h3>
+          <div class="calc-totals">
+            <div>
+              <span>{{ 'calculate.aluminum' | translate }}</span>
+              <strong>{{ calc.totalAluminumCost | number: '1.0-2' }}</strong>
+            </div>
+            <div>
+              <span>{{ 'calculate.glass' | translate }}</span>
+              <strong>{{ calc.totalGlassCost | number: '1.0-2' }}</strong>
+            </div>
+            <div>
+              <span>{{ 'calculate.accessories' | translate }}</span>
+              <strong>{{ calc.totalAccessoryCost | number: '1.0-2' }}</strong>
+            </div>
+            <div>
+              <span>{{ 'calculate.grandTotal' | translate }}</span>
+              <strong>{{ calc.grandTotal | number: '1.0-2' }}</strong>
+            </div>
+          </div>
+
+          <h4>{{ 'calculate.purchaseBars' | translate }}</h4>
+          @if (calc.purchaseBars.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.material' | translate }}</th>
+                    <th>{{ 'calculate.length' | translate }}</th>
+                    <th>{{ 'calculate.qty' | translate }}</th>
+                    <th>{{ 'calculate.lineCost' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (bar of calc.purchaseBars; track $index) {
+                    <tr>
+                      <td>{{ bar.materialCode }} — {{ bar.materialName }}</td>
+                      <td>{{ formatCm(bar.lengthMm) }}</td>
+                      <td>{{ bar.quantity }}</td>
+                      <td>{{ bar.lineCost | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <h4>{{ 'calculate.glassPanes' | translate }}</h4>
+          @if (calc.glassPanes.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.item' | translate }}</th>
+                    <th>{{ 'calculate.glassSpec' | translate }}</th>
+                    <th>{{ 'calculate.size' | translate }}</th>
+                    <th>{{ 'calculate.qty' | translate }}</th>
+                    <th>{{ 'calculate.lineCost' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (pane of calc.glassPanes; track $index) {
+                    <tr>
+                      <td>{{ pane.itemLabel }}</td>
+                      <td>{{ pane.name }}</td>
+                      <td>
+                        {{ formatCm(pane.widthMm) }} × {{ formatCm(pane.heightMm) }}
+                      </td>
+                      <td>{{ pane.paneQuantity }}</td>
+                      <td>{{ pane.lineCost | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <h4>{{ 'calculate.accessoryLines' | translate }}</h4>
+          @if (calc.accessories.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.item' | translate }}</th>
+                    <th>{{ 'calculate.accessory' | translate }}</th>
+                    <th>{{ 'calculate.qty' | translate }}</th>
+                    <th>{{ 'calculate.lineCost' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (line of calc.accessories; track $index) {
+                    <tr>
+                      <td>{{ line.itemLabel }}</td>
+                      <td>{{ line.name }}</td>
+                      <td>{{ line.quantity }}</td>
+                      <td>{{ line.lineCost | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <h4>{{ 'calculate.itemCosts' | translate }}</h4>
+          @if (calc.itemCosts.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.item' | translate }}</th>
+                    <th>{{ 'calculate.aluminum' | translate }}</th>
+                    <th>{{ 'calculate.glass' | translate }}</th>
+                    <th>{{ 'calculate.accessories' | translate }}</th>
+                    <th>{{ 'calculate.total' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of calc.itemCosts; track row.projectItemId) {
+                    <tr>
+                      <td>{{ row.label }}</td>
+                      <td>{{ row.aluminumCost | number: '1.0-2' }}</td>
+                      <td>{{ row.glassCost | number: '1.0-2' }}</td>
+                      <td>{{ row.accessoryCost | number: '1.0-2' }}</td>
+                      <td>{{ row.totalCost | number: '1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <h4>{{ 'calculate.waste' | translate }}</h4>
+          @if (calc.wasteByMaterial.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.material' | translate }}</th>
+                    <th>{{ 'calculate.wastePercent' | translate }}</th>
+                    <th>{{ 'calculate.leftover' | translate }}</th>
+                    <th>{{ 'calculate.kerf' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (w of calc.wasteByMaterial; track w.materialId) {
+                    <tr>
+                      <td>{{ w.materialCode }}</td>
+                      <td>{{ w.wastePercent | number: '1.0-1' }}%</td>
+                      <td>{{ formatCm(w.totalLeftoverMm) }}</td>
+                      <td>{{ formatCm(w.totalKerfMm) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          <h4>{{ 'calculate.unallocated' | translate }}</h4>
+          @if (calc.unallocated.length === 0) {
+            <p class="page__muted">{{ 'calculate.none' | translate }}</p>
+          } @else {
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>{{ 'calculate.material' | translate }}</th>
+                    <th>{{ 'calculate.length' | translate }}</th>
+                    <th>{{ 'calculate.qty' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (u of calc.unallocated; track $index) {
+                    <tr>
+                      <td>{{ u.materialCode }} — {{ u.name }}</td>
+                      <td>{{ formatCm(u.lengthMm) }}</td>
+                      <td>{{ u.quantity }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
       }
     </article>
-  </div>
+  } @else {
+    <article class="card panel">
+      <h2>{{ 'projects.addElementTitle' | translate }}</h2>
+      <p class="panel__hint">{{ 'projects.addElementHint' | translate }}</p>
+
+      @if (elementTypes().length === 0) {
+        <p class="field-note">
+          {{ 'projects.noLinkedTypes' | translate }}
+          <a routerLink="/settings">{{ 'settings.goSettings' | translate }}</a>
+        </p>
+      } @else {
+        <form class="add-form" (ngSubmit)="addElement()" novalidate>
+          <label>
+            <span>{{ 'projects.elementType' | translate }}</span>
+            <select
+              [(ngModel)]="elementTypeId"
+              name="elementTypeId"
+              required
+            >
+              @for (type of elementTypes(); track type.id) {
+                <option [value]="type.id">
+                  {{ type.name }}
+                  @if (type.materialCode) {
+                    ({{ type.materialCode }})
+                  }
+                </option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>{{ 'projects.sectionNameOptional' | translate }}</span>
+            <input
+              [(ngModel)]="elementName"
+              name="elementName"
+              [placeholder]="'projects.sectionName' | translate"
+            />
+          </label>
+
+          <div class="made-from" aria-live="polite">
+            <span class="made-from__label">{{ 'projects.madeFrom' | translate }}</span>
+            <strong>{{ madeFromLabel() || '—' }}</strong>
+          </div>
+
+          <label>
+            <span>{{ 'projects.heightCm' | translate }}</span>
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              [(ngModel)]="heightCm"
+              name="heightCm"
+              required
+            />
+          </label>
+
+          <label>
+            <span>{{ 'projects.widthCm' | translate }}</span>
+            <input
+              type="number"
+              min="0.1"
+              step="0.1"
+              [(ngModel)]="widthCm"
+              name="widthCm"
+              required
+            />
+          </label>
+
+          <label>
+            <span>{{ 'projects.unitQuantity' | translate }}</span>
+            <input
+              type="number"
+              min="1"
+              [(ngModel)]="quantity"
+              name="quantity"
+              required
+            />
+          </label>
+
+          <p class="frame-note">{{ 'projects.frameFormulaHint' | translate }}</p>
+
+          @if (selectedType(); as type) {
+            <div class="draft-preview">
+              <app-frame-preview
+                [label]="elementName.trim() || type.name"
+                [sectorCode]="type.code"
+                [sectorName]="type.name"
+                [heightMm]="draftHeightMm()"
+                [widthMm]="draftWidthMm()"
+                [quantity]="quantity"
+                [compact]="true"
+              />
+            </div>
+          }
+
+          <label class="accessories-toggle">
+            <input
+              type="checkbox"
+              [(ngModel)]="includeAccessories"
+              name="includeAccessories"
+              (ngModelChange)="onToggleAccessories()"
+            />
+            <span>{{ 'accessories.enable' | translate }}</span>
+          </label>
+
+          @if (includeAccessories) {
+            <div class="accessories-draft">
+              @if (catalog().length === 0) {
+                <p class="page__muted">{{ 'accessories.empty' | translate }}</p>
+              } @else {
+                @for (line of accessoryLines; track $index; let i = $index) {
+                  <div class="accessories-draft__row">
+                    <label>
+                      <span>{{ 'accessories.pick' | translate }}</span>
+                      <select
+                        [ngModel]="line.accessoryId"
+                        (ngModelChange)="onLegacyAccessorySelect(i, $event)"
+                        [name]="'acc-' + i"
+                      >
+                        @for (item of catalog(); track item.id) {
+                          <option [value]="item.id">
+                            {{ item.name }} ({{ item.unitPrice }})
+                          </option>
+                        }
+                        @if (canManageCatalog()) {
+                          <option value="__add__">
+                            {{ 'glossary.addNew' | translate }}
+                          </option>
+                        }
+                      </select>
+                    </label>
+                    <label>
+                      <span>{{ 'accessories.quantity' | translate }}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        [(ngModel)]="line.quantity"
+                        [name]="'acc-qty-' + i"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      class="link-danger"
+                      (click)="removeAccessoryLine(i)"
+                    >
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  </div>
+                }
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  (click)="addAccessoryLine()"
+                >
+                  {{ 'accessories.addLine' | translate }}
+                </button>
+              }
+            </div>
+          }
+
+          <button
+            type="submit"
+            class="btn btn--primary add-form__submit"
+            [disabled]="!canSubmitElement()"
+          >
+            {{ 'projects.addElement' | translate }}
+          </button>
+        </form>
+      }
+    </article>
+
+    <article class="card panel">
+      <h2>{{ 'projects.addedList' | translate }}</h2>
+
+      @if (loading()) {
+        <p class="page__muted">{{ 'common.loading' | translate }}</p>
+      } @else if (rows().length === 0) {
+        <p class="page__muted">{{ 'projects.noElementsYet' | translate }}</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'projects.elementType' | translate }}</th>
+                <th>{{ 'projects.elementLabel' | translate }}</th>
+                <th>{{ 'projects.material' | translate }}</th>
+                <th>{{ 'projects.sizeHxW' | translate }}</th>
+                <th>{{ 'projects.unitQuantity' | translate }}</th>
+                <th>{{ 'projects.pieces' | translate }}</th>
+                <th>{{ 'accessories.colAccessories' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of rows(); track row.section.id) {
+                <tr>
+                  <td>{{ row.section.sectorName || row.section.sectorCode }}</td>
+                  <td>{{ row.section.name }}</td>
+                  <td>{{ row.materialCode }}</td>
+                  <td>{{ sizeLabel(row.section) }}</td>
+                  <td>{{ row.section.unitQuantity ?? '—' }}</td>
+                  <td class="pieces-cell">{{ pieceSummary(row) }}</td>
+                  <td class="pieces-cell">{{ accessoriesSummary(row.section) }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn--ghost"
+                      (click)="removeRow(row)"
+                    >
+                      {{ 'common.delete' | translate }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  }
+
+  @if (quickAddMode(); as mode) {
+    <app-resource-quick-add
+      [mode]="mode"
+      (closed)="onQuickAddClosed()"
+      (created)="onQuickAddCreated($event)"
+    />
+  }
 </section>

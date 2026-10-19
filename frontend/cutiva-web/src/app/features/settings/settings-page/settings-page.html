@@ -12,56 +12,124 @@
   }
 
   <div class="settings__grid">
-    <article class="card panel">
-      <h2>{{ 'settings.workshops' | translate }}</h2>
-      <form class="inline-form" (ngSubmit)="createWorkshop()">
-        <input
-          [(ngModel)]="workshopName"
-          name="workshopName"
-          [placeholder]="'settings.workshopName' | translate"
-          required
-        />
-        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
-      </form>
-
-      <ul class="list">
-        @for (workshop of workshopContext.workshops(); track workshop.id) {
-          <li class="list__row">
+    @if (primaryWorkshop(); as workshop) {
+      <article class="card panel panel--workshop">
+        <h2>{{ 'settings.workshop' | translate }}</h2>
+        <p class="panel__hint">{{ 'settings.workshopHint' | translate }}</p>
+        <form class="workshop-rename" (ngSubmit)="renamePrimaryWorkshop()">
+          <label>
+            <span>{{ 'settings.workshopName' | translate }}</span>
             <input
-              [ngModel]="workshopDraft(workshop.id, workshop.name)"
-              (ngModelChange)="setWorkshopDraft(workshop.id, $event)"
-              [name]="'w-' + workshop.id"
+              [(ngModel)]="workshopNameDraft"
+              name="workshopNameDraft"
+              required
             />
-            <button
-              type="button"
-              class="btn btn--ghost"
-              (click)="renameWorkshop(workshop.id, workshop.name)"
-            >
-              {{ 'common.save' | translate }}
-            </button>
-            <button type="button" class="btn btn--ghost" (click)="deleteWorkshop(workshop.id)">
-              {{ 'common.delete' | translate }}
-            </button>
-          </li>
-        }
-      </ul>
-    </article>
+          </label>
+          <label>
+            <span>{{ 'settings.productionPricePerM2' | translate }}</span>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              [(ngModel)]="productionPricePerM2"
+              name="productionPricePerM2"
+              [placeholder]="'settings.productionPricePerM2Ph' | translate"
+            />
+          </label>
+          <p class="panel__hint">{{ 'settings.productionPriceHint' | translate }}</p>
+          <button type="submit" class="btn btn--primary">{{ 'common.save' | translate }}</button>
+        </form>
+      </article>
+    }
 
-    <article class="card panel">
+    <article class="card panel panel--elements">
       <h2>{{ 'settings.sectors' | translate }}</h2>
-      <form class="inline-form" (ngSubmit)="createSector()">
-        <input [(ngModel)]="sectorCode" name="sectorCode" [placeholder]="'settings.sectorCode' | translate" required />
-        <input [(ngModel)]="sectorName" name="sectorName" [placeholder]="'settings.sectorName' | translate" required />
-        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
-      </form>
+      <p class="panel__hint">{{ 'settings.sectorsHint' | translate }}</p>
 
-      <ul class="list">
+      @if (!materialsReady()) {
+        <p class="page__muted">{{ 'common.loading' | translate }}</p>
+      } @else if (profileMaterials().length === 0) {
+        <p class="field-note">
+          {{ 'settings.noMarketMaterials' | translate }}
+          <a [routerLink]="marketLink">{{ 'settings.goMarket' | translate }}</a>
+        </p>
+      } @else {
+        <form class="element-form" (ngSubmit)="createSector()">
+          <label>
+            <span>{{ 'settings.sectorCode' | translate }}</span>
+            <input
+              [(ngModel)]="sectorCode"
+              name="sectorCode"
+              [placeholder]="'settings.sectorCodePh' | translate"
+              required
+            />
+          </label>
+          <label>
+            <span>{{ 'settings.sectorName' | translate }}</span>
+            <input
+              [(ngModel)]="sectorName"
+              name="sectorName"
+              [placeholder]="'settings.sectorNamePh' | translate"
+              required
+            />
+          </label>
+          <label class="element-form__material">
+            <span>{{ 'settings.madeFrom' | translate }}</span>
+            <select [(ngModel)]="sectorMaterialId" name="sectorMaterialId" required>
+              @for (material of profileMaterials(); track material.id) {
+                <option [value]="material.id">
+                  {{ material.code }} — {{ material.name }}
+                </option>
+              }
+            </select>
+          </label>
+          <button type="submit" class="btn btn--primary element-form__submit">
+            {{ 'common.add' | translate }}
+          </button>
+        </form>
+      }
+
+      <ul class="list element-list">
         @for (sector of sectors(); track sector.id) {
-          <li class="list__row">
-            <span>{{ sector.code }} — {{ sector.name }}</span>
-            <button type="button" class="btn btn--ghost" (click)="deleteSector(sector.id)">
-              {{ 'common.delete' | translate }}
-            </button>
+          <li class="element-card" [class.element-card--unlinked]="!sector.materialId">
+            <div class="element-card__main">
+              <strong>{{ sector.code }} — {{ sector.name }}</strong>
+              @if (materialLabel(sector); as label) {
+                <span class="element-card__link">
+                  {{ 'settings.madeFromShort' | translate }}
+                  <em>{{ label }}</em>
+                </span>
+              } @else {
+                <span class="element-card__warn">{{ 'settings.needsMaterial' | translate }}</span>
+              }
+            </div>
+
+            <div class="element-card__actions">
+              @if (profileMaterials().length > 0) {
+                <select
+                  [ngModel]="linkDraft(sector)"
+                  (ngModelChange)="setLinkDraft(sector.id, $event)"
+                  [name]="'link-' + sector.id"
+                  [attr.aria-label]="'settings.madeFrom' | translate"
+                >
+                  @for (material of profileMaterials(); track material.id) {
+                    <option [value]="material.id">
+                      {{ material.code }} — {{ material.name }}
+                    </option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="btn btn--ghost"
+                  (click)="saveSectorMaterial(sector)"
+                >
+                  {{ 'settings.linkMaterial' | translate }}
+                </button>
+              }
+              <button type="button" class="btn btn--ghost" (click)="deleteSector(sector.id)">
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
           </li>
         }
       </ul>

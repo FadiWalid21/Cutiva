@@ -1,0 +1,39 @@
+<div class="admin-shell">
+  <aside class="admin-shell__side">
+    <div class="admin-shell__brand">
+      <strong>{{ 'app.name' | translate }}</strong>
+      <span>{{ 'admin.badge' | translate }}</span>
+    </div>
+    <nav>
+      <a routerLink="/admin" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+        {{ 'admin.nav.overview' | translate }}
+      </a>
+      <a routerLink="/admin/clients" routerLinkActive="is-active">
+        {{ 'admin.nav.clients' | translate }}
+      </a>
+      <a routerLink="/admin/plans" routerLinkActive="is-active">
+        {{ 'admin.nav.plans' | translate }}
+      </a>
+    </nav>
+    <div class="admin-shell__foot">
+      @if (showInstall()) {
+        <button type="button" class="link install" (click)="installApp()">
+          {{ 'shell.installApp' | translate }}
+        </button>
+      }
+      <div class="lang">
+        <button type="button" (click)="setLanguage('ar')" [class.is-on]="currentLanguage() === 'ar'">
+          عربي
+        </button>
+        <button type="button" (click)="setLanguage('en')" [class.is-on]="currentLanguage() === 'en'">
+          EN
+        </button>
+      </div>
+      <p>{{ currentUser()?.displayName || currentUser()?.email }}</p>
+      <button type="button" class="link" (click)="logout()">{{ 'auth.logout' | translate }}</button>
+    </div>
+  </aside>
+  <main class="admin-shell__main">
+    <router-outlet />
+  </main>
+</div>

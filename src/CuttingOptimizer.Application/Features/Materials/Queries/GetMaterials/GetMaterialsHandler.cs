@@ -22,6 +22,17 @@ public sealed class GetMaterialsHandler(
                 material => material.SectorId == request.SectorId.Value);
         }
 
+        if (request.Category.HasValue)
+        {
+            query = query.Where(
+                material => material.Category == request.Category.Value);
+        }
+
+        if (request.ActiveOnly == true)
+        {
+            query = query.Where(material => material.IsActive);
+        }
+
         return await query
             .OrderBy(material => material.Name)
             .Select(material => new MaterialDto(
@@ -31,7 +42,10 @@ public sealed class GetMaterialsHandler(
                 material.Sector.Name,
                 material.Code,
                 material.Name,
-                material.Description))
+                material.Description,
+                material.Category,
+                material.ThicknessMm,
+                material.IsActive))
             .ToListAsync(cancellationToken);
     }
 }

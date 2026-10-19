@@ -4,4 +4,5 @@ namespace CuttingOptimizer.Application.Features.Workshops.Commands.UpdateWorksho
 
 public sealed record UpdateWorkshopCommand(
     Guid Id,
-    string Name) : IRequest<bool>;
+    string Name,
+    decimal? ProductionPricePerM2 = null) : IRequest<bool>;

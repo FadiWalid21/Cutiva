@@ -1,0 +1,75 @@
+.admin-page {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 56rem;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.85rem;
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  display: grid;
+  gap: 0.55rem;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+
+  label {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+
+    input[type='text'],
+    input[type='number'] {
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 0.45rem 0.55rem;
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+  }
+
+  label.active,
+  label.unlimited {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    grid-template-columns: none;
+  }
+}
+
+.page__ok {
+  color: var(--color-accent);
+  margin: 0;
+}
+
+.page__error {
+  color: var(--color-danger);
+  margin: 0;
+}

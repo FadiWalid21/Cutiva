@@ -18,8 +18,8 @@ export class RecentProjects {
   }
 
   statusClass(status: RecentProject['status']): string {
-    return status === 'optimized'
-      ? 'badge badge--success'
-      : 'badge badge--info';
+    if (status === 'optimized') return 'badge badge--success';
+    if (status === 'incomplete') return 'badge badge--warning';
+    return 'badge badge--info';
   }
 }

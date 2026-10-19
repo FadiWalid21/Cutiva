@@ -1,0 +1,123 @@
+<div class="quick-add" role="dialog" aria-modal="true">
+  <div class="quick-add__panel">
+    <header class="quick-add__head">
+      <h2>
+        @switch (mode()) {
+          @case ('aluminum') {
+            {{ 'quickAdd.titleAluminum' | translate }}
+          }
+          @case ('glassSpec') {
+            {{ 'quickAdd.titleGlass' | translate }}
+          }
+          @default {
+            {{ 'quickAdd.titleAccessory' | translate }}
+          }
+        }
+      </h2>
+      <button type="button" class="btn btn--ghost" (click)="cancel()">
+        {{ 'common.cancel' | translate }}
+      </button>
+    </header>
+
+    @if (error(); as err) {
+      <p class="quick-add__error">
+        {{ err | translate }}
+      </p>
+    }
+
+    <form class="quick-add__form" (ngSubmit)="submit()">
+      @if (mode() === 'aluminum') {
+        <label>
+          <span>{{ 'quickAdd.code' | translate }}</span>
+          <input [(ngModel)]="code" name="qaCode" required />
+        </label>
+        <label>
+          <span>{{ 'quickAdd.name' | translate }}</span>
+          <input [(ngModel)]="name" name="qaName" required />
+        </label>
+      }
+
+      @if (mode() === 'glassSpec') {
+        <label>
+          <span>{{ 'quickAdd.glassType' | translate }}</span>
+          <select [(ngModel)]="glassTypeId" name="qaGlassType">
+            @for (t of glassTypes(); track t.id) {
+              <option [value]="t.id">{{ t.name }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>{{ 'quickAdd.newGlassType' | translate }}</span>
+          <input [(ngModel)]="newGlassTypeName" name="qaNewType" />
+        </label>
+        <label>
+          <span>{{ 'quickAdd.thicknessMm' | translate }}</span>
+          <input
+            type="number"
+            min="1"
+            step="0.1"
+            [(ngModel)]="thicknessMm"
+            name="qaThick"
+            required
+          />
+        </label>
+        <label>
+          <span>{{ 'quickAdd.pricePerSqm' | translate }}</span>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="pricePerSqm"
+            name="qaPrice"
+            required
+          />
+        </label>
+      }
+
+      @if (mode() === 'accessory') {
+        <label>
+          <span>{{ 'quickAdd.name' | translate }}</span>
+          <input [(ngModel)]="name" name="qaAccName" required />
+        </label>
+        <label>
+          <span>{{ 'quickAdd.brand' | translate }}</span>
+          <input [(ngModel)]="brand" name="qaBrand" />
+        </label>
+        <label>
+          <span>{{ 'quickAdd.unit' | translate }}</span>
+          <select [(ngModel)]="unit" name="qaUnit">
+            @for (u of units; track u) {
+              <option [value]="u">
+                {{ ('resources.units.' + u) | translate }}
+              </option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>{{ 'quickAdd.unitPrice' | translate }}</span>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="unitPrice"
+            name="qaUnitPrice"
+            required
+          />
+        </label>
+      }
+
+      <div class="quick-add__actions">
+        <button type="button" class="btn btn--ghost" (click)="cancel()">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button type="submit" class="btn btn--primary" [disabled]="saving()">
+          @if (saving()) {
+            {{ 'quickAdd.saving' | translate }}
+          } @else {
+            {{ 'common.save' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

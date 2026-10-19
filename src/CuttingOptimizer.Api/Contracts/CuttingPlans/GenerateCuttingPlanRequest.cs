@@ -14,4 +14,7 @@ public sealed class GenerateCuttingPlanRequest
     [Required]
     [MinLength(1)]
     public IReadOnlyList<Guid> RequiredCutIds { get; init; } = [];
+
+    /// <summary>Include remnant warehouse stock (default true).</summary>
+    public bool UseRemnants { get; init; } = true;
 }

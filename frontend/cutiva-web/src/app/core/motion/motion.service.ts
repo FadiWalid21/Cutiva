@@ -40,7 +40,7 @@ export class MotionService {
         duration: 0.45,
         stagger: 0.07,
         ease: 'power2.out',
-        clearProps: 'transform',
+        clearProps: 'all',
       },
     );
   }

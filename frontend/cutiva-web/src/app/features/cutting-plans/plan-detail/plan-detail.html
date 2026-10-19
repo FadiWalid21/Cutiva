@@ -12,23 +12,44 @@
   } @else if (plan(); as p) {
     <header class="detail__header card">
       <div>
-        <a routerLink="/" class="back">← {{ 'nav.dashboard' | translate }}</a>
+        @if (p.comparisonGroupId) {
+          <a
+            class="back"
+            [routerLink]="['/cutting-plans/new']"
+            [queryParams]="{ groupId: p.comparisonGroupId }"
+          >
+            ← {{ 'plans.backToCompare' | translate }}
+          </a>
+        } @else {
+          <a routerLink="/dashboard" class="back">← {{ 'nav.dashboard' | translate }}</a>
+        }
         <h1>{{ 'plans.detailTitle' | translate }}</h1>
         <p>
           {{ 'plans.status' | translate }}:
-          <strong>{{ p.status || 'Draft' }}</strong>
+          <strong>{{ statusLabelKey() | translate }}</strong>
           · {{ p.createdAtUtc | date: 'medium' }}
         </p>
+        <p class="continuity-inline">{{ 'plans.continuityRule' | translate }}</p>
       </div>
       <div class="detail__actions">
         @if (isDraft()) {
           <button
             type="button"
             class="btn btn--primary"
-            [disabled]="approving()"
+            [disabled]="approving() || !isComplete()"
+            [attr.title]="!isComplete() ? ('plans.approveIncompleteHint' | translate) : null"
             (click)="approve()"
           >
             {{ 'plans.approve' | translate }}
+          </button>
+        } @else if (p.projectId) {
+          <button
+            type="button"
+            class="btn btn--primary"
+            [disabled]="openingQuote()"
+            (click)="openQuote()"
+          >
+            {{ 'quote.open' | translate }}
           </button>
         }
         <a routerLink="/cutting-plans/new" class="btn btn--ghost">
@@ -50,18 +71,171 @@
       </p>
     }
 
+    @if (previewSections().length > 0) {
+      <article class="card block preview-panel">
+        <header class="preview-panel__head">
+          <div>
+            <h2>{{ 'preview.title' | translate }}</h2>
+            <p>{{ 'preview.subtitle' | translate }}</p>
+          </div>
+          <app-aluminum-finish-bar />
+        </header>
+        <div class="preview-grid">
+          @for (section of previewSections(); track section.id) {
+            <app-frame-preview
+              [label]="section.name"
+              [sectorCode]="section.sectorCode"
+              [sectorName]="section.sectorName"
+              [heightMm]="section.heightMm"
+              [widthMm]="section.widthMm"
+              [quantity]="section.unitQuantity"
+            />
+          }
+        </div>
+      </article>
+    }
+
+    @if (isComplete()) {
+      <aside class="verdict verdict--ok" role="status">
+        <strong>{{ 'plans.verdictCompleteTitle' | translate }}</strong>
+        <p>{{ 'plans.verdictCompleteBody' | translate }}</p>
+      </aside>
+    } @else {
+      <aside class="verdict verdict--warn" role="alert">
+        <strong>{{ 'plans.verdictIncompleteTitle' | translate }}</strong>
+        <p>
+          {{ 'plans.verdictIncompleteBody' | translate: { count: unallocatedCount() } }}
+        </p>
+      </aside>
+
+      <article class="card block block--warn">
+        <h2>{{ 'plans.unallocated' | translate }}</h2>
+        <p class="block__hint">{{ 'plans.unallocatedHint' | translate }}</p>
+        <ul class="unallocated-list">
+          @for (group of unallocatedGroups(); track group.name + group.lengthMm) {
+            <li>
+              <span>{{ group.name }} — {{ formatCm(group.lengthMm) }} {{ 'common.cm' | translate }}</span>
+              <strong>× {{ group.quantity }}</strong>
+            </li>
+          }
+        </ul>
+        <a routerLink="/materials" class="btn btn--ghost">
+          {{ 'plans.goMarket' | translate }}
+        </a>
+      </article>
+    }
+
+    <article class="card block buy-list">
+      <header class="buy-list__header">
+        <div>
+          <h2>{{ 'plans.buyListTitle' | translate }}</h2>
+          <p>
+            {{
+              (isComplete() ? 'plans.buyListSubtitle' : 'plans.buyListSubtitleIncomplete')
+                | translate
+            }}
+          </p>
+          <p class="buy-list__source">
+            @if (p.useRemnants) {
+              {{ 'plans.remnantsAllowed' | translate }}
+            } @else {
+              {{ 'plans.marketOnly' | translate }}
+            }
+          </p>
+        </div>
+        <div class="buy-list__meta">
+          <span>{{ 'plans.wastePercent' | translate }}: {{ wastePercent() | number: '1.0-1' }}%</span>
+          <strong>{{ 'plans.cost' | translate }}: {{ p.totalMaterialCost | number: '1.0-2' }}</strong>
+        </div>
+      </header>
+
+      <section class="buy-list__section">
+        <h3>{{ 'plans.buyFromMarket' | translate }}</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'plans.barLength' | translate }}</th>
+                <th>{{ 'plans.buyQty' | translate }}</th>
+                <th>{{ 'plans.unitPrice' | translate }}</th>
+                <th>{{ 'plans.lineTotal' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                line of marketBuyList();
+                track line.lengthMm + '-' + line.unitPrice + '-M'
+              ) {
+                <tr>
+                  <td>{{ formatCm(line.lengthMm) }} {{ 'common.cm' | translate }}</td>
+                  <td>{{ line.quantity }}</td>
+                  <td>{{ line.unitPrice | number: '1.0-2' }}</td>
+                  <td>{{ line.lineTotal | number: '1.0-2' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4">{{ 'plans.buyFromMarketEmpty' | translate }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      @if (remnantBuyList().length > 0) {
+        <section class="buy-list__section">
+          <h3>{{ 'plans.buyFromRemnant' | translate }}</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'plans.barLength' | translate }}</th>
+                  <th>{{ 'plans.buyQty' | translate }}</th>
+                  <th>{{ 'plans.unitPrice' | translate }}</th>
+                  <th>{{ 'plans.lineTotal' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  line of remnantBuyList();
+                  track line.lengthMm + '-' + line.unitPrice + '-R'
+                ) {
+                  <tr class="is-remnant">
+                    <td>{{ formatCm(line.lengthMm) }} {{ 'common.cm' | translate }}</td>
+                    <td>{{ line.quantity }}</td>
+                    <td>{{ line.unitPrice | number: '1.0-2' }}</td>
+                    <td>{{ line.lineTotal | number: '1.0-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    </article>
+
     <section class="kpi-row">
+      <article class="card kpi">
+        <span>{{ 'plans.marketBarsCount' | translate }}</span>
+        <strong>{{ marketBarsCount() }}</strong>
+      </article>
+      @if (remnantBarsCount() > 0) {
+        <article class="card kpi">
+          <span>{{ 'plans.remnantBarsCount' | translate }}</span>
+          <strong>{{ remnantBarsCount() }}</strong>
+        </article>
+      }
       <article class="card kpi">
         <span>{{ 'plans.barsUsed' | translate }}</span>
         <strong>{{ p.totalBarsUsed }}</strong>
       </article>
       <article class="card kpi">
         <span>{{ 'plans.pieceLength' | translate }}</span>
-        <strong>{{ p.totalPieceLengthMm }} mm</strong>
+        <strong>{{ formatCm(p.totalPieceLengthMm) }} {{ 'common.cm' | translate }}</strong>
       </article>
       <article class="card kpi">
         <span>{{ 'plans.stockLength' | translate }}</span>
-        <strong>{{ p.totalStockLengthMm }} mm</strong>
+        <strong>{{ formatCm(p.totalStockLengthMm) }} {{ 'common.cm' | translate }}</strong>
       </article>
       <article class="card kpi">
         <span>{{ 'plans.cost' | translate }}</span>
@@ -71,37 +245,30 @@
 
     <article class="card block">
       <h2>{{ 'plans.bars' | translate }}</h2>
+      <p class="block__hint">{{ 'plans.barsHint' | translate }}</p>
       @for (bar of p.bars; track bar.stockBarId + $index) {
-        <div class="bar">
+        <div class="bar" [class.bar--remnant]="bar.isRemnant || bar.unitPrice <= 0">
           <header>
-            <strong>{{ bar.lengthMm }} mm</strong>
+            <strong>
+              {{ formatCm(bar.lengthMm) }} {{ 'common.cm' | translate }}
+              @if (bar.isRemnant || bar.unitPrice <= 0) {
+                <span class="badge badge--remnant">{{ 'plans.fromRemnant' | translate }}</span>
+              }
+            </strong>
             <span>
-              {{ 'plans.leftover' | translate }}: {{ bar.remainingLengthMm }} mm ·
-              kerf {{ bar.kerfMm }} mm
+              {{ 'plans.leftover' | translate }}: {{ formatCm(bar.remainingLengthMm) }}
+              {{ 'common.cm' | translate }}
             </span>
           </header>
           <ul>
             @for (piece of bar.pieces; track piece.requiredCutId + $index) {
-              <li>{{ piece.name }} — {{ piece.lengthMm }} mm</li>
+              <li>
+                {{ piece.name }} — {{ formatCm(piece.lengthMm) }} {{ 'common.cm' | translate }}
+              </li>
             }
           </ul>
         </div>
       }
     </article>
-
-    @if (p.unallocatedPieces.length) {
-      <article class="card block">
-        <h2>{{ 'plans.unallocated' | translate }}</h2>
-        <ul>
-          @for (piece of p.unallocatedPieces; track piece.requiredCutId + $index) {
-            <li>{{ piece.name }} — {{ piece.lengthMm }} mm</li>
-          }
-        </ul>
-      </article>
-    }
-
-    @if (p.strategyNote) {
-      <p class="page__muted">{{ p.strategyNote }}</p>
-    }
   }
 </section>

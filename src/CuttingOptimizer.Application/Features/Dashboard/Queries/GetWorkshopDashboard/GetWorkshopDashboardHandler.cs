@@ -1,5 +1,6 @@
 using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Application.Features.Dashboard;
+using CuttingOptimizer.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,11 @@ public sealed class GetWorkshopDashboardHandler(
                 plan.WorkshopId == request.WorkshopId
                 && plan.CreatedAtUtc >= sinceUtc);
 
-        var totals = await recentPlans
+        // KPIs reflect confirmed work only — drafts inflate waste without stocking remnants.
+        var approvedPlans = recentPlans
+            .Where(plan => plan.Status == CuttingPlanStatus.Approved);
+
+        var totals = await approvedPlans
             .GroupBy(_ => 1)
             .Select(group => new
             {
@@ -102,30 +107,33 @@ public sealed class GetWorkshopDashboardHandler(
             })
             .ToList();
 
-        var projectedLeftovers = await context.CuttingPlanBars
+        var workshopMaterialIds = context.CuttingPlans
             .AsNoTracking()
-            .Where(bar =>
-                bar.CuttingPlan.WorkshopId == request.WorkshopId
-                && bar.CuttingPlan.CreatedAtUtc >= sinceUtc
-                && bar.RemainingLengthMm > 0)
-            .OrderByDescending(bar => bar.CuttingPlan.CreatedAtUtc)
-            .Take(50)
-            .Select(bar => new ProjectedLeftoverDto(
-                bar.CuttingPlanId,
-                bar.Id,
-                bar.StockBarId,
-                bar.CuttingPlan.MaterialId,
-                bar.CuttingPlan.Material.Name,
-                bar.RemainingLengthMm,
-                bar.LengthMm,
-                bar.CuttingPlan.CreatedAtUtc,
-                true))
+            .Where(plan => plan.WorkshopId == request.WorkshopId)
+            .Select(plan => plan.MaterialId)
+            .Distinct();
+
+        var remnantInventory = await context.StockBars
+            .AsNoTracking()
+            .Where(stockBar =>
+                stockBar.IsRemnant
+                && stockBar.IsActive
+                && stockBar.AvailableQuantity > 0
+                && workshopMaterialIds.Contains(stockBar.MaterialId))
+            .OrderByDescending(stockBar => stockBar.LengthMm)
+            .ThenBy(stockBar => stockBar.Material.Name)
+            .Select(stockBar => new RemnantInventoryItemDto(
+                stockBar.Id,
+                stockBar.MaterialId,
+                stockBar.Material.Name,
+                stockBar.LengthMm,
+                stockBar.AvailableQuantity))
             .ToListAsync(cancellationToken);
 
         return new WorkshopDashboardDto(
             kpis,
             recentProjects,
-            projectedLeftovers);
+            remnantInventory);
     }
 
     private static double Round1(double value) =>

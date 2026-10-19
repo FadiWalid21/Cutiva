@@ -20,6 +20,19 @@
   <data name="MaterialNotFoundSimple" xml:space="preserve"><value>المادة المحددة غير موجودة.</value></data>
   <data name="StockBarOrMaterialNotFound" xml:space="preserve"><value>قضيب المخزون أو المادة غير موجود.</value></data>
   <data name="StockBarNotFound" xml:space="preserve"><value>قضيب المخزون غير موجود.</value></data>
+  <data name="StockBarInUse" xml:space="preserve"><value>لا يمكن حذف طول مستخدم في خطة قص.</value></data>
+  <data name="QuoteNotFound" xml:space="preserve"><value>عرض السعر أو المشروع أو خطة القص غير موجود.</value></data>
+  <data name="QuotePlanNotApproved" xml:space="preserve"><value>أكّد نتيجة القص قبل إنشاء عرض سعر للعميل.</value></data>
+  <data name="AccessoryNotFound" xml:space="preserve"><value>الأكسسوار غير موجود.</value></data>
+  <data name="AccessoryDuplicateName" xml:space="preserve"><value>يوجد أكسسوار بنفس الاسم في الورشة.</value></data>
+  <data name="AccessoryDeactivated" xml:space="preserve"><value>الأكسسوار مستخدم وتم تعطيله بدل الحذف.</value></data>
+  <data name="AccessoryInvalidForWorkshop" xml:space="preserve"><value>أكسسوار واحد أو أكثر غير صالح لهذه الورشة.</value></data>
+  <data name="GlassTypeNotFound" xml:space="preserve"><value>نوع الزجاج غير موجود.</value></data>
+  <data name="GlassTypeDuplicateName" xml:space="preserve"><value>يوجد نوع زجاج بنفس الاسم في الورشة.</value></data>
+  <data name="GlassSpecNotFound" xml:space="preserve"><value>مواصفة الزجاج غير موجودة.</value></data>
+  <data name="GlassMaterialInvalid" xml:space="preserve"><value>اختَر مادة زجاج صالحة بسعر للمتر المربع.</value></data>
+  <data name="GlassMaterialRequiredForHopper" xml:space="preserve"><value>فتحات القلاب تتطلب مادة زجاج.</value></data>
+  <data name="QuoteNoBillableLines" xml:space="preserve"><value>أضف زجاج أو أكسسوارات للمشروع قبل إنشاء عرض سعر بدون خطة قص.</value></data>
   <data name="RequiredCutSectionOrMaterialNotFound" xml:space="preserve"><value>قسم المشروع أو المادة المطابقة غير موجودة.</value></data>
   <data name="RequiredCutUpdateNotFound" xml:space="preserve"><value>القطعة المطلوبة أو قسم المشروع أو المادة المطابقة غير موجودة.</value></data>
   <data name="RequiredCutNotFound" xml:space="preserve"><value>القطعة المطلوبة غير موجودة.</value></data>
@@ -27,7 +40,25 @@
   <data name="CuttingPlanByIdNotFound" xml:space="preserve"><value>خطة القص غير موجودة.</value></data>
   <data name="CuttingPlanAlreadyApproved" xml:space="preserve"><value>خطة القص معتمدة مسبقًا.</value></data>
   <data name="CuttingPlanInsufficientStock" xml:space="preserve"><value>لا يوجد مخزون نشط كافٍ لاعتماد خطة القص هذه.</value></data>
+  <data name="CuttingPlanIncomplete" xml:space="preserve"><value>لا يمكن تأكيد خطة ناقصة. بعض القطع أطول من كل أطوال السوق لهذه المادة.</value></data>
   <data name="WorkshopDashboardNotFound" xml:space="preserve"><value>الورشة غير موجودة.</value></data>
+  <data name="ProductVariantNotFound" xml:space="preserve"><value>طراز المنتج غير موجود.</value></data>
+  <data name="TemplatePartNotFound" xml:space="preserve"><value>جزء القالب غير موجود.</value></data>
+  <data name="TemplateGlassSlotNotFound" xml:space="preserve"><value>فتحة زجاج القالب غير موجودة.</value></data>
+  <data name="TemplateAccessorySlotNotFound" xml:space="preserve"><value>فتحة أكسسوار القالب غير موجودة.</value></data>
+  <data name="ProjectItemNotFound" xml:space="preserve"><value>عنصر المشروع غير موجود.</value></data>
+  <data name="ProjectHasNoItems" xml:space="preserve"><value>أضف عنصر مشروع واحدًا على الأقل قبل الحساب.</value></data>
+  <data name="InvalidAluminumMaterial" xml:space="preserve"><value>اختَر مادة ألمنيوم نشطة.</value></data>
+  <data name="InvalidGlassSpec" xml:space="preserve"><value>اختَر مواصفة زجاج تنتمي إلى هذه الورشة.</value></data>
+  <data name="InvalidAccessory" xml:space="preserve"><value>اختَر أكسسوارًا نشطًا ينتمي إلى هذه الورشة.</value></data>
+  <data name="TemplatePartNotInVariant" xml:space="preserve"><value>جزء واحد أو أكثر لا ينتمي إلى طراز المنتج المحدد.</value></data>
+  <data name="GlassSlotNotInVariant" xml:space="preserve"><value>فتحة زجاج واحدة أو أكثر لا تنتمي إلى طراز المنتج المحدد.</value></data>
+  <data name="AccessorySlotNotInVariant" xml:space="preserve"><value>فتحة أكسسوار واحدة أو أكثر لا تنتمي إلى طراز المنتج المحدد.</value></data>
+  <data name="RequiredGlassSlotMissing" xml:space="preserve"><value>فتحة زجاج مطلوبة بدون مواصفة زجاج.</value></data>
+  <data name="MissingPartChoice" xml:space="preserve"><value>كل جزء في القالب يحتاج اختيار مادة ألمنيوم.</value></data>
+  <data name="DuplicatePartChoice" xml:space="preserve"><value>لا يُسمح باختيارات مواد مكررة للأجزاء.</value></data>
+  <data name="DuplicateGlassChoice" xml:space="preserve"><value>لا يُسمح باختيارات زجاج مكررة.</value></data>
+  <data name="DuplicateAccessoryChoice" xml:space="preserve"><value>لا يُسمح باختيارات أكسسوار مكررة.</value></data>
 
   <data name="AuthEmailRequired" xml:space="preserve"><value>البريد الإلكتروني مطلوب.</value></data>
   <data name="AuthEmailInvalid" xml:space="preserve"><value>أدخل بريدًا إلكترونيًا صالحًا.</value></data>
@@ -49,6 +80,11 @@
   <data name="SectorIdRequired" xml:space="preserve"><value>معرّف القطاع مطلوب.</value></data>
   <data name="SectionNameRequired" xml:space="preserve"><value>اسم القسم مطلوب.</value></data>
   <data name="SectionNameMaxLength" xml:space="preserve"><value>يجب ألا يتجاوز اسم القسم 200 حرفًا.</value></data>
+  <data name="SectionHeightRequired" xml:space="preserve"><value>يجب أن يكون الارتفاع أكبر من صفر.</value></data>
+  <data name="SectionWidthRequired" xml:space="preserve"><value>يجب أن يكون العرض أكبر من صفر.</value></data>
+  <data name="SectionUnitQuantityRequired" xml:space="preserve"><value>يجب أن يكون عدد الوحدات أكبر من صفر.</value></data>
+  <data name="SectionNotFound" xml:space="preserve"><value>قسم المشروع غير موجود.</value></data>
+  <data name="SectionInUse" xml:space="preserve"><value>لا يمكن حذف قسم مستخدمة قصاته في خطة قص.</value></data>
   <data name="MaterialRequired" xml:space="preserve"><value>المادة مطلوبة.</value></data>
   <data name="ProjectSectionRequired" xml:space="preserve"><value>قسم المشروع مطلوب.</value></data>
   <data name="NameRequiredMax150" xml:space="preserve"><value>الاسم مطلوب ويجب ألا يتجاوز 150 حرفًا.</value></data>

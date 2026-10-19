@@ -7,11 +7,15 @@ export interface Sector {
   id: string;
   code: string;
   name: string;
+  materialId: string | null;
+  materialCode: string | null;
+  materialName: string | null;
 }
 
 export interface CreateSectorBody {
   code: string;
   name: string;
+  materialId?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -23,11 +27,18 @@ export class SectorsApi {
     return this.http.get<Sector[]>(this.baseUrl);
   }
 
-  create(body: CreateSectorBody): Observable<{ id: string; code: string; name: string }> {
-    return this.http.post<{ id: string; code: string; name: string }>(
-      this.baseUrl,
-      body,
-    );
+  create(body: CreateSectorBody): Observable<{
+    id: string;
+    code: string;
+    name: string;
+    materialId: string | null;
+  }> {
+    return this.http.post<{
+      id: string;
+      code: string;
+      name: string;
+      materialId: string | null;
+    }>(this.baseUrl, body);
   }
 
   update(id: string, body: CreateSectorBody): Observable<void> {

@@ -14,7 +14,7 @@ public sealed class UpdateStockBarHandler(
     {
         var stockBar = await context.StockBars
             .FirstOrDefaultAsync(
-                x => x.Id == request.Id,
+                x => x.Id == request.Id && !x.IsRemnant,
                 cancellationToken);
 
         if (stockBar is null)

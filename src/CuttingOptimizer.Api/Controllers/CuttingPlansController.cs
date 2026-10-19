@@ -3,6 +3,7 @@ using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Features.CuttingPlans.Commands.ApproveCuttingPlan;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCuttingPlan;
 using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GetCuttingPlanById;
+using CuttingOptimizer.Application.Features.CuttingPlans.Queries.GetCuttingPlanComparison;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -19,18 +20,19 @@ public sealed class CuttingPlansController(
     IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<CuttingPlanDto>> Generate(
+    public async Task<ActionResult<CuttingPlanComparisonDto>> Generate(
         [FromBody] GenerateCuttingPlanRequest request,
         CancellationToken cancellationToken)
     {
-        var plan = await sender.Send(
+        var comparison = await sender.Send(
             new GenerateCuttingPlanQuery(
                 request.MaterialId,
                 request.KerfMm!.Value,
-                request.RequiredCutIds),
+                request.RequiredCutIds,
+                request.UseRemnants),
             cancellationToken);
 
-        if (plan is null)
+        if (comparison is null)
         {
             return NotFound(new
             {
@@ -38,7 +40,27 @@ public sealed class CuttingPlansController(
             });
         }
 
-        return Ok(plan);
+        return Ok(comparison);
+    }
+
+    [HttpGet("comparisons/{groupId:guid}")]
+    public async Task<ActionResult<CuttingPlanComparisonDto>> GetComparison(
+        Guid groupId,
+        CancellationToken cancellationToken)
+    {
+        var comparison = await sender.Send(
+            new GetCuttingPlanComparisonQuery(groupId),
+            cancellationToken);
+
+        if (comparison is null)
+        {
+            return NotFound(new
+            {
+                message = localizer["CuttingPlanByIdNotFound"].Value
+            });
+        }
+
+        return Ok(comparison);
     }
 
     [HttpGet("{id:guid}")]
@@ -81,9 +103,9 @@ public sealed class CuttingPlansController(
             {
                 message = localizer["CuttingPlanAlreadyApproved"].Value
             }),
-            ApproveCuttingPlanInsufficientStock => BadRequest(new
+            ApproveCuttingPlanIncomplete => BadRequest(new
             {
-                message = localizer["CuttingPlanInsufficientStock"].Value
+                message = localizer["CuttingPlanIncomplete"].Value
             }),
             _ => StatusCode(500)
         };

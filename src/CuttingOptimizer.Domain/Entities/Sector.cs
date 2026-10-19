@@ -8,6 +8,13 @@ public class Sector
 
     public string Name { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Profile material this project element type is made from (null for system MAT bucket).
+    /// </summary>
+    public Guid? MaterialId { get; set; }
+
+    public Material? Material { get; set; }
+
     public ICollection<ProjectSection> ProjectSections { get; set; }
         = new List<ProjectSection>();
 }

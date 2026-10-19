@@ -1,11 +1,11 @@
 import {
   DashboardRecentProjectDto,
-  ProjectedLeftoverDto,
+  RemnantInventoryItemDto,
   WorkshopDashboardResponse,
 } from '../../../core/api/workshops.models';
 import {
   DashboardSnapshot,
-  ProjectedLeftoverItem,
+  RemnantInventoryItem,
   RecentProject,
 } from './dashboard.models';
 
@@ -19,25 +19,18 @@ export function mapWorkshopDashboard(
       stockBarsUsed: response.kpis.stockBarsUsed,
       totalMaterialCost: response.kpis.totalMaterialCost,
     },
-    projectedLeftovers: response.projectedLeftovers.map(mapProjectedLeftover),
+    remnantInventory: (response.remnantInventory ?? []).map(mapRemnant),
     recentProjects: response.recentProjects.map(mapRecentProject),
   };
 }
 
-function mapProjectedLeftover(item: ProjectedLeftoverDto): ProjectedLeftoverItem {
-  const percentOfBar =
-    item.sourceBarLengthMm > 0
-      ? (item.remainingLengthMm / item.sourceBarLengthMm) * 100
-      : 0;
-
+function mapRemnant(item: RemnantInventoryItemDto): RemnantInventoryItem {
   return {
-    id: item.cuttingPlanBarId,
-    cuttingPlanId: item.cuttingPlanId,
-    lengthMm: item.remainingLengthMm,
-    percentOfBar: Math.round(percentOfBar * 10) / 10,
-    sourceBarLabel: `${item.sourceBarLengthMm} mm`,
+    id: item.stockBarId,
+    materialId: item.materialId,
     materialName: item.materialName,
-    isProjected: item.isProjected,
+    lengthMm: item.lengthMm,
+    quantity: item.availableQuantity,
   };
 }
 
@@ -48,7 +41,7 @@ function mapRecentProject(item: DashboardRecentProjectDto): RecentProject {
     cuttingPlanId: item.cuttingPlanId,
     material: item.materialName ?? '—',
     efficiencyPercent: item.efficiencyPercent,
-    status: item.isComplete ? 'optimized' : 'inProgress',
+    status: item.isComplete ? 'optimized' : 'incomplete',
     lastPlanAtUtc: item.lastPlanAtUtc,
   };
 }

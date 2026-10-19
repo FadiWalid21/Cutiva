@@ -9,7 +9,9 @@ namespace CuttingOptimizer.Infrastructure.Auth;
 
 public sealed class JwtTokenService(IOptions<JwtOptions> options)
 {
-    public (string Token, DateTime ExpiresAtUtc) CreateToken(ApplicationUser user)
+    public (string Token, DateTime ExpiresAtUtc) CreateToken(
+        ApplicationUser user,
+        IEnumerable<string> roles)
     {
         var jwt = options.Value;
         var expires = DateTime.UtcNow.AddMinutes(jwt.ExpiresMinutes);
@@ -26,6 +28,12 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options)
 
         if (!string.IsNullOrWhiteSpace(user.DisplayName))
             claims.Add(new Claim("display_name", user.DisplayName));
+
+        if (user.WorkshopId.HasValue)
+            claims.Add(new Claim("workshop_id", user.WorkshopId.Value.ToString()));
+
+        foreach (var role in roles.Distinct(StringComparer.OrdinalIgnoreCase))
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
         var token = new JwtSecurityToken(
             issuer: jwt.Issuer,

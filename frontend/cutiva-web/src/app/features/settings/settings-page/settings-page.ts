@@ -1,95 +1,173 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { forkJoin } from 'rxjs';
+import { Material, MaterialsApi } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { WorkshopsApi } from '../../../core/api/workshops.api';
+import { MARKET_MATERIALS_SECTOR_CODE } from '../../../core/constants/market';
+import { FeatureFlagsService } from '../../../core/services/feature-flags.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 
 @Component({
   selector: 'app-settings-page',
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, RouterLink],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.scss',
 })
 export class SettingsPage implements OnInit {
   private readonly workshopsApi = inject(WorkshopsApi);
   private readonly sectorsApi = inject(SectorsApi);
+  private readonly materialsApi = inject(MaterialsApi);
   readonly workshopContext = inject(WorkshopContextService);
+  readonly features = inject(FeatureFlagsService);
+  readonly marketLink = this.features.resourcesV2 ? '/resources' : '/materials';
 
   readonly sectors = signal<Sector[]>([]);
+  readonly profileMaterials = signal<Material[]>([]);
+  readonly materialsReady = signal(false);
   readonly error = signal<string | null>(null);
   readonly notice = signal<string | null>(null);
-  readonly draftNames = signal<Record<string, string>>({});
+  readonly linkDrafts = signal<Record<string, string>>({});
 
-  workshopName = '';
+  readonly primaryWorkshop = computed(
+    () =>
+      this.workshopContext.selectedWorkshop() ??
+      this.workshopContext.workshops()[0] ??
+      null,
+  );
+
+  workshopNameDraft = '';
+  productionPricePerM2: number | null = null;
   sectorCode = '';
   sectorName = '';
+  sectorMaterialId = '';
+
+  constructor() {
+    effect(() => {
+      const workshop = this.primaryWorkshop();
+      if (workshop) {
+        this.workshopNameDraft = workshop.name;
+        this.productionPricePerM2 = workshop.productionPricePerM2 ?? null;
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.reloadSectors();
+    this.reloadAll();
   }
 
-  workshopDraft(id: string, fallback: string): string {
-    return this.draftNames()[id] ?? fallback;
-  }
-
-  setWorkshopDraft(id: string, value: string): void {
-    this.draftNames.update((map) => ({ ...map, [id]: value }));
-  }
-
-  reloadSectors(): void {
-    this.sectorsApi.list().subscribe({
-      next: (sectors) => this.sectors.set(sectors),
+  reloadAll(): void {
+    this.materialsReady.set(false);
+    forkJoin({
+      materials: this.materialsApi.list(),
+      sectors: this.sectorsApi.list(),
+    }).subscribe({
+      next: ({ materials, sectors }) => {
+        this.profileMaterials.set(materials);
+        this.materialsReady.set(true);
+        if (!this.sectorMaterialId && materials.length) {
+          this.sectorMaterialId = materials[0].id;
+        }
+        this.sectors.set(
+          sectors.filter(
+            (s) => s.code.toUpperCase() !== MARKET_MATERIALS_SECTOR_CODE,
+          ),
+        );
+        this.linkDrafts.set({});
+      },
       error: () => this.error.set('common.loadError'),
     });
   }
 
-  createWorkshop(): void {
-    if (!this.workshopName.trim()) return;
-    this.workshopsApi.create(this.workshopName.trim()).subscribe({
-      next: (created) => {
-        this.workshopName = '';
-        this.notice.set('settings.workshopCreated');
-        this.workshopContext.reload();
-        setTimeout(() => this.workshopContext.selectWorkshop(created.id), 400);
+  reloadSectors(): void {
+    this.sectorsApi.list().subscribe({
+      next: (sectors) => {
+        this.sectors.set(
+          sectors.filter(
+            (s) => s.code.toUpperCase() !== MARKET_MATERIALS_SECTOR_CODE,
+          ),
+        );
+        this.linkDrafts.set({});
       },
-      error: () => this.error.set('common.saveError'),
+      error: () => this.error.set('common.loadError'),
     });
   }
 
-  renameWorkshop(id: string, fallback: string): void {
-    const trimmed = this.workshopDraft(id, fallback).trim();
-    if (!trimmed) return;
-    this.workshopsApi.update(id, trimmed).subscribe({
-      next: () => {
-        this.notice.set('settings.workshopUpdated');
-        this.workshopContext.reload();
-      },
-      error: () => this.error.set('common.saveError'),
-    });
-  }
+  renamePrimaryWorkshop(): void {
+    const workshop = this.primaryWorkshop();
+    const trimmed = this.workshopNameDraft.trim();
+    if (!workshop || !trimmed) return;
 
-  deleteWorkshop(id: string): void {
-    this.workshopsApi.delete(id).subscribe({
-      next: () => {
-        this.notice.set('settings.workshopDeleted');
-        this.workshopContext.reload();
-      },
-      error: () => this.error.set('common.deleteError'),
-    });
+    const rate = this.productionPricePerM2;
+    const productionPricePerM2 =
+      rate != null && Number(rate) > 0 ? Number(rate) : null;
+
+    this.workshopsApi
+      .update(workshop.id, trimmed, productionPricePerM2)
+      .subscribe({
+        next: () => {
+          this.notice.set('settings.workshopUpdated');
+          this.workshopContext.reload();
+        },
+        error: () => this.error.set('common.saveError'),
+      });
   }
 
   createSector(): void {
     if (!this.sectorCode.trim() || !this.sectorName.trim()) return;
+
+    if (this.sectorCode.trim().toUpperCase() === MARKET_MATERIALS_SECTOR_CODE) {
+      this.error.set('settings.reservedSectorCode');
+      return;
+    }
+
+    if (this.profileMaterials().length === 0) {
+      this.error.set('settings.noMarketMaterials');
+      return;
+    }
+
+    if (!this.sectorMaterialId) {
+      this.error.set('settings.materialRequired');
+      return;
+    }
+
+    this.error.set(null);
     this.sectorsApi
       .create({
         code: this.sectorCode.trim(),
         name: this.sectorName.trim(),
+        materialId: this.sectorMaterialId,
       })
       .subscribe({
         next: () => {
           this.sectorCode = '';
           this.sectorName = '';
+          this.notice.set('settings.sectorCreated');
+          this.reloadSectors();
+        },
+        error: () => this.error.set('common.saveError'),
+      });
+  }
+
+  saveSectorMaterial(sector: Sector): void {
+    const materialId = this.linkDraft(sector);
+    if (!materialId) {
+      this.error.set('settings.materialRequired');
+      return;
+    }
+
+    this.error.set(null);
+    this.sectorsApi
+      .update(sector.id, {
+        code: sector.code,
+        name: sector.name,
+        materialId,
+      })
+      .subscribe({
+        next: () => {
+          this.notice.set('settings.sectorLinked');
           this.reloadSectors();
         },
         error: () => this.error.set('common.saveError'),
@@ -101,5 +179,20 @@ export class SettingsPage implements OnInit {
       next: () => this.reloadSectors(),
       error: () => this.error.set('common.deleteError'),
     });
+  }
+
+  linkDraft(sector: Sector): string {
+    return this.linkDrafts()[sector.id] ?? sector.materialId ?? '';
+  }
+
+  setLinkDraft(id: string, value: string): void {
+    this.linkDrafts.update((map) => ({ ...map, [id]: value }));
+  }
+
+  materialLabel(sector: Sector): string {
+    if (sector.materialCode && sector.materialName) {
+      return `${sector.materialCode} — ${sector.materialName}`;
+    }
+    return '';
   }
 }

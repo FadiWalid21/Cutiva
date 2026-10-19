@@ -73,7 +73,7 @@ export class Login implements OnInit {
     this.auth.login(email.trim(), password).subscribe({
       next: () => {
         this.submitting.set(false);
-        void this.router.navigateByUrl('/');
+        void this.router.navigateByUrl(this.auth.homeUrl());
       },
       error: (err) => {
         this.submitting.set(false);

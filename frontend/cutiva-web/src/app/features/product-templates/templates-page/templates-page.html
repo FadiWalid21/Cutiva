@@ -1,0 +1,661 @@
+<section class="templates" #pageRoot>
+  <header class="templates__header">
+    <div>
+      <h1>{{ 'glossary.productRecipes' | translate }}</h1>
+      <p>{{ 'templates.subtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (error(); as err) {
+    <p class="page__error">
+      @if (isI18nKey(err)) {
+        {{ err | translate }}
+      } @else {
+        {{ err }}
+      }
+    </p>
+  }
+
+  @if (message(); as msg) {
+    <p class="page__ok">{{ msg | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else {
+    <div class="templates__layout">
+      <aside class="templates__nav">
+        <h2>{{ 'templates.types' | translate }}</h2>
+        @if (types().length === 0) {
+          <p class="page__muted">{{ 'templates.empty' | translate }}</p>
+        } @else {
+          <ul class="type-list">
+            @for (type of types(); track type.id) {
+              <li class="type-block">
+                <button
+                  type="button"
+                  class="type-list__type"
+                  [class.is-active]="selectedTypeId() === type.id"
+                  (click)="selectType(type.id)"
+                >
+                  <strong>{{ type.name }}</strong>
+                  <span>{{ type.kind }}</span>
+                </button>
+                @if (selectedTypeId() === type.id) {
+                  <ul class="variant-list">
+                    @for (v of type.variants; track v.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="variant-list__item"
+                          [class.is-active]="selectedVariantId() === v.id"
+                          (click)="selectVariant(v.id)"
+                        >
+                          <span class="variant-list__name">{{ v.name }}</span>
+                          <span class="variant-list__code">{{ v.code }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </aside>
+
+      <div class="templates__main">
+        @if (variant(); as v) {
+          @if (v.isSeeded) {
+            <p class="seeded-banner" role="status">
+              {{ 'templates.seededHint' | translate }}
+            </p>
+          }
+
+          <section class="editor-block">
+            <header class="editor-block__head">
+              <h2>{{ 'glossary.model' | translate }}</h2>
+              <span class="editor-block__meta">{{ v.code }} · {{ v.productTypeName }}</span>
+            </header>
+
+            <form class="field-grid" (ngSubmit)="saveVariantHeader()">
+              <label class="field">
+                <span>{{ 'templates.name' | translate }}</span>
+                <input [(ngModel)]="variantName" name="variantName" required />
+              </label>
+              <label class="field">
+                <span>{{ 'templates.sashCount' | translate }}</span>
+                <input
+                  type="number"
+                  min="0"
+                  [(ngModel)]="variantSashCount"
+                  name="variantSashCount"
+                />
+              </label>
+              <label class="field">
+                <span>{{ 'templates.overlapCm' | translate }}</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="variantOverlapCm"
+                  name="variantOverlapCm"
+                />
+              </label>
+              <label class="field field--check">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="variantIsActive"
+                  name="variantIsActive"
+                />
+                <span>{{ 'templates.active' | translate }}</span>
+              </label>
+              <div class="field-grid__actions">
+                <button
+                  type="submit"
+                  class="btn btn--primary"
+                  [disabled]="saving()"
+                >
+                  {{ 'common.save' | translate }}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="editor-block preview-block">
+            <header class="editor-block__head">
+              <h2>{{ 'glossary.livePreview' | translate }}</h2>
+            </header>
+            <div class="preview-inputs">
+              <label class="field">
+                <span>{{ 'templates.previewW' | translate }}</span>
+                <input
+                  type="number"
+                  min="1"
+                  [ngModel]="previewWidthCm()"
+                  (ngModelChange)="previewWidthCm.set($event)"
+                  name="previewW"
+                />
+              </label>
+              <label class="field">
+                <span>{{ 'templates.previewH' | translate }}</span>
+                <input
+                  type="number"
+                  min="1"
+                  [ngModel]="previewHeightCm()"
+                  (ngModelChange)="previewHeightCm.set($event)"
+                  name="previewH"
+                />
+              </label>
+            </div>
+            @if (previewRows().length) {
+              <ul class="preview-list">
+                @for (row of previewRows(); track row.id) {
+                  <li>
+                    <span>{{ row.name }}</span>
+                    <strong
+                      >{{ row.lengthCm }}
+                      {{ 'glossary.cm' | translate }} ×
+                      {{ row.qty }}</strong
+                    >
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section class="editor-block">
+            <header class="editor-block__head">
+              <h2>{{ 'templates.parts' | translate }}</h2>
+            </header>
+            <p class="formula-help">{{ 'templates.formulaHelp' | translate }}</p>
+
+            @if (v.parts.length === 0) {
+              <p class="page__muted">{{ 'templates.noParts' | translate }}</p>
+            } @else {
+              <div class="part-stack">
+                @for (part of v.parts; track part.id) {
+                  <form class="part-card" (ngSubmit)="savePart(part)">
+                    <div class="part-card__role">
+                      <strong>{{ part.displayName || part.role }}</strong>
+                    </div>
+
+                    <div class="field-grid">
+                      <label class="field">
+                        <span>{{ 'templates.displayName' | translate }}</span>
+                        <input
+                          [(ngModel)]="part.displayName"
+                          [name]="'dn-' + part.id"
+                        />
+                      </label>
+
+                      @if (partSimple(part); as simple) {
+                        <div class="sentence">
+                          <span>{{ 'glossary.lengthEquals' | translate }}</span>
+                          <select
+                            [ngModel]="simple.axis"
+                            (ngModelChange)="
+                              onPartSentenceChange(part, 'axis', $event)
+                            "
+                            [name]="'axis-' + part.id"
+                          >
+                            @for (a of axes; track a) {
+                              <option [value]="a">
+                                {{ ('glossary.' + a) | translate }}
+                              </option>
+                            }
+                          </select>
+                          <select
+                            [ngModel]="simple.op"
+                            (ngModelChange)="
+                              onPartSentenceChange(part, 'op', $event)
+                            "
+                            [name]="'op-' + part.id"
+                          >
+                            @for (o of ops; track o) {
+                              <option [value]="o">
+                                {{ ('glossary.' + o) | translate }}
+                              </option>
+                            }
+                          </select>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.1"
+                            class="sentence__n"
+                            [ngModel]="simple.nCm"
+                            (ngModelChange)="
+                              onPartSentenceChange(part, 'nCm', $event)
+                            "
+                            [name]="'ncm-' + part.id"
+                          />
+                          <span>{{ 'glossary.cm' | translate }}</span>
+                          <span>،</span>
+                          <span>{{ 'glossary.qty' | translate }}</span>
+                          <input
+                            type="number"
+                            min="1"
+                            class="sentence__n"
+                            [ngModel]="part.qtyPerUnit"
+                            (ngModelChange)="
+                              onPartSentenceChange(part, 'qty', $event)
+                            "
+                            [name]="'qty-' + part.id"
+                          />
+                        </div>
+                      } @else {
+                        <p class="page__muted">
+                          {{ 'glossary.customFormula' | translate }}
+                        </p>
+                      }
+
+                      <label class="field">
+                        <span>{{ 'templates.defaultMaterial' | translate }}</span>
+                        <select
+                          [ngModel]="part.defaultAluminumMaterialId"
+                          (ngModelChange)="onMaterialSelect(part, $event)"
+                          [name]="'mat-' + part.id"
+                        >
+                          <option [ngValue]="null">—</option>
+                          @for (m of aluminumMaterials(); track m.id) {
+                            <option [ngValue]="m.id">
+                              {{ m.code }} — {{ m.name }}
+                            </option>
+                          }
+                          @if (canManageCatalog()) {
+                            <option [ngValue]="'__add__'">
+                              {{ 'glossary.addNew' | translate }}
+                            </option>
+                          }
+                        </select>
+                      </label>
+
+                      <details class="advanced">
+                        <summary>{{ 'glossary.advanced' | translate }}</summary>
+                        <div class="field-grid advanced__grid">
+                          <label class="field">
+                            <span>{{ 'templates.widthCoef' | translate }}</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="part.widthCoef"
+                              [name]="'wc-' + part.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.heightCoef' | translate }}</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="part.heightCoef"
+                              [name]="'hc-' + part.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.offsetCm' | translate }}</span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              [ngModel]="offsetCm(part.offsetMm)"
+                              (ngModelChange)="setOffsetCm(part, $event)"
+                              [name]="'off-' + part.id"
+                            />
+                          </label>
+                          <label class="field field--check">
+                            <input
+                              type="checkbox"
+                              [(ngModel)]="part.useSashWidthDivision"
+                              [name]="'sash-' + part.id"
+                            />
+                            <span>{{
+                              'templates.useSashDivision' | translate
+                            }}</span>
+                          </label>
+                        </div>
+                      </details>
+
+                      <div class="field-grid__actions">
+                        <button
+                          type="submit"
+                          class="btn btn--ghost"
+                          [disabled]="saving()"
+                        >
+                          {{ 'common.save' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="editor-block">
+            <header class="editor-block__head">
+              <h2>{{ 'templates.glassSlots' | translate }}</h2>
+            </header>
+            <p class="formula-help">{{
+              'templates.glassFormulaHelp' | translate
+            }}</p>
+
+            @if (v.glassSlots.length === 0) {
+              <p class="page__muted">{{ 'templates.noGlassSlots' | translate }}</p>
+            } @else {
+              <div class="part-stack">
+                @for (slot of v.glassSlots; track slot.id) {
+                  <form class="part-card" (ngSubmit)="saveGlassSlot(slot)">
+                    <div class="field-grid">
+                      <label class="field">
+                        <span>{{ 'templates.slotName' | translate }}</span>
+                        <input
+                          [(ngModel)]="slot.name"
+                          [name]="'gsn-' + slot.id"
+                        />
+                      </label>
+                      <label class="field">
+                        <span>{{ 'templates.paneCount' | translate }}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          [(ngModel)]="slot.paneCount"
+                          [name]="'gsp-' + slot.id"
+                        />
+                      </label>
+
+                      <div class="sentence-block">
+                        <span class="sentence-block__label">{{
+                          'templates.glassWidth' | translate
+                        }}</span>
+                        @if (glassSimpleW(slot); as simpleW) {
+                          <div class="sentence">
+                            <span>{{ 'glossary.lengthEquals' | translate }}</span>
+                            <select
+                              [ngModel]="simpleW.axis"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'W', 'axis', $event)
+                              "
+                              [name]="'gw-axis-' + slot.id"
+                            >
+                              @for (a of axes; track a) {
+                                <option [value]="a">
+                                  {{ ('glossary.' + a) | translate }}
+                                </option>
+                              }
+                            </select>
+                            <select
+                              [ngModel]="simpleW.op"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'W', 'op', $event)
+                              "
+                              [name]="'gw-op-' + slot.id"
+                            >
+                              @for (o of ops; track o) {
+                                <option [value]="o">
+                                  {{ ('glossary.' + o) | translate }}
+                                </option>
+                              }
+                            </select>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.1"
+                              class="sentence__n"
+                              [ngModel]="simpleW.nCm"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'W', 'nCm', $event)
+                              "
+                              [name]="'gw-n-' + slot.id"
+                            />
+                            <span>{{ 'glossary.cm' | translate }}</span>
+                          </div>
+                        } @else {
+                          <p class="page__muted">
+                            {{ 'glossary.customFormula' | translate }}
+                          </p>
+                        }
+                      </div>
+
+                      <div class="sentence-block">
+                        <span class="sentence-block__label">{{
+                          'templates.glassHeight' | translate
+                        }}</span>
+                        @if (glassSimpleH(slot); as simpleH) {
+                          <div class="sentence">
+                            <span>{{ 'glossary.lengthEquals' | translate }}</span>
+                            <select
+                              [ngModel]="simpleH.axis"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'H', 'axis', $event)
+                              "
+                              [name]="'gh-axis-' + slot.id"
+                            >
+                              @for (a of axes; track a) {
+                                <option [value]="a">
+                                  {{ ('glossary.' + a) | translate }}
+                                </option>
+                              }
+                            </select>
+                            <select
+                              [ngModel]="simpleH.op"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'H', 'op', $event)
+                              "
+                              [name]="'gh-op-' + slot.id"
+                            >
+                              @for (o of ops; track o) {
+                                <option [value]="o">
+                                  {{ ('glossary.' + o) | translate }}
+                                </option>
+                              }
+                            </select>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.1"
+                              class="sentence__n"
+                              [ngModel]="simpleH.nCm"
+                              (ngModelChange)="
+                                onGlassSentenceChange(slot, 'H', 'nCm', $event)
+                              "
+                              [name]="'gh-n-' + slot.id"
+                            />
+                            <span>{{ 'glossary.cm' | translate }}</span>
+                          </div>
+                        } @else {
+                          <p class="page__muted">
+                            {{ 'glossary.customFormula' | translate }}
+                          </p>
+                        }
+                      </div>
+
+                      <label class="field field--check">
+                        <input
+                          type="checkbox"
+                          [(ngModel)]="slot.required"
+                          [name]="'req-' + slot.id"
+                        />
+                        <span>{{ 'templates.required' | translate }}</span>
+                      </label>
+
+                      <details class="advanced">
+                        <summary>{{ 'glossary.advanced' | translate }}</summary>
+                        <div class="field-grid advanced__grid">
+                          <label class="field">
+                            <span>{{ 'templates.widthCoef' | translate }} W</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="slot.widthCoefW"
+                              [name]="'wcw-' + slot.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.heightCoef' | translate }} W</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="slot.heightCoefW"
+                              [name]="'hcw-' + slot.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.offsetCm' | translate }} W</span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              [ngModel]="offsetCm(slot.offsetWMm)"
+                              (ngModelChange)="
+                                setGlassOffsetCm(slot, 'W', $event)
+                              "
+                              [name]="'ow-' + slot.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.widthCoef' | translate }} H</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="slot.widthCoefH"
+                              [name]="'wch-' + slot.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.heightCoef' | translate }} H</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              [(ngModel)]="slot.heightCoefH"
+                              [name]="'hch-' + slot.id"
+                            />
+                          </label>
+                          <label class="field">
+                            <span>{{ 'templates.offsetCm' | translate }} H</span>
+                            <input
+                              type="number"
+                              step="0.1"
+                              [ngModel]="offsetCm(slot.offsetHMm)"
+                              (ngModelChange)="
+                                setGlassOffsetCm(slot, 'H', $event)
+                              "
+                              [name]="'oh-' + slot.id"
+                            />
+                          </label>
+                          <label class="field field--check">
+                            <input
+                              type="checkbox"
+                              [(ngModel)]="slot.useSashWidthDivision"
+                              [name]="'gss-' + slot.id"
+                            />
+                            <span>{{
+                              'templates.useSashDivision' | translate
+                            }}</span>
+                          </label>
+                        </div>
+                      </details>
+
+                      <div class="field-grid__actions">
+                        <button
+                          type="submit"
+                          class="btn btn--ghost"
+                          [disabled]="saving()"
+                        >
+                          {{ 'common.save' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="editor-block">
+            <header class="editor-block__head">
+              <h2>{{ 'templates.accessorySlots' | translate }}</h2>
+            </header>
+
+            @if (v.accessorySlots.length === 0) {
+              <p class="page__muted">{{
+                'templates.noAccessorySlots' | translate
+              }}</p>
+            } @else {
+              <div class="part-stack">
+                @for (slot of v.accessorySlots; track slot.id) {
+                  <form class="part-card" (ngSubmit)="saveAccessorySlot(slot)">
+                    <div class="field-grid">
+                      <label class="field">
+                        <span>{{ 'templates.slotName' | translate }}</span>
+                        <input
+                          [(ngModel)]="slot.name"
+                          [name]="'asn-' + slot.id"
+                        />
+                      </label>
+                      <label class="field">
+                        <span>{{ 'templates.quantityRule' | translate }}</span>
+                        <select
+                          [(ngModel)]="slot.quantityRule"
+                          [name]="'aqr-' + slot.id"
+                        >
+                          @for (rule of quantityRules; track rule) {
+                            <option [value]="rule">
+                              {{ ('templates.rules.' + rule) | translate }}
+                            </option>
+                          }
+                        </select>
+                      </label>
+                      <label class="field">
+                        <span>{{ 'glossary.qty' | translate }}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          [(ngModel)]="slot.qty"
+                          [name]="'aq-' + slot.id"
+                        />
+                      </label>
+                      <label class="field">
+                        <span>{{ 'templates.defaultAccessory' | translate }}</span>
+                        <select
+                          [ngModel]="slot.defaultAccessoryId"
+                          (ngModelChange)="onAccessorySelect(slot, $event)"
+                          [name]="'ada-' + slot.id"
+                        >
+                          <option [ngValue]="null">—</option>
+                          @for (a of accessories(); track a.id) {
+                            <option [ngValue]="a.id">{{ a.name }}</option>
+                          }
+                          @if (canManageCatalog()) {
+                            <option [ngValue]="'__add__'">
+                              {{ 'glossary.addNew' | translate }}
+                            </option>
+                          }
+                        </select>
+                      </label>
+                      <div class="field-grid__actions">
+                        <button
+                          type="submit"
+                          class="btn btn--ghost"
+                          [disabled]="saving()"
+                        >
+                          {{ 'common.save' | translate }}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                }
+              </div>
+            }
+          </section>
+        } @else {
+          <p class="templates__empty">{{ 'templates.selectVariant' | translate }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (quickAddMode(); as mode) {
+    <app-resource-quick-add
+      [mode]="mode"
+      (closed)="onQuickAddClosed()"
+      (created)="onQuickAddCreated($event)"
+    />
+  }
+</section>

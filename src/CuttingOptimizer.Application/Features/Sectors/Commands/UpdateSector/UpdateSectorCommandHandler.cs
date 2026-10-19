@@ -31,8 +31,21 @@ public sealed class UpdateSectorCommandHandler(
         if (codeExists)
             return UpdateSectorResult.CodeAlreadyExists;
 
+        if (request.MaterialId.HasValue)
+        {
+            var materialOk = await dbContext.Materials
+                .AsNoTracking()
+                .AnyAsync(
+                    material => material.Id == request.MaterialId.Value,
+                    cancellationToken);
+
+            if (!materialOk)
+                return UpdateSectorResult.MaterialNotFound;
+        }
+
         sector.Code = code;
         sector.Name = request.Name.Trim();
+        sector.MaterialId = request.MaterialId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
 

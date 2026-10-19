@@ -1,9 +1,9 @@
+using System.Globalization;
 using System.Security.Claims;
 using CuttingOptimizer.Api.Contracts.Auth;
 using CuttingOptimizer.Application.Abstractions.Auth;
 using CuttingOptimizer.Application.Features.Auth;
 using CuttingOptimizer.Application.Features.Auth.Commands.Login;
-using CuttingOptimizer.Application.Features.Auth.Commands.Register;
 using CuttingOptimizer.Application.Resources;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -17,37 +17,17 @@ namespace CuttingOptimizer.Api.Controllers;
 public sealed class AuthController(
     ISender sender,
     IAuthService authService,
+    IPasswordResetService passwordResetService,
     IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<IActionResult> Register(
-        [FromBody] RegisterRequest request,
-        CancellationToken cancellationToken)
+    public IActionResult Register()
     {
-        var result = await sender.Send(
-            new RegisterCommand(
-                request.Email,
-                request.Password,
-                request.DisplayName),
-            cancellationToken);
-
-        return result switch
+        return StatusCode(StatusCodes.Status410Gone, new
         {
-            RegisterSucceeded succeeded => Created(
-                "/api/auth/me",
-                succeeded.Token),
-            RegisterDuplicateEmail => Conflict(new
-            {
-                message = localizer["AuthEmailExists"].Value
-            }),
-            RegisterFailed failed => BadRequest(new
-            {
-                message = localizer["AuthRegisterFailed"].Value,
-                errors = new { password = failed.Errors.ToArray() }
-            }),
-            _ => StatusCode(500)
-        };
+            message = "Public registration is disabled. Contact your administrator."
+        });
     }
 
     [AllowAnonymous]
@@ -71,6 +51,46 @@ public sealed class AuthController(
         };
     }
 
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        [FromBody] ForgotPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var arabic = IsArabicRequest();
+        await passwordResetService.RequestForgotPasswordAsync(
+            request.Email ?? string.Empty,
+            arabic,
+            cancellationToken);
+        return NoContent();
+    }
+
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordWithCodeRequest request,
+        CancellationToken cancellationToken)
+    {
+        var outcome = await passwordResetService.ResetPasswordAsync(
+            request.Email ?? string.Empty,
+            request.Code ?? string.Empty,
+            request.NewPassword ?? string.Empty,
+            cancellationToken);
+
+        return outcome switch
+        {
+            PasswordResetOutcome.Succeeded => NoContent(),
+            PasswordResetOutcome.WeakPassword => BadRequest(new
+            {
+                message = localizer["AuthRegisterFailed"].Value
+            }),
+            _ => BadRequest(new
+            {
+                message = "Invalid or expired code."
+            })
+        };
+    }
+
     [Authorize]
     [HttpGet("me")]
     public async Task<ActionResult<AuthMeResponse>> Me(
@@ -87,6 +107,18 @@ public sealed class AuthController(
         if (me is null)
             return Unauthorized();
 
-        return Ok(new AuthMeResponse(me.UserId, me.Email, me.DisplayName));
+        return Ok(new AuthMeResponse(
+            me.UserId,
+            me.Email,
+            me.DisplayName,
+            me.Roles,
+            me.WorkshopId,
+            me.Subscription));
+    }
+
+    private bool IsArabicRequest()
+    {
+        var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+        return string.Equals(culture, "ar", StringComparison.OrdinalIgnoreCase);
     }
 }

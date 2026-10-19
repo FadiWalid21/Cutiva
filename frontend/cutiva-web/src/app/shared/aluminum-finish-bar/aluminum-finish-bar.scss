@@ -1,0 +1,59 @@
+.finish-bar {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.finish-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+}
+
+.finish-bar__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.finish-bar__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.finish-bar__swatch {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  background: linear-gradient(
+    145deg,
+    var(--swatch-light),
+    var(--swatch) 45%,
+    var(--swatch-dark)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+
+  &.is-active {
+    border-color: var(--color-accent);
+    outline: 2px solid var(--color-accent-soft);
+  }
+
+  &:hover {
+    transform: scale(1.06);
+  }
+
+  &--glass {
+    border-radius: 0.35rem;
+    opacity: 0.92;
+  }
+}
+
+.finish-bar__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}

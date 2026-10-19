@@ -2,10 +2,11 @@ using MediatR;
 
 namespace CuttingOptimizer.Application.Features.Workshops.Queries.GetWorkshops;
 
-
 public sealed record GetWorkshopsQuery(
     int Page = 1,
-    int PageSize = 10)
+    int PageSize = 10,
+    Guid? RestrictToWorkshopId = null,
+    bool IsAdmin = false)
     : IRequest<PagedWorkshopsDto>;
 
 public sealed record PagedWorkshopsDto(
@@ -16,6 +17,5 @@ public sealed record PagedWorkshopsDto(
 
 public sealed record WorkshopListItemDto(
     Guid Id,
-    string Name);
-    
-    
+    string Name,
+    decimal? ProductionPricePerM2);

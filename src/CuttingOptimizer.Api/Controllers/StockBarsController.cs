@@ -2,6 +2,8 @@ using CuttingOptimizer.Api.Contracts.StockBars;
 using CuttingOptimizer.Application.Features.StockBars.Commands.CreateStockBar;
 using CuttingOptimizer.Application.Features.StockBars.Commands.UpdateStockBar;
 using CuttingOptimizer.Application.Features.StockBars.Commands.DeactivateStockBar;
+using CuttingOptimizer.Application.Features.StockBars.Commands.DeleteStockBar;
+using CuttingOptimizer.Application.Features.StockBars.Commands.SetStockBarAvailability;
 using CuttingOptimizer.Application.Features.StockBars.Queries;
 using CuttingOptimizer.Application.Features.StockBars.Queries.GetStockBars;
 using CuttingOptimizer.Application.Resources;
@@ -57,10 +59,11 @@ public sealed class StockBarsController(
         [FromQuery] Guid? materialId,
         [FromQuery] Guid? sectorId,
         [FromQuery] bool? isActive,
+        [FromQuery] bool? isRemnant,
         CancellationToken cancellationToken)
     {
         var stockBars = await sender.Send(
-            new GetStockBarsQuery(materialId, sectorId, isActive),
+            new GetStockBarsQuery(materialId, sectorId, isActive, isRemnant),
             cancellationToken);
 
         return Ok(stockBars);
@@ -92,6 +95,27 @@ public sealed class StockBarsController(
         return NoContent();
     }
 
+    [HttpPatch("{id:guid}/availability")]
+    public async Task<IActionResult> SetAvailability(
+        Guid id,
+        [FromBody] SetStockBarAvailabilityRequest request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await sender.Send(
+            new SetStockBarAvailabilityCommand(id, request.IsActive),
+            cancellationToken);
+
+        if (!updated)
+        {
+            return NotFound(new
+            {
+                message = localizer["StockBarNotFound"].Value
+            });
+        }
+
+        return NoContent();
+    }
+
     [HttpPatch("{id:guid}/deactivate")]
     public async Task<IActionResult> Deactivate(
         Guid id,
@@ -110,5 +134,28 @@ public sealed class StockBarsController(
         }
 
         return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeleteStockBarCommand(id),
+            cancellationToken);
+
+        return result switch
+        {
+            DeleteStockBarSucceeded => NoContent(),
+            DeleteStockBarInUse => Conflict(new
+            {
+                message = localizer["StockBarInUse"].Value
+            }),
+            _ => NotFound(new
+            {
+                message = localizer["StockBarNotFound"].Value
+            })
+        };
     }
 }

@@ -18,6 +18,20 @@ export class AuthService {
   readonly accessToken = this.tokenSignal.asReadonly();
   readonly currentUser = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
+  readonly isAdmin = computed(
+    () => this.userSignal()?.roles?.includes('Admin') ?? false,
+  );
+  readonly isWorkshopOwner = computed(
+    () => this.userSignal()?.roles?.includes('WorkshopOwner') ?? false,
+  );
+  readonly isWorkshopMember = computed(
+    () => this.userSignal()?.roles?.includes('WorkshopMember') ?? false,
+  );
+  /** Resources + product recipes: Owner or platform Admin. */
+  readonly canManageCatalog = computed(
+    () => this.isAdmin() || this.isWorkshopOwner(),
+  );
+  readonly homeUrl = computed(() => (this.isAdmin() ? '/admin' : '/dashboard'));
 
   getToken(): string | null {
     return this.tokenSignal();
@@ -27,16 +41,6 @@ export class AuthService {
     return this.authApi.login({ email, password }).pipe(
       tap((result) => this.persistSession(result)),
     );
-  }
-
-  register(
-    email: string,
-    password: string,
-    displayName?: string | null,
-  ): Observable<AuthTokenResponse> {
-    return this.authApi
-      .register({ email, password, displayName: displayName || null })
-      .pipe(tap((result) => this.persistSession(result)));
   }
 
   loadMe(): Observable<AuthMeResponse | null> {
@@ -57,7 +61,7 @@ export class AuthService {
   logout(navigate = true): void {
     this.clearSession();
     if (navigate) {
-      void this.router.navigateByUrl('/login');
+      void this.router.navigateByUrl('/');
     }
   }
 
@@ -73,8 +77,13 @@ export class AuthService {
       userId: '',
       email: result.email,
       displayName: result.displayName,
+      roles: result.roles ?? [],
+      workshopId: result.workshopId ?? null,
+      subscription: result.subscription ?? null,
     });
-    this.workshops.load();
+    if (!(result.roles ?? []).includes('Admin')) {
+      this.workshops.load();
+    }
   }
 
   private clearSession(): void {

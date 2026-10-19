@@ -29,40 +29,45 @@ public sealed class ApproveCuttingPlanHandler(
         if (plan.Status == CuttingPlanStatus.Approved)
             return new ApproveCuttingPlanAlreadyApproved();
 
-        var usageByStockBarId = plan.Bars
-            .GroupBy(bar => bar.StockBarId)
-            .ToDictionary(group => group.Key, group => group.Count());
+        if (!plan.IsComplete || plan.UnallocatedPieces.Count > 0)
+            return new ApproveCuttingPlanIncomplete();
 
-        var stockBarIds = usageByStockBarId.Keys.ToList();
-        var stockBars = await context.StockBars
-            .Where(stock => stockBarIds.Contains(stock.Id))
+        var usedStockBarIds = plan.Bars
+            .Select(bar => bar.StockBarId)
+            .Distinct()
+            .ToList();
+
+        var usedStockBars = await context.StockBars
+            .Where(stockBar => usedStockBarIds.Contains(stockBar.Id))
             .ToListAsync(cancellationToken);
 
-        if (stockBars.Count != stockBarIds.Count)
-            return new ApproveCuttingPlanInsufficientStock();
+        var remnantById = usedStockBars
+            .Where(stockBar => stockBar.IsRemnant)
+            .ToDictionary(stockBar => stockBar.Id);
 
-        foreach (var stockBar in stockBars)
+        // Consume remnant inventory used by this plan (catalog is unlimited).
+        foreach (var group in plan.Bars.GroupBy(bar => bar.StockBarId))
         {
-            var needed = usageByStockBarId[stockBar.Id];
-            if (!stockBar.IsActive || stockBar.AvailableQuantity < needed)
-                return new ApproveCuttingPlanInsufficientStock();
+            if (!remnantById.TryGetValue(group.Key, out var remnant))
+                continue;
+
+            var usedCount = group.Count();
+            remnant.AvailableQuantity = Math.Max(0, remnant.AvailableQuantity - usedCount);
+            if (remnant.AvailableQuantity == 0)
+                remnant.IsActive = false;
         }
 
-        foreach (var stockBar in stockBars)
+        // Store usable leftovers as remnant stock for future plans.
+        foreach (var bar in plan.Bars.Where(b => b.RemainingLengthMm > 0))
         {
-            stockBar.AvailableQuantity -= usageByStockBarId[stockBar.Id];
-        }
-
-        foreach (var planBar in plan.Bars.Where(bar => bar.RemainingLengthMm > 0))
-        {
-            var source = stockBars.First(stock => stock.Id == planBar.StockBarId);
             context.StockBars.Add(new StockBar
             {
                 MaterialId = plan.MaterialId,
-                LengthMm = planBar.RemainingLengthMm,
-                UnitPrice = planBar.UnitPrice > 0 ? planBar.UnitPrice : source.UnitPrice,
+                LengthMm = bar.RemainingLengthMm,
+                UnitPrice = 0m,
                 AvailableQuantity = 1,
-                IsActive = true
+                IsActive = true,
+                IsRemnant = true
             });
         }
 

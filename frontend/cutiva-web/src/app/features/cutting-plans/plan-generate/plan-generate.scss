@@ -1,6 +1,104 @@
 .page {
   padding: 1.5rem;
-  max-width: 40rem;
+  max-width: 72rem;
+}
+
+.generate__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 1.05fr);
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.generate__form {
+  max-width: none;
+}
+
+.remnant-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0.25rem 0 0.85rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface-solid));
+
+  input {
+    margin-top: 0.2rem;
+  }
+
+  span {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  &__status {
+    margin-top: 0.15rem;
+
+    &--ok {
+      color: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+      font-weight: 500;
+    }
+
+    &--warn {
+      color: var(--color-muted);
+    }
+  }
+}
+
+.generate__preview {
+  padding: 1.15rem;
+  position: sticky;
+  top: 1rem;
+
+  header {
+    margin-bottom: 0.75rem;
+
+    h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1.05rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--color-muted);
+      font-size: 0.85rem;
+    }
+  }
+
+  app-aluminum-finish-bar {
+    display: block;
+    margin-bottom: 0.9rem;
+  }
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 960px) {
+  .generate__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .generate__preview {
+    position: static;
+    order: -1;
+  }
 }
 
 .page__header {
@@ -22,6 +120,7 @@
 .form {
   display: grid;
   gap: 1rem;
+  max-width: 40rem;
 
   label,
   fieldset {
@@ -65,6 +164,13 @@
   }
 }
 
+.continuity-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
 .page__muted,
 .page__empty {
   color: var(--color-muted);
@@ -72,4 +178,127 @@
 
 .page__error {
   color: var(--color-danger);
+}
+
+.page__notice {
+  margin: 0.5rem 0 0;
+  color: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+  font-size: 0.9rem;
+}
+
+.compare {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.compare__header {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.15rem;
+  }
+
+  p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.92rem;
+  }
+}
+
+.compare__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.85rem;
+}
+
+.alt-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-elevated);
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.alt-card--bad {
+  border-color: color-mix(in srgb, #c45c26 40%, var(--color-border));
+  opacity: 0.92;
+}
+
+.alt-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.chip--cost {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  color: var(--color-accent);
+}
+
+.chip--waste {
+  background: color-mix(in srgb, #2f6f4e 16%, transparent);
+  color: #2f6f4e;
+}
+
+.chip--ok {
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-text);
+}
+
+.chip--bad {
+  background: color-mix(in srgb, #c45c26 16%, transparent);
+  color: #9a4a1a;
+}
+
+.alt-card__summary {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.alt-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  dt {
+    margin: 0;
+    font-size: 0.72rem;
+    color: var(--color-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+}
+
+.alt-card__warn {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #9a4a1a;
+  line-height: 1.4;
 }

@@ -6,11 +6,30 @@ export const authGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (auth.isAuthenticated()) {
-    return true;
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
   }
 
-  return router.createUrlTree(['/login']);
+  if (auth.isAdmin()) {
+    return router.createUrlTree(['/admin']);
+  }
+
+  return true;
+};
+
+export const adminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  if (!auth.isAdmin()) {
+    return router.createUrlTree(['/dashboard']);
+  }
+
+  return true;
 };
 
 export const guestGuard: CanActivateFn = () => {
@@ -21,5 +40,5 @@ export const guestGuard: CanActivateFn = () => {
     return true;
   }
 
-  return router.createUrlTree(['/']);
+  return router.createUrlTree([auth.homeUrl()]);
 };

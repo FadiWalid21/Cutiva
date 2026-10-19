@@ -4,4 +4,9 @@ export const environment = {
   useDashboardMock: false,
   defaultLanguage: 'en',
   supportedLanguages: ['en', 'ar'] as const,
+  /** Off in production builds until Phase 6 flag removal is approved. */
+  features: {
+    resourcesV2: false,
+    productTemplates: false,
+  },
 };

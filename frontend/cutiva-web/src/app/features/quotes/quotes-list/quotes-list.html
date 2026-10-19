@@ -1,0 +1,57 @@
+<section class="quotes-list">
+  <header>
+    <div>
+      <h1>{{ 'quote.listTitle' | translate }}</h1>
+      <p>{{ 'quote.listSubtitle' | translate }}</p>
+    </div>
+  </header>
+
+  @if (!workshopContext.loaded() || workshopContext.loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (!workshopContext.hasWorkshops()) {
+    <p class="page__empty">{{ 'dashboard.noWorkshop' | translate }}</p>
+  } @else if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (error(); as err) {
+    <p class="page__error">
+      @if (isI18nKey(err)) {
+        {{ err | translate }}
+      } @else {
+        {{ err }}
+      }
+    </p>
+  } @else if (quotes().length === 0) {
+    <p class="page__muted">{{ 'quote.listEmpty' | translate }}</p>
+  } @else {
+    <div class="table-wrap card">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'quote.colProject' | translate }}</th>
+            <th>{{ 'quote.colCustomer' | translate }}</th>
+            <th>{{ 'quote.colMaterial' | translate }}</th>
+            <th>{{ 'quote.grandTotal' | translate }}</th>
+            <th>{{ 'quote.colDate' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of quotes(); track item.id) {
+            <tr>
+              <td>{{ item.projectName }}</td>
+              <td>{{ item.customerName || '—' }}</td>
+              <td>{{ item.materialName }}</td>
+              <td>{{ item.grandTotal | number: '1.0-2' }}</td>
+              <td>{{ item.createdAtUtc | date: 'mediumDate' }}</td>
+              <td>
+                <a class="btn btn--ghost" [routerLink]="['/quotes', item.id]">
+                  {{ 'quote.open' | translate }}
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

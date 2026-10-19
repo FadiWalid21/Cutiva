@@ -15,4 +15,4 @@ public sealed record ApproveCuttingPlanNotFound : ApproveCuttingPlanResult;
 
 public sealed record ApproveCuttingPlanAlreadyApproved : ApproveCuttingPlanResult;
 
-public sealed record ApproveCuttingPlanInsufficientStock : ApproveCuttingPlanResult;
+public sealed record ApproveCuttingPlanIncomplete : ApproveCuttingPlanResult;

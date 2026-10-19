@@ -22,5 +22,17 @@ public sealed class CreateProjectSectionCommandValidator
             .WithMessage(_ => localizer["SectionNameRequired"])
             .MaximumLength(200)
             .WithMessage(_ => localizer["SectionNameMaxLength"]);
+
+        RuleFor(x => x.HeightMm)
+            .GreaterThan(0)
+            .WithMessage(_ => localizer["SectionHeightRequired"]);
+
+        RuleFor(x => x.WidthMm)
+            .GreaterThan(0)
+            .WithMessage(_ => localizer["SectionWidthRequired"]);
+
+        RuleFor(x => x.UnitQuantity)
+            .GreaterThan(0)
+            .WithMessage(_ => localizer["SectionUnitQuantityRequired"]);
     }
 }

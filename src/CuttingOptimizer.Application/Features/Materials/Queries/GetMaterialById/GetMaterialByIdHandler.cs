@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CuttingOptimizer.Application.Features.Materials.Queries.GetMaterialById;
 
-
 public sealed class GetMaterialByIdHandler(
     IApplicationDbContext context)
     : IRequestHandler<GetMaterialByIdQuery, MaterialDto?>
@@ -23,7 +22,10 @@ public sealed class GetMaterialByIdHandler(
                 material.Sector.Name,
                 material.Code,
                 material.Name,
-                material.Description))
+                material.Description,
+                material.Category,
+                material.ThicknessMm,
+                material.IsActive))
             .FirstOrDefaultAsync(cancellationToken);
     }
 }

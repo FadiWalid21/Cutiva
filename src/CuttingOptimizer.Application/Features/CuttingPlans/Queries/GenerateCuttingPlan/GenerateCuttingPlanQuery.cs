@@ -6,5 +6,6 @@ namespace CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCut
 public sealed record GenerateCuttingPlanQuery(
     Guid MaterialId,
     int KerfMm,
-    IReadOnlyList<Guid> RequiredCutIds
-) : IRequest<CuttingPlanDto?>;
+    IReadOnlyList<Guid> RequiredCutIds,
+    bool UseRemnants = true
+) : IRequest<CuttingPlanComparisonDto?>;

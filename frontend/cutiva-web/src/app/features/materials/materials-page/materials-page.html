@@ -3,6 +3,7 @@
     <div>
       <h1>{{ 'materials.title' | translate }}</h1>
       <p>{{ 'materials.subtitle' | translate }}</p>
+      <p class="materials__hint">{{ 'materials.hint' | translate }}</p>
     </div>
   </header>
 
@@ -17,147 +18,190 @@
   }
 
   <div class="materials__grid">
-    <article class="card panel">
-      <h2>{{ 'materials.list' | translate }}</h2>
-      <form class="inline-form" (ngSubmit)="createMaterial()">
-        <div class="field">
-          <input
-            [(ngModel)]="materialCode"
-            name="materialCode"
-            [placeholder]="'materials.code' | translate"
-            [attr.aria-invalid]="!!materialFieldErrors().code"
-          />
-          <app-form-field-error [message]="materialFieldErrors().code ?? null" />
-        </div>
-        <div class="field">
-          <input
-            [(ngModel)]="materialName"
-            name="materialName"
-            [placeholder]="'materials.name' | translate"
-            [attr.aria-invalid]="!!materialFieldErrors().name"
-          />
-          <app-form-field-error [message]="materialFieldErrors().name ?? null" />
-        </div>
-        <div class="field">
-          <select
-            [(ngModel)]="materialSectorId"
-            name="materialSectorId"
-            [attr.aria-invalid]="!!materialFieldErrors().sectorId"
-          >
-            @for (sector of sectors(); track sector.id) {
-              <option [value]="sector.id">{{ sector.code }} — {{ sector.name }}</option>
-            }
-          </select>
-          <app-form-field-error [message]="materialFieldErrors().sectorId ?? null" />
-        </div>
-        <div class="field">
-          <input
-            [(ngModel)]="materialDescription"
-            name="materialDescription"
-            [placeholder]="'materials.description' | translate"
-          />
-          <app-form-field-error [message]="materialFieldErrors().description ?? null" />
-        </div>
-        <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
-      </form>
+    <article class="card panel panel--profiles">
+      <div class="panel__head">
+        <h2>{{ 'materials.list' | translate }}</h2>
+        <span class="panel__count">{{ materials().length }}</span>
+      </div>
 
-      <ul class="list">
-        @for (material of materials(); track material.id) {
-          <li>
-            <button
-              type="button"
-              class="list__item"
-              [class.is-active]="selectedMaterialId() === material.id"
-              (click)="selectMaterial(material.id)"
-            >
-              <strong>{{ material.code }} — {{ material.name }}</strong>
-              <span>{{ material.sectorName }}</span>
-            </button>
+      <ul class="profile-list">
+        @if (materials().length === 0) {
+          <li class="profile-list__empty">
+            {{ 'materials.emptyProfiles' | translate }}
           </li>
+        } @else {
+          @for (material of materials(); track material.id) {
+            <li>
+              <button
+                type="button"
+                class="profile-list__item"
+                [class.is-active]="selectedMaterialId() === material.id"
+                (click)="selectMaterial(material.id)"
+              >
+                <strong>{{ material.name }}</strong>
+                <span>{{ material.code }}</span>
+              </button>
+            </li>
+          }
         }
       </ul>
+
+      <details class="add-drawer" [open]="materials().length === 0">
+        <summary>{{ 'materials.addProfile' | translate }}</summary>
+        <form class="add-form" (ngSubmit)="createMaterial()">
+          <label class="field">
+            <span>{{ 'materials.code' | translate }}</span>
+            <input
+              [(ngModel)]="materialCode"
+              name="materialCode"
+              [attr.aria-invalid]="!!materialFieldErrors().code"
+            />
+            <app-form-field-error [message]="materialFieldErrors().code ?? null" />
+          </label>
+          <label class="field">
+            <span>{{ 'materials.name' | translate }}</span>
+            <input
+              [(ngModel)]="materialName"
+              name="materialName"
+              [attr.aria-invalid]="!!materialFieldErrors().name"
+            />
+            <app-form-field-error [message]="materialFieldErrors().name ?? null" />
+          </label>
+          <label class="field">
+            <span>{{ 'materials.description' | translate }}</span>
+            <input [(ngModel)]="materialDescription" name="materialDescription" />
+          </label>
+          <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+        </form>
+      </details>
     </article>
 
-    <article class="card panel">
-      <h2>{{ 'materials.stock' | translate }}</h2>
-      @if (!selectedMaterialId()) {
-        <p class="page__muted">{{ 'materials.selectMaterial' | translate }}</p>
-      } @else {
-        <form class="inline-form" (ngSubmit)="createStock()">
-          <div class="field">
+    <article class="card panel panel--stock">
+      @if (selectedMaterial(); as selected) {
+        <div class="panel__head">
+          <div>
+            <h2>{{ 'materials.stock' | translate }}</h2>
+            <p class="panel__sub">{{ selected.name }} · {{ selected.code }}</p>
+          </div>
+        </div>
+
+        <form class="add-form add-form--row" (ngSubmit)="createStock()">
+          <label class="field">
+            <span>{{ 'materials.lengthCm' | translate }}</span>
             <input
               type="number"
               min="1"
-              [(ngModel)]="stockLengthMm"
-              name="stockLengthMm"
-              [placeholder]="'materials.lengthMm' | translate"
+              step="0.1"
+              [(ngModel)]="stockLengthCm"
+              name="stockLengthCm"
               [attr.aria-invalid]="!!stockFieldErrors().lengthMm"
             />
             <app-form-field-error [message]="stockFieldErrors().lengthMm ?? null" />
-          </div>
-          <div class="field">
+          </label>
+          <label class="field">
+            <span>{{ 'materials.unitPrice' | translate }}</span>
             <input
               type="number"
-              min="0"
+              min="0.01"
               step="0.01"
               [(ngModel)]="stockUnitPrice"
               name="stockUnitPrice"
-              [placeholder]="'materials.unitPrice' | translate"
               [attr.aria-invalid]="!!stockFieldErrors().unitPrice"
             />
             <app-form-field-error [message]="stockFieldErrors().unitPrice ?? null" />
-          </div>
-          <div class="field">
-            <input
-              type="number"
-              min="0"
-              [(ngModel)]="stockQuantity"
-              name="stockQuantity"
-              [placeholder]="'materials.quantity' | translate"
-              [attr.aria-invalid]="!!stockFieldErrors().availableQuantity"
-            />
-            <app-form-field-error [message]="stockFieldErrors().availableQuantity ?? null" />
-          </div>
-          <button type="submit" class="btn btn--primary">{{ 'common.add' | translate }}</button>
+          </label>
+          <button type="submit" class="btn btn--primary add-form__submit">
+            {{ 'common.add' | translate }}
+          </button>
         </form>
 
+        @if (stockBars().length === 0) {
+          <p class="page__muted">{{ 'materials.emptyLengths' | translate }}</p>
+        } @else {
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{{ 'materials.lengthCm' | translate }}</th>
+                  <th>{{ 'materials.unitPrice' | translate }}</th>
+                  <th>{{ 'materials.active' | translate }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (bar of stockBars(); track bar.id) {
+                  <tr [class.is-off]="!bar.isActive">
+                    <td class="cell-len">{{ formatCm(bar.lengthMm) }}</td>
+                    <td>{{ bar.unitPrice | number: '1.0-2' }}</td>
+                    <td>
+                      <label class="switch">
+                        <input
+                          type="checkbox"
+                          [checked]="bar.isActive"
+                          (change)="toggleAvailability(bar, $event)"
+                        />
+                        <span class="switch__track" aria-hidden="true"></span>
+                        @if (bar.isActive) {
+                          <span class="badge badge--ok">{{ 'materials.available' | translate }}</span>
+                        } @else {
+                          <span class="badge badge--off">{{ 'materials.unavailable' | translate }}</span>
+                        }
+                      </label>
+                    </td>
+                    <td class="actions">
+                      <button type="button" class="link-danger" (click)="deleteBar(bar)">
+                        {{ 'materials.delete' | translate }}
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <p class="page__muted">{{ 'materials.selectMaterial' | translate }}</p>
+      }
+    </article>
+  </div>
+
+  <article class="card panel accessories-panel">
+    <div class="panel__head">
+      <div>
+        <h2>{{ 'accessories.title' | translate }}</h2>
+        <p class="page__muted">{{ 'accessories.subtitle' | translate }}</p>
+      </div>
+      <span class="panel__count">{{ accessories().length }}</span>
+    </div>
+
+    @if (!workshopContext.selectedWorkshopId()) {
+      <p class="page__muted">{{ 'accessories.needWorkshop' | translate }}</p>
+    } @else {
+      @if (accessories().length === 0) {
+        <p class="page__muted">{{ 'accessories.empty' | translate }}</p>
+      } @else {
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>{{ 'materials.lengthMm' | translate }}</th>
-                <th>{{ 'materials.unitPrice' | translate }}</th>
-                <th>{{ 'materials.quantity' | translate }}</th>
-                <th>{{ 'materials.active' | translate }}</th>
-                <th>{{ 'common.actions' | translate }}</th>
+                <th>{{ 'accessories.name' | translate }}</th>
+                <th>{{ 'accessories.unitPrice' | translate }}</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              @for (bar of stockBars(); track bar.id) {
+              @for (item of accessories(); track item.id) {
                 <tr>
-                  <td>{{ bar.lengthMm }}</td>
-                  <td>{{ bar.unitPrice | number: '1.0-2' }}</td>
-                  <td>
-                    <input
-                      class="qty-input"
-                      type="number"
-                      min="0"
-                      [ngModel]="editingQty()[bar.id]"
-                      (ngModelChange)="setQtyDraft(bar.id, $event)"
-                      [name]="'qty-' + bar.id"
-                      [disabled]="!bar.isActive"
-                    />
-                  </td>
-                  <td>{{ bar.isActive ? ('common.yes' | translate) : ('common.no' | translate) }}</td>
+                  <td>{{ item.name }}</td>
+                  <td>{{ item.unitPrice | number: '1.0-2' }}</td>
                   <td class="actions">
-                    @if (bar.isActive) {
-                      <button type="button" class="btn btn--ghost" (click)="saveStockQty(bar)">
-                        {{ 'common.save' | translate }}
-                      </button>
-                      <button type="button" class="btn btn--ghost" (click)="deactivate(bar)">
-                        {{ 'materials.deactivate' | translate }}
-                      </button>
-                    }
+                    <button
+                      type="button"
+                      class="link-danger"
+                      (click)="deleteAccessory(item)"
+                    >
+                      {{ 'materials.delete' | translate }}
+                    </button>
                   </td>
                 </tr>
               }
@@ -165,6 +209,27 @@
           </table>
         </div>
       }
-    </article>
-  </div>
+
+      <form class="add-form accessories-form" (ngSubmit)="createAccessory()">
+        <label class="field">
+          <span>{{ 'accessories.name' | translate }}</span>
+          <input [(ngModel)]="accessoryName" name="accessoryName" required />
+        </label>
+        <label class="field">
+          <span>{{ 'accessories.unitPrice' | translate }}</span>
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            [(ngModel)]="accessoryUnitPrice"
+            name="accessoryUnitPrice"
+            required
+          />
+        </label>
+        <button type="submit" class="btn btn--primary">
+          {{ 'accessories.add' | translate }}
+        </button>
+      </form>
+    }
+  </article>
 </section>

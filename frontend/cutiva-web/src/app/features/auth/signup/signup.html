@@ -3,12 +3,16 @@
 
   <div class="auth__layout">
     <header class="auth__brand" #brand>
-      <p class="auth__mark">{{ 'app.name' | translate }}</p>
+      <a class="auth__brand-row" routerLink="/" [attr.aria-label]="'auth.goHome' | translate">
+        <span class="auth__mono" aria-hidden="true">C</span>
+        <span class="auth__mark">{{ 'app.name' | translate }}</span>
+      </a>
+      <div class="auth__rule" aria-hidden="true"></div>
       <h1>{{ 'auth.signup.headline' | translate }}</h1>
       <p class="auth__support">{{ 'auth.signup.support' | translate }}</p>
     </header>
 
-    <form class="auth__panel glass" #panel [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <form class="auth__panel" #panel [formGroup]="form" (ngSubmit)="submit()" novalidate>
       <h2>{{ 'auth.signup.title' | translate }}</h2>
 
       @if (formError(); as err) {
@@ -55,13 +59,16 @@
         <span class="field__hint">{{ 'auth.validation.passwordHint' | translate }}</span>
       </label>
 
-      <button type="submit" class="btn btn--primary auth__submit" [disabled]="submitting()">
+      <button type="submit" class="auth__submit" [disabled]="submitting()">
         {{ 'auth.signup.submit' | translate }}
       </button>
 
       <p class="auth__switch">
         {{ 'auth.signup.hasAccount' | translate }}
         <a routerLink="/login">{{ 'auth.signup.goLogin' | translate }}</a>
+      </p>
+      <p class="auth__home">
+        <a routerLink="/">{{ 'auth.goHome' | translate }}</a>
       </p>
     </form>
   </div>

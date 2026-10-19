@@ -1,0 +1,236 @@
+<section class="admin-page">
+  <header>
+    <h1>{{ 'admin.clientsTitle' | translate }}</h1>
+  </header>
+
+  @if (notice()) {
+    <p class="page__ok">{{ notice()! | translate }}</p>
+  }
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  }
+  @if (lastTempPassword(); as pwd) {
+    <p class="page__ok temp-pwd">
+      {{ 'admin.tempPasswordOnce' | translate }}: <code>{{ pwd }}</code>
+    </p>
+  }
+
+  <form class="create card" (ngSubmit)="createClient()">
+    <h2>{{ 'admin.createClient' | translate }}</h2>
+    <p class="hint">{{ 'admin.createClientHint' | translate }}</p>
+    <div class="grid">
+      <label>
+        <span>{{ 'admin.workshopName' | translate }}</span>
+        <input [(ngModel)]="workshopName" name="workshopName" required />
+      </label>
+      <label>
+        <span>{{ 'admin.ownerEmail' | translate }}</span>
+        <input type="email" [(ngModel)]="ownerEmail" name="ownerEmail" required />
+      </label>
+      <label>
+        <span>{{ 'admin.ownerName' | translate }}</span>
+        <input [(ngModel)]="ownerDisplayName" name="ownerDisplayName" />
+      </label>
+      <label>
+        <span>{{ 'admin.plan' | translate }}</span>
+        <select [(ngModel)]="planCode" name="planCode">
+          @for (p of plans(); track p.id) {
+            <option [value]="p.code">
+              {{ p.name }} ({{ p.priceSar }}) —
+              {{ p.maxUsers == null ? ('admin.unlimited' | translate) : p.maxUsers }}
+            </option>
+          }
+        </select>
+      </label>
+      <label>
+        <span>{{ 'admin.durationDays' | translate }}</span>
+        <input type="number" min="1" [(ngModel)]="durationDays" name="durationDays" />
+      </label>
+      <label>
+        <span>{{ 'admin.paymentStatus' | translate }}</span>
+        <select [(ngModel)]="paymentStatus" name="paymentStatus">
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Waived">Waived</option>
+        </select>
+      </label>
+      <label>
+        <span>{{ 'admin.paymentAmount' | translate }}</span>
+        <input type="number" min="0" step="0.01" [(ngModel)]="paymentAmount" name="paymentAmount" />
+      </label>
+      <label>
+        <span>{{ 'admin.paymentNote' | translate }}</span>
+        <input [(ngModel)]="paymentNote" name="paymentNote" />
+      </label>
+    </div>
+    <button type="submit" class="btn btn--primary">{{ 'common.save' | translate }}</button>
+  </form>
+
+  <div class="layout">
+    <div class="table-wrap card">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'admin.workshopName' | translate }}</th>
+            <th>{{ 'admin.ownerEmail' | translate }}</th>
+            <th>{{ 'admin.plan' | translate }}</th>
+            <th>{{ 'admin.seats' | translate }}</th>
+            <th>{{ 'admin.paymentStatus' | translate }}</th>
+            <th>{{ 'admin.status' | translate }}</th>
+            <th>{{ 'admin.daysLeft' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of clients(); track c.workshopId) {
+            <tr [class.is-selected]="selected()?.workshopId === c.workshopId">
+              <td>{{ c.workshopName }}</td>
+              <td>{{ c.ownerEmail || '—' }}</td>
+              <td>{{ c.planName || '—' }}</td>
+              <td>{{ seatLabel(c) }}</td>
+              <td>{{ c.paymentStatus || '—' }}</td>
+              <td>{{ c.subscriptionStatus || '—' }}</td>
+              <td>{{ c.daysRemaining ?? '—' }}</td>
+              <td>
+                <button type="button" class="btn btn--ghost" (click)="openClient(c)">
+                  {{ 'admin.manage' | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8">{{ 'admin.noClients' | translate }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (selected(); as client) {
+      <aside class="detail card">
+        <h2>{{ client.workshopName }}</h2>
+        <p class="meta">
+          {{ 'admin.seats' | translate }}: {{ seatLabel(client) }} ·
+          {{ client.planName || '—' }} · {{ client.paymentStatus || '—' }}
+        </p>
+        <ul class="detail-stats">
+          <li>
+            {{ 'admin.projects' | translate }}: <strong>{{ client.projectCount }}</strong>
+          </li>
+          <li>
+            {{ 'admin.quotes' | translate }}: <strong>{{ client.quoteCount }}</strong>
+          </li>
+          <li>
+            {{ 'admin.subStarts' | translate }}:
+            <strong>{{ client.startsAtUtc ? (client.startsAtUtc | date: 'mediumDate') : '—' }}</strong>
+          </li>
+          <li>
+            {{ 'admin.subEnds' | translate }}:
+            <strong>{{ client.endsAtUtc ? (client.endsAtUtc | date: 'mediumDate') : '—' }}</strong>
+          </li>
+          <li>
+            {{ 'admin.paymentConfirmed' | translate }}:
+            <strong>
+              {{
+                client.paymentConfirmedAtUtc
+                  ? (client.paymentConfirmedAtUtc | date: 'mediumDate')
+                  : '—'
+              }}
+            </strong>
+          </li>
+        </ul>
+
+        <div class="sub-form">
+          <h3>{{ 'admin.assignPlan' | translate }}</h3>
+          <label>
+            <span>{{ 'admin.plan' | translate }}</span>
+            <select [(ngModel)]="assignPlanCode" name="assignPlanCode">
+              @for (p of plans(); track p.id) {
+                <option [value]="p.code">{{ p.name }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>{{ 'admin.durationDays' | translate }}</span>
+            <input type="number" min="1" [(ngModel)]="assignDays" name="assignDays" />
+          </label>
+          <label>
+            <span>{{ 'admin.paymentStatus' | translate }}</span>
+            <select [(ngModel)]="assignPaymentStatus" name="assignPaymentStatus">
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+              <option value="Waived">Waived</option>
+            </select>
+          </label>
+          <label>
+            <span>{{ 'admin.paymentAmount' | translate }}</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="assignPaymentAmount"
+              name="assignPaymentAmount"
+            />
+          </label>
+          <label>
+            <span>{{ 'admin.paymentNote' | translate }}</span>
+            <input [(ngModel)]="assignPaymentNote" name="assignPaymentNote" />
+          </label>
+          <div class="row">
+            <button type="button" class="btn btn--primary" (click)="assignPlan()">
+              {{ 'admin.activate' | translate }}
+            </button>
+            <button type="button" class="btn btn--ghost" (click)="suspend()">
+              {{ 'admin.suspend' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="users">
+          <h3>{{ 'admin.users' | translate }}</h3>
+          <ul>
+            @for (u of users(); track u.userId) {
+              <li>
+                <div>
+                  <strong>{{ u.displayName || u.email }}</strong>
+                  <span>{{ u.email }}</span>
+                  @if (u.isPrimaryContact) {
+                    <em>{{ 'admin.primary' | translate }}</em>
+                  }
+                  @if (u.isLockedOut) {
+                    <em class="warn">{{ 'admin.locked' | translate }}</em>
+                  }
+                </div>
+                <div class="row">
+                  <button type="button" class="btn btn--ghost" (click)="resetUser(u)">
+                    {{ 'admin.resetPassword' | translate }}
+                  </button>
+                  <button type="button" class="btn btn--ghost" (click)="toggleLock(u)">
+                    {{ (u.isLockedOut ? 'admin.unlock' : 'admin.lock') | translate }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+
+          <div class="add-user">
+            <input
+              type="email"
+              [(ngModel)]="newUserEmail"
+              name="newUserEmail"
+              [placeholder]="'admin.ownerEmail' | translate"
+            />
+            <input
+              [(ngModel)]="newUserName"
+              name="newUserName"
+              [placeholder]="'admin.ownerName' | translate"
+            />
+            <button type="button" class="btn btn--primary" (click)="addUser()">
+              {{ 'admin.addUser' | translate }}
+            </button>
+          </div>
+        </div>
+      </aside>
+    }
+  </div>
+</section>

@@ -27,6 +27,7 @@ export class ForgotPassword implements OnInit {
 
   readonly step = signal<'request' | 'reset' | 'done'>('request');
   readonly submitting = signal(false);
+  readonly showPassword = signal(false);
   readonly formError = signal<string | null>(null);
   readonly notice = signal<string | null>(null);
   readonly fieldErrors = signal<{

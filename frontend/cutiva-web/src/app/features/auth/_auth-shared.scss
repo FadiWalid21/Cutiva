@@ -170,6 +170,46 @@
   }
 }
 
+.field--password .field__control {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+
+  input {
+    padding-inline-end: 2.85rem;
+  }
+}
+
+.field__toggle {
+  position: absolute;
+  inset-inline-end: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--auth-muted);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--auth-ink);
+    background: rgba(255, 255, 255, 0.06);
+    outline: none;
+  }
+
+  svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: block;
+  }
+}
+
 .field__hint {
   font-size: 0.75rem;
   color: var(--auth-muted);

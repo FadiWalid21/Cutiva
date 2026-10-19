@@ -45,6 +45,10 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "outputPath": {
+              "base": "dist/cutiva-web",
+              "browser": ""
+            },
             "assets": [
               {
                 "glob": "**/*",
@@ -65,7 +69,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
+                  "maximumWarning": "16kB",
                   "maximumError": "20kB"
                 }
               ],

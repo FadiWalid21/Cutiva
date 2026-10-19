@@ -125,6 +125,12 @@ h3 {
   -webkit-backdrop-filter: blur(18px);
 }
 
+@media (max-width: 900px) {
+  .card {
+    border-radius: calc(var(--radius-md) - 2px);
+  }
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

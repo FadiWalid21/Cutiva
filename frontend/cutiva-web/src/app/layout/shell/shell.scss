@@ -548,14 +548,23 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     place-content: center;
     position: fixed;
     z-index: 40;
-    inset-inline-start: max(0.85rem, env(safe-area-inset-left));
-    top: max(0.85rem, env(safe-area-inset-top));
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--color-border);
+    /* Logical start inset + gap (LTR left / RTL right). */
+    inset-inline-start: calc(
+      env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.85rem
+    );
+    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    width: 2.85rem;
+    height: 2.85rem;
+    min-width: 44px;
+    min-height: 44px;
+    border: 1px solid var(--color-border-strong, var(--color-border));
     border-radius: 12px;
-    background: color-mix(in srgb, var(--color-surface-solid) 92%, transparent);
-    box-shadow: var(--shadow-soft);
+    background: color-mix(in srgb, var(--color-surface-solid) 96%, transparent);
+    box-shadow:
+      var(--shadow-soft),
+      0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
 
     span {
@@ -565,6 +574,11 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
       border-radius: 2px;
       background: var(--color-text);
     }
+  }
+
+  /* Older WebKit: inline-start safe-area may be missing — use physical right in RTL. */
+  html[dir='rtl'] .app-shell__menu {
+    inset-inline-start: calc(env(safe-area-inset-right, 0px) + 0.85rem);
   }
 
   .app-shell__scrim {
@@ -593,6 +607,12 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     height: 100dvh;
     padding-top: calc(1rem + env(safe-area-inset-top, 0px));
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-inline-start: calc(
+      env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.35rem
+    );
+    padding-inline-end: calc(
+      env(safe-area-inset-inline-end, env(safe-area-inset-right, 0px)) + 0.35rem
+    );
     border-inline-end: 1px solid var(--color-border);
     border-bottom: 0;
     transform: translateX(-105%);
@@ -600,9 +620,12 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     background: var(--color-surface-solid);
   }
 
-  [dir='rtl'] .sidebar,
-  [dir='rtl'] .app-shell.is-collapsed .sidebar {
+  html[dir='rtl'] .sidebar,
+  html[dir='rtl'] .app-shell.is-collapsed .sidebar {
+    /* Drawer off the start edge (physical right in RTL). */
     transform: translateX(105%);
+    padding-inline-start: calc(env(safe-area-inset-right, 0px) + 0.35rem);
+    padding-inline-end: calc(env(safe-area-inset-left, 0px) + 0.35rem);
   }
 
   .app-shell.is-mobile-nav-open .sidebar,
@@ -615,13 +638,23 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
   }
 
   .app-shell__content {
-    padding: calc(4.25rem + env(safe-area-inset-top, 0px)) 1rem
+    /* Clears floating menu (44px+) + gap under status bar. */
+    padding: calc(4.75rem + env(safe-area-inset-top, 0px)) 1rem
       calc(1.25rem + env(safe-area-inset-bottom, 0px));
   }
 
   .sidebar__nav a {
     min-height: 2.75rem;
     font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  html[dir='rtl'] .sidebar__nav a {
+    text-align: start;
+  }
+
+  html[dir='rtl'] .sidebar__logo-full {
+    object-position: right center;
   }
 
   .sidebar__logout,
@@ -636,12 +669,31 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     min-height: 100dvh;
   }
 
+  .app-shell__menu {
+    inset-inline-start: calc(
+      env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.85rem
+    );
+    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  html[dir='rtl'] .app-shell__menu {
+    inset-inline-start: calc(env(safe-area-inset-right, 0px) + 0.85rem);
+  }
+
   .app-shell__content {
-    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(4.75rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(1.35rem + env(safe-area-inset-bottom, 0px));
   }
 
   .sidebar {
-    padding-top: calc(1.1rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(1.15rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  html[dir='rtl'] .sidebar {
+    padding-inline-start: calc(env(safe-area-inset-right, 0px) + 0.35rem);
+    padding-inline-end: calc(env(safe-area-inset-left, 0px) + 0.35rem);
   }
 }

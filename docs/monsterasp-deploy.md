@@ -1,38 +1,62 @@
 # MonsterASP API deploy checklist
 
-Production API host: `https://cutiva.runasp.net`
+Production API host: `https://cutiva.runasp.net`  
+Site: FreeSite / IIS (e.g. `site100135`) — website root `\wwwroot`
 
-## Current status
+## Why login returns 504
 
-If the homepage still shows MonsterASP’s “Your website is ready…” page, the API is **not** published yet. Login from Vercel will fail with **504 Gateway Timeout** until the API is deployed.
+If the site preview still shows **“Your website is ready…”**, `\wwwroot` has **no** published API. Vercel calls `https://cutiva.runasp.net/api/auth/login` and IIS returns **504 Gateway Timeout**.
 
-## Deploy
+DevTools **Source: Service Worker** is normal for the Angular PWA; it does **not** cause this 504.
 
-1. Publish `CuttingOptimizer.Api` to the site bound to `cutiva.runasp.net` (GitHub Actions / MonsterASP Git deploy / FTP publish).
-2. After deploy, opening `https://cutiva.runasp.net/` must **not** be the placeholder page.
-3. Enable HTTPS on the site.
+## 1. Publish locally
 
-## Environment variables
+From the repo root:
 
-Set these on MonsterASP (ASP.NET Core `__` nesting):
+```bash
+chmod +x scripts/publish-api-monsterasp.sh
+./scripts/publish-api-monsterasp.sh
+```
+
+Output folder: `publish/api/` (includes `web.config` + DLLs). Do **not** commit this folder.
+
+## 2. Upload via WebFTP
+
+1. Open [WebFTP](https://webftp.monsterasp.net) (or FTP/SFTP).
+2. Host example: `site100135.siteasp.net` — login from MonsterASP **FTP / SFTP** panel.
+3. Go to `\wwwroot`.
+4. Delete placeholder / default files if present.
+5. Upload **all files and folders** from `publish/api/` into `\wwwroot`  
+   (including `web.config`, `CuttingOptimizer.Api.dll`, `web.config`, deps, runtimes, etc.).
+6. Confirm `web.config` is in `\wwwroot` (not only in a subfolder).
+
+## 3. Environment variables
+
+In MonsterASP site settings (ASP.NET Core `__` nesting):
 
 | Variable | Notes |
 |----------|--------|
-| `ConnectionStrings__DefaultConnection` | Postgres string. If the password contains `=`, quote it: `Password='…'` |
+| `ConnectionStrings__DefaultConnection` | Postgres. If password contains `=`, use `Password='…'` |
 | `Jwt__Key` | ≥32 random chars (`openssl rand -base64 48`) |
 | `Jwt__Issuer` | `Cutiva` |
 | `Jwt__Audience` | `Cutiva` |
 | `Brevo__ApiKey` | From Brevo |
 | `Brevo__SenderEmail` | Verified sender |
 | `Brevo__SenderName` | e.g. `CUTIVA` |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
 | `Features__ResourcesV2` | `true` when ready |
 | `Features__ProductTemplates` | `true` when ready |
 
 CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
-## Smoke test
+## 4. Restart
 
-1. `https://cutiva.runasp.net/` — app response (not placeholder).
-2. From Vercel login: `fadialhallag@gmail.com` / seeded admin password (`Admin123!` unless changed).
+On the site overview: **Restart** (or Stop then Start).
+
+## 5. Smoke test
+
+1. `https://cutiva.runasp.net/` — must **not** be the MonsterASP placeholder.
+2. From https://cutiva-kappa.vercel.app login: `fadialhallag@gmail.com` / `Admin123!` (unless you changed it).
+3. Network: `/api/auth/login` → `200` (or `401` for wrong password), **not** `504`.
 
 DB migrations and admin seed were applied earlier against the MonsterASP Postgres database.

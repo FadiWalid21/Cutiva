@@ -59,9 +59,6 @@ export class Shell implements AfterViewInit {
   readonly showInstall = this.pwa.showInstallControl;
   readonly mobileNavOpen = signal(false);
   readonly collapsed = signal(localStorage.getItem(SIDEBAR_KEY) === '1');
-  /** Fixed monogram for collapsed brand (CUTIVA → C). */
-  readonly brandMono = 'C';
-
   ngAfterViewInit(): void {
     this.motion.pageEnter(this.shellRoot()?.nativeElement ?? null);
     const nav = this.navLinks()?.nativeElement;

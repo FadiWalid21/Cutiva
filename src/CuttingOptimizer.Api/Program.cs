@@ -151,6 +151,21 @@ builder.Services.AddScoped<
     CuttingOptimizer.Application.Abstractions.Admin.IAdminClientService,
     CuttingOptimizer.Infrastructure.Admin.AdminClientService>();
 
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient("GeoIp", client =>
+{
+    client.BaseAddress = new Uri("http://ip-api.com/");
+    client.Timeout = TimeSpan.FromSeconds(3);
+});
+builder.Services.AddHttpClient("FxRates", client =>
+{
+    client.BaseAddress = new Uri("https://open.er-api.com/");
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+builder.Services.AddScoped<
+    CuttingOptimizer.Application.Abstractions.Pricing.IPricingDisplayService,
+    CuttingOptimizer.Infrastructure.Pricing.PricingDisplayService>();
+
 builder.Services.AddMediatR(configuration =>
     configuration.RegisterServicesFromAssembly(
         typeof(CreateWorkshopCommand).Assembly));

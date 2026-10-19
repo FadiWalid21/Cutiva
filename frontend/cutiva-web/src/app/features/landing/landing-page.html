@@ -283,8 +283,10 @@
           }
           <h3>{{ tier.name }}</h3>
           <p class="landing__price">
-            <span class="landing__price-num">{{ tier.priceSar | number: '1.0-0' }}</span>
-            <span class="landing__price-unit">{{ 'landing.pricing.perMonth' | translate }}</span>
+            <span class="landing__price-num">{{ tier.price | number: '1.0-0' }}</span>
+            <span class="landing__price-unit">
+              {{ 'landing.pricing.perMonth' | translate: { currency: tier.currency } }}
+            </span>
           </p>
           <p class="landing__tier-seats">
             @if (tier.maxUsers == null) {

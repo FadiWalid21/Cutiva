@@ -46,6 +46,8 @@ public class ApplicationDbContext(
 
     public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
 
+    public DbSet<FxRateSnapshot> FxRateSnapshots => Set<FxRateSnapshot>();
+
     public DbSet<WorkshopSubscription> WorkshopSubscriptions =>
         Set<WorkshopSubscription>();
 
@@ -104,6 +106,7 @@ public class ApplicationDbContext(
         ConfigureAccessory(modelBuilder);
         ConfigureProjectSectionAccessory(modelBuilder);
         ConfigureSubscriptionPlan(modelBuilder);
+        ConfigureFxRateSnapshot(modelBuilder);
         ConfigureWorkshopSubscription(modelBuilder);
         ConfigurePasswordResetOtp(modelBuilder);
         ConfigureGlassType(modelBuilder);
@@ -637,6 +640,30 @@ public class ApplicationDbContext(
 
             entity.Property(x => x.DurationDays)
                 .HasDefaultValue(30);
+        });
+    }
+
+    private static void ConfigureFxRateSnapshot(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<FxRateSnapshot>(entity =>
+        {
+            entity.ToTable("FxRateSnapshots");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.FromCurrency)
+                .HasMaxLength(8)
+                .IsRequired();
+
+            entity.Property(x => x.ToCurrency)
+                .HasMaxLength(8)
+                .IsRequired();
+
+            entity.Property(x => x.Rate)
+                .HasPrecision(18, 8);
+
+            entity.HasIndex(x => new { x.FromCurrency, x.ToCurrency })
+                .IsUnique();
         });
     }
 

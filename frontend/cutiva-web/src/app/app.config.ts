@@ -18,6 +18,7 @@ import { languageInterceptor } from './core/interceptors/language.interceptor';
 import { AuthService } from './core/services/auth.service';
 import { LanguageService } from './core/services/language.service';
 import { PwaInstallService } from './core/services/pwa-install.service';
+import { PwaUpdateService } from './core/services/pwa-update.service';
 import { ThemeService } from './core/services/theme.service';
 import { WorkshopContextService } from './core/services/workshop-context.service';
 
@@ -45,9 +46,11 @@ export const appConfig: ApplicationConfig = {
       const auth = inject(AuthService);
       const workshops = inject(WorkshopContextService);
       const pwa = inject(PwaInstallService);
+      const pwaUpdate = inject(PwaUpdateService);
 
       theme.init();
       pwa.init();
+      pwaUpdate.init();
 
       return language.init().then(() =>
         firstValueFrom(auth.loadMe()).then((user) => {

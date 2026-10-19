@@ -298,6 +298,37 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("CuttingPlanUnallocatedPieces", (string)null);
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.FxRateSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("FetchedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromCurrency")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<decimal>("Rate")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)");
+
+                    b.Property<string>("ToCurrency")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FromCurrency", "ToCurrency")
+                        .IsUnique();
+
+                    b.ToTable("FxRateSnapshots", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassSpec", b =>
                 {
                     b.Property<Guid>("Id")

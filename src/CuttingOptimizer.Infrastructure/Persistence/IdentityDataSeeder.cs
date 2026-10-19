@@ -37,6 +37,7 @@ public static class IdentityDataSeeder
         }
 
         await EnsurePlansAsync(db);
+        await EnsureFxFallbackAsync(db);
 
         var admin = await userManager.FindByEmailAsync(DefaultAdminEmail);
         if (admin is null)
@@ -106,6 +107,27 @@ public static class IdentityDataSeeder
             }
         }
 
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task EnsureFxFallbackAsync(ApplicationDbContext db)
+    {
+        const string from = "SAR";
+        const string to = "EGP";
+        const decimal seed = 13.0m;
+
+        var exists = await db.FxRateSnapshots
+            .AnyAsync(x => x.FromCurrency == from && x.ToCurrency == to);
+        if (exists)
+            return;
+
+        db.FxRateSnapshots.Add(new FxRateSnapshot
+        {
+            FromCurrency = from,
+            ToCurrency = to,
+            Rate = seed,
+            FetchedAtUtc = DateTimeOffset.UtcNow
+        });
         await db.SaveChangesAsync();
     }
 }

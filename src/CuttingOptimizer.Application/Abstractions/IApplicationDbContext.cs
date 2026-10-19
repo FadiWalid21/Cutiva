@@ -21,6 +21,7 @@ public interface IApplicationDbContext
     DbSet<Accessory> Accessories { get; }
     DbSet<ProjectSectionAccessory> ProjectSectionAccessories { get; }
     DbSet<SubscriptionPlan> SubscriptionPlans { get; }
+    DbSet<FxRateSnapshot> FxRateSnapshots { get; }
     DbSet<WorkshopSubscription> WorkshopSubscriptions { get; }
     DbSet<PasswordResetOtp> PasswordResetOtps { get; }
     DbSet<GlassType> GlassTypes { get; }

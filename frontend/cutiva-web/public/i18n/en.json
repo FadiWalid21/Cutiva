@@ -571,7 +571,7 @@
     "pricing": {
       "title": "Simple pricing",
       "subtitle": "Pick a plan. Upgrade when the workshop grows.",
-      "perMonth": "SAR / month",
+      "perMonth": "{{currency}} / month",
       "popular": "Most popular",
       "cta": "Request this plan",
       "starter": {
@@ -621,7 +621,11 @@
     "iosBody": "In Safari, tap Share, then Add to Home Screen. Use https://cutiva-kappa.vercel.app (not a preview URL).",
     "iosGotIt": "Got it",
     "desktopTitle": "Install on Android / desktop",
-    "desktopBody": "On Android Chrome, tap Install when prompted, or open the browser menu → Install app / Add to Home screen. Use the production site https://cutiva-kappa.vercel.app."
+    "desktopBody": "On Android Chrome, tap Install when prompted, or open the browser menu → Install app / Add to Home screen. Use the production site https://cutiva-kappa.vercel.app.",
+    "updateTitle": "Update available",
+    "updateBody": "A newer version of CUTIVA is ready.",
+    "updateNow": "Update",
+    "updateLater": "Later"
   },
   "resources": {
     "title": "Resources",

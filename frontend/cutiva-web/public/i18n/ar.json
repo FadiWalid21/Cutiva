@@ -571,7 +571,7 @@
     "pricing": {
       "title": "أسعار بسيطة",
       "subtitle": "اختَر باقة. وتقدر تترقى لما الورشة تكبر.",
-      "perMonth": "ر.س / شهر",
+      "perMonth": "{{currency}} / شهر",
       "popular": "الأكثر اختيارًا",
       "cta": "اطلب هذه الشريحة",
       "starter": {
@@ -621,7 +621,11 @@
     "iosBody": "في Safari اضغط مشاركة ثم إضافة إلى الشاشة الرئيسية. استخدم https://cutiva-kappa.vercel.app وليس رابط معاينة مؤقت.",
     "iosGotIt": "حسناً",
     "desktopTitle": "تثبيت على أندرويد / سطح المكتب",
-    "desktopBody": "في Chrome على أندرويد اضغط تثبيت عند الظهور، أو من قائمة المتصفح → تثبيت التطبيق / إضافة إلى الشاشة الرئيسية. استخدم الموقع الإنتاجي https://cutiva-kappa.vercel.app."
+    "desktopBody": "في Chrome على أندرويد اضغط تثبيت عند الظهور، أو من قائمة المتصفح → تثبيت التطبيق / إضافة إلى الشاشة الرئيسية. استخدم الموقع الإنتاجي https://cutiva-kappa.vercel.app.",
+    "updateTitle": "يتوفر تحديث",
+    "updateBody": "نسخة أحدث من CUTIVA جاهزة.",
+    "updateNow": "تحديث",
+    "updateLater": "لاحقاً"
   },
   "resources": {
     "title": "الموارد",

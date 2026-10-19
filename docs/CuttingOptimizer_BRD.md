@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/cutiva-logo.png" alt="CUTIVA" width="320" />
+</p>
+
 # CuttingOptimizer — Business Requirements Document (BRD)
 
 **Document status:** Draft — initial requirements  

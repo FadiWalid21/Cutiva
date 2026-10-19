@@ -1,27 +1,57 @@
-# MonsterASP API deploy checklist
+# MonsterASP API deploy (GitHub Git Deploy)
 
-Production API host: `https://cutiva.runasp.net`
+Production API: `https://cutiva.runasp.net`  
+Frontend (Vercel): `https://cutiva-kappa.vercel.app`  
+Repo: `https://github.com/FadiWalid21/Cutiva.git`
 
-## Current status
+## Why login returns 504
 
-If the homepage still shows MonsterASP’s “Your website is ready…” page, the API is **not** published yet. Login from Vercel will fail with **504 Gateway Timeout** until the API is deployed.
+If the site still shows MonsterASP’s **“Your website is ready…”** page, `\wwwroot` has no published API. Fix that with **Git deploy → Build .NET app** (no FTP upload).
 
-## Deploy
+DevTools **Source: Service Worker** on the login request is normal for the PWA; it does not cause the 504.
 
-1. Publish `CuttingOptimizer.Api` to the site bound to `cutiva.runasp.net` (GitHub Actions / MonsterASP Git deploy / FTP publish).
-2. After deploy, opening `https://cutiva.runasp.net/` must **not** be the placeholder page.
-3. Enable HTTPS on the site.
+## Primary path: Control Panel Git Deploy
 
-## Environment variables
+Official help: [Deploy from a GitHub repository](https://help.monsterasp.net/websites/git-deploy/github-repository)
 
-Set these on MonsterASP (ASP.NET Core `__` nesting):
+You may **delete and recreate** the FreeSite if an old Git deploy config is messy.
+
+### Configure
+
+1. MonsterASP → **Websites** → your site → **Git deploy**
+2. **GitHub repository URL** (HTTPS, ends with `.git`):
+   `https://github.com/FadiWalid21/Cutiva.git`
+3. If the repo is **private**, paste a GitHub Personal Access Token, then **Load** branches
+4. **Branch:** `feature/resources-products-costing`  
+   (switch to `main` after you merge this work)
+5. **Deployment type:** **Build .NET app**
+6. **Project to build** (multi-project repo):  
+   `src/CuttingOptimizer.Api/CuttingOptimizer.Api.csproj`
+7. Platform: site must allow **.NET 10.x** (already on FreeSite overview)
+8. Click **Enable Git deploy**
+
+Enabling does **not** change the live site until you publish.
+
+### Publish
+
+1. **Pull latest** (fetches the branch into staging)
+2. **Build & publish** (server runs `dotnet publish` and deploys output to `\wwwroot`)
+3. Check **Recent builds** / logs if it fails
+4. On the site overview: **Restart**
+
+On **FreeSite**, auto-deploy on every push is usually **not** available (Premium). After each `git push`, repeat **Pull latest** → **Build & publish**.
+
+### Environment variables
+
+Set these in the MonsterASP site settings (ASP.NET Core `__` nesting):
 
 | Variable | Notes |
 |----------|--------|
-| `ConnectionStrings__DefaultConnection` | Postgres string. If the password contains `=`, quote it: `Password='…'` |
+| `ConnectionStrings__DefaultConnection` | Postgres. If password contains `=`, use `Password='…'` |
 | `Jwt__Key` | ≥32 random chars (`openssl rand -base64 48`) |
 | `Jwt__Issuer` | `Cutiva` |
 | `Jwt__Audience` | `Cutiva` |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
 | `Brevo__ApiKey` | From Brevo |
 | `Brevo__SenderEmail` | Verified sender |
 | `Brevo__SenderName` | e.g. `CUTIVA` |
@@ -30,9 +60,24 @@ Set these on MonsterASP (ASP.NET Core `__` nesting):
 
 CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
-## Smoke test
+### Smoke test
 
-1. `https://cutiva.runasp.net/` — app response (not placeholder).
-2. From Vercel login: `fadialhallag@gmail.com` / seeded admin password (`Admin123!` unless changed).
+1. `https://cutiva.runasp.net/` — must **not** be the placeholder page
+2. From Vercel login: `fadialhallag@gmail.com` / `Admin123!` (unless changed)
+3. Network: `POST /api/auth/login` → `200` or `401`, **not** `504`
 
 DB migrations and admin seed were applied earlier against the MonsterASP Postgres database.
+
+## Optional local fallback (not required)
+
+If you ever need a local publish folder:
+
+```bash
+./scripts/publish-api-monsterasp.sh
+```
+
+Output is `publish/` (gitignored). Prefer Git deploy above instead of uploading this manually.
+
+## Later: push-to-deploy without opening the panel
+
+Premium MonsterASP auto-deploy, or GitHub Actions + WebDeploy (needs WebDeploy secrets from **Deploy → Visual Studio access**). Not configured in this repo yet.

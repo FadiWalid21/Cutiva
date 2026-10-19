@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/cutiva-logo.png" alt="CUTIVA" width="320" />
+</p>
+
 # CUTIVA — Project Summary and Current Status
 
 **Last updated:** 18 October 2026  

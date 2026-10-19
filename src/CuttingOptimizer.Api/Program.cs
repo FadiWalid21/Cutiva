@@ -16,6 +16,7 @@ using CuttingOptimizer.Infrastructure.Persistence;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,15 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// MonsterASP / reverse proxies terminate TLS; honor X-Forwarded-* for HTTPS redirects.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -163,6 +173,8 @@ var localizationOptions = app.Services
 app.UseRequestLocalization(localizationOptions);
 
 app.UseExceptionHandler();
+
+app.UseForwardedHeaders();
 
 if (app.Environment.IsDevelopment())
 {

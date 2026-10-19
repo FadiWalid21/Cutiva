@@ -1,6 +1,15 @@
 <div class="landing">
   <header class="landing__nav">
-    <a class="landing__brand" routerLink="/" data-hero>{{ 'app.name' | translate }}</a>
+    <a class="landing__brand" routerLink="/" data-hero>
+      <img
+        class="landing__brand-mark"
+        src="/brand/cutiva-mark.png"
+        width="28"
+        height="28"
+        alt=""
+      />
+      <span>{{ 'app.name' | translate }}</span>
+    </a>
 
     <nav class="landing__links" aria-label="Landing">
       <a href="#product">{{ 'landing.nav.product' | translate }}</a>
@@ -93,15 +102,7 @@
       }
     </div>
 
-    <h1 class="landing__logo" data-hero>
-      <img
-        class="landing__logo-img"
-        src="/brand/cutiva-logo.png"
-        width="640"
-        height="360"
-        alt="CUTIVA"
-      />
-    </h1>
+    <h1 class="landing__logo" data-hero>{{ 'app.name' | translate }}</h1>
     <p class="landing__tagline" data-hero>{{ 'app.tagline' | translate }}</p>
     <p class="landing__hero-line" data-hero>{{ 'landing.hero.line' | translate }}</p>
     <div class="landing__cta" data-hero>

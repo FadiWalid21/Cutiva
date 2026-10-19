@@ -109,7 +109,9 @@
     "fields": {
       "email": "Email",
       "password": "Password",
-      "displayName": "Display name"
+      "displayName": "Display name",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "login": {
       "title": "Welcome back",
@@ -137,7 +139,8 @@
       "displayNameMax": "Display name must not exceed 150 characters."
     },
     "errors": {
-      "generic": "Something went wrong. Try again."
+      "generic": "Something went wrong. Try again.",
+      "unavailable": "Server unavailable. The API may still be deploying — try again shortly."
     },
     "forgot": {
       "headline": "Reset access",
@@ -614,11 +617,11 @@
     "bannerBody": "Add to your home screen for a faster workshop workspace.",
     "install": "Install",
     "hide": "Not now",
-    "iosTitle": "Add to Home Screen",
-    "iosBody": "Tap Share, then Add to Home Screen.",
+    "iosTitle": "Install on iPhone / iPad",
+    "iosBody": "In Safari, tap Share, then Add to Home Screen. Use https://cutiva-kappa.vercel.app (not a preview URL).",
     "iosGotIt": "Got it",
-    "desktopTitle": "Install CUTIVA",
-    "desktopBody": "In Chrome or Edge, open the browser menu and choose Install app / Add to Home screen. A production build with the service worker enables the one-click prompt."
+    "desktopTitle": "Install on Android / desktop",
+    "desktopBody": "On Android Chrome, tap Install when prompted, or open the browser menu → Install app / Add to Home screen. Use the production site https://cutiva-kappa.vercel.app."
   },
   "resources": {
     "title": "Resources",

@@ -10,6 +10,7 @@ import {
   apiErrorMessage,
   apiFieldErrors,
   firstFieldError,
+  isApiUnavailable,
   isI18nKey,
 } from '../../../core/http/api-error';
 import { MotionService } from '../../../core/motion/motion.service';
@@ -32,6 +33,7 @@ export class Login implements OnInit {
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   readonly submitting = signal(false);
+  readonly showPassword = signal(false);
   readonly formError = signal<string | null>(null);
   readonly fieldErrors = signal<{ email: string | null; password: string | null }>({
     email: null,
@@ -82,6 +84,10 @@ export class Login implements OnInit {
           email: firstFieldError(fields, 'email'),
           password: firstFieldError(fields, 'password'),
         });
+        if (isApiUnavailable(err)) {
+          this.formError.set('auth.errors.unavailable');
+          return;
+        }
         this.formError.set(apiErrorMessage(err, 'auth.errors.generic'));
       },
     });

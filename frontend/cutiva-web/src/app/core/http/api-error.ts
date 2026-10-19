@@ -64,6 +64,13 @@ export function isI18nKey(value: string): boolean {
   return value.includes('.') && !value.includes(' ');
 }
 
+/** True for offline, timeouts, and gateway failures (502/503/504). */
+export function isApiUnavailable(err: unknown): boolean {
+  if (!(err instanceof HttpErrorResponse)) return false;
+  if (err.status === 0) return true;
+  return err.status === 502 || err.status === 503 || err.status === 504;
+}
+
 function normalizeFieldKey(key: string): string {
   if (!key) return key;
   return key.charAt(0).toLowerCase() + key.slice(1);

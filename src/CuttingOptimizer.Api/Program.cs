@@ -113,10 +113,13 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var corsOrigins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
+    ?? [];
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("DevFrontend", policy =>
-        policy.WithOrigins("http://localhost:4200")
+    options.AddPolicy("Frontend", policy =>
+        policy.SetIsOriginAllowed(origin => IsAllowedCorsOrigin(origin, corsOrigins))
             .AllowAnyHeader()
             .AllowAnyMethod());
 });
@@ -164,8 +167,9 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseCors("DevFrontend");
 }
+
+app.UseCors("Frontend");
 
 app.UseHttpsRedirection();
 
@@ -178,3 +182,27 @@ await CuttingOptimizer.Infrastructure.Persistence.IdentityDataSeeder.SeedAllAsyn
     app.Services);
 
 app.Run();
+
+static bool IsAllowedCorsOrigin(string? origin, string[] configured)
+{
+    if (string.IsNullOrWhiteSpace(origin))
+        return false;
+
+    if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+        return false;
+
+    if (configured.Any(o =>
+            string.Equals(o, origin, StringComparison.OrdinalIgnoreCase)))
+        return true;
+
+    // Local Angular dev
+    if (uri.IsLoopback && (uri.Port == 4200 || uri.Port == 4201))
+        return true;
+
+    // Vercel production + preview deployments (https://*.vercel.app)
+    if (uri.Scheme == Uri.UriSchemeHttps
+        && uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase))
+        return true;
+
+    return false;
+}

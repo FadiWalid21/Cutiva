@@ -69,7 +69,10 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 1rem;
-  padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+  padding: calc(0.85rem + env(safe-area-inset-top, 0px))
+    max(clamp(1rem, 4vw, 2.5rem), env(safe-area-inset-right, 0px))
+    0.85rem
+    max(clamp(1rem, 4vw, 2.5rem), env(safe-area-inset-left, 0px));
   backdrop-filter: blur(16px);
   background: var(--landing-nav-bg);
   border-bottom: 1px solid var(--landing-line);

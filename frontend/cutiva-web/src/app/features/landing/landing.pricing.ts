@@ -45,7 +45,7 @@ export function mapPublicPlansToTiers(
 }
 
 export const LANDING_CONTACT = {
-  email: 'fadiwd2@gmail.com',
+  email: 'fadiwd21@gmail.com',
   phoneDisplay: '+966 56 238 5677',
   phoneTel: '+966 56 238 5677',
 } as const;

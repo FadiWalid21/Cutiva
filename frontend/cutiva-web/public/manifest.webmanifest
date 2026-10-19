@@ -8,7 +8,7 @@
   "display": "standalone",
   "orientation": "any",
   "scope": "/",
-  "start_url": "/",
+  "start_url": "/login",
   "icons": [
     {
       "src": "icons/icon-192.png",

@@ -2,5 +2,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist/cutiva-web",
   "framework": null,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/((?!icons/|brand/|i18n/|favicon\\.ico|manifest\\.webmanifest|ngsw.*|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

@@ -77,12 +77,23 @@
 
 .landing__brand {
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0.14em;
   font-size: 0.95rem;
   text-decoration: none;
   color: inherit;
+}
+
+.landing__brand-mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.35rem;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .landing__links {
@@ -291,15 +302,12 @@
 
 .landing__logo {
   margin: 0;
-  line-height: 0;
-}
-
-.landing__logo-img {
-  display: block;
-  width: min(100%, 22rem);
-  height: auto;
-  max-width: 36rem;
-  border-radius: 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 15vw, 9rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 0.92;
+  color: var(--landing-ink);
 }
 
 .landing__tagline {

@@ -1,0 +1,5 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/cutiva-web/browser",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

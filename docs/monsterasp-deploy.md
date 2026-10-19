@@ -1,38 +1,49 @@
-# MonsterASP API deploy checklist
+# MonsterASP API deploy (GitHub Git Deploy)
 
-Production API host: `https://cutiva.runasp.net`  
-Site: FreeSite / IIS (e.g. `site100135`) — website root `\wwwroot`
+Production API: `https://cutiva.runasp.net`  
+Frontend (Vercel): `https://cutiva-kappa.vercel.app`  
+Repo: `https://github.com/FadiWalid21/Cutiva.git`
 
 ## Why login returns 504
 
-If the site preview still shows **“Your website is ready…”**, `\wwwroot` has **no** published API. Vercel calls `https://cutiva.runasp.net/api/auth/login` and IIS returns **504 Gateway Timeout**.
+If the site still shows MonsterASP’s **“Your website is ready…”** page, `\wwwroot` has no published API. Fix that with **Git deploy → Build .NET app** (no FTP upload).
 
-DevTools **Source: Service Worker** is normal for the Angular PWA; it does **not** cause this 504.
+DevTools **Source: Service Worker** on the login request is normal for the PWA; it does not cause the 504.
 
-## 1. Publish locally
+## Primary path: Control Panel Git Deploy
 
-From the repo root:
+Official help: [Deploy from a GitHub repository](https://help.monsterasp.net/websites/git-deploy/github-repository)
 
-```bash
-chmod +x scripts/publish-api-monsterasp.sh
-./scripts/publish-api-monsterasp.sh
-```
+You may **delete and recreate** the FreeSite if an old Git deploy config is messy.
 
-Output folder: `publish/api/` (includes `web.config` + DLLs). Do **not** commit this folder.
+### Configure
 
-## 2. Upload via WebFTP
+1. MonsterASP → **Websites** → your site → **Git deploy**
+2. **GitHub repository URL** (HTTPS, ends with `.git`):
+   `https://github.com/FadiWalid21/Cutiva.git`
+3. If the repo is **private**, paste a GitHub Personal Access Token, then **Load** branches
+4. **Branch:** `feature/resources-products-costing`  
+   (switch to `main` after you merge this work)
+5. **Deployment type:** **Build .NET app**
+6. **Project to build** (multi-project repo):  
+   `src/CuttingOptimizer.Api/CuttingOptimizer.Api.csproj`
+7. Platform: site must allow **.NET 10.x** (already on FreeSite overview)
+8. Click **Enable Git deploy**
 
-1. Open [WebFTP](https://webftp.monsterasp.net) (or FTP/SFTP).
-2. Host example: `site100135.siteasp.net` — login from MonsterASP **FTP / SFTP** panel.
-3. Go to `\wwwroot`.
-4. Delete placeholder / default files if present.
-5. Upload **all files and folders** from `publish/api/` into `\wwwroot`  
-   (including `web.config`, `CuttingOptimizer.Api.dll`, `web.config`, deps, runtimes, etc.).
-6. Confirm `web.config` is in `\wwwroot` (not only in a subfolder).
+Enabling does **not** change the live site until you publish.
 
-## 3. Environment variables
+### Publish
 
-In MonsterASP site settings (ASP.NET Core `__` nesting):
+1. **Pull latest** (fetches the branch into staging)
+2. **Build & publish** (server runs `dotnet publish` and deploys output to `\wwwroot`)
+3. Check **Recent builds** / logs if it fails
+4. On the site overview: **Restart**
+
+On **FreeSite**, auto-deploy on every push is usually **not** available (Premium). After each `git push`, repeat **Pull latest** → **Build & publish**.
+
+### Environment variables
+
+Set these in the MonsterASP site settings (ASP.NET Core `__` nesting):
 
 | Variable | Notes |
 |----------|--------|
@@ -40,23 +51,33 @@ In MonsterASP site settings (ASP.NET Core `__` nesting):
 | `Jwt__Key` | ≥32 random chars (`openssl rand -base64 48`) |
 | `Jwt__Issuer` | `Cutiva` |
 | `Jwt__Audience` | `Cutiva` |
+| `ASPNETCORE_ENVIRONMENT` | `Production` |
 | `Brevo__ApiKey` | From Brevo |
 | `Brevo__SenderEmail` | Verified sender |
 | `Brevo__SenderName` | e.g. `CUTIVA` |
-| `ASPNETCORE_ENVIRONMENT` | `Production` |
 | `Features__ResourcesV2` | `true` when ready |
 | `Features__ProductTemplates` | `true` when ready |
 
 CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
-## 4. Restart
+### Smoke test
 
-On the site overview: **Restart** (or Stop then Start).
-
-## 5. Smoke test
-
-1. `https://cutiva.runasp.net/` — must **not** be the MonsterASP placeholder.
-2. From https://cutiva-kappa.vercel.app login: `fadialhallag@gmail.com` / `Admin123!` (unless you changed it).
-3. Network: `/api/auth/login` → `200` (or `401` for wrong password), **not** `504`.
+1. `https://cutiva.runasp.net/` — must **not** be the placeholder page
+2. From Vercel login: `fadialhallag@gmail.com` / `Admin123!` (unless changed)
+3. Network: `POST /api/auth/login` → `200` or `401`, **not** `504`
 
 DB migrations and admin seed were applied earlier against the MonsterASP Postgres database.
+
+## Optional local fallback (not required)
+
+If you ever need a local publish folder:
+
+```bash
+./scripts/publish-api-monsterasp.sh
+```
+
+Output is `publish/` (gitignored). Prefer Git deploy above instead of uploading this manually.
+
+## Later: push-to-deploy without opening the panel
+
+Premium MonsterASP auto-deploy, or GitHub Actions + WebDeploy (needs WebDeploy secrets from **Deploy → Visual Studio access**). Not configured in this repo yet.

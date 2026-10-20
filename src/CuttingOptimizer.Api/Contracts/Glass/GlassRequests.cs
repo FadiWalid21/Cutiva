@@ -16,11 +16,11 @@ public sealed record UpdateGlassTypeRequest(
 
 public sealed record CreateGlassSpecRequest(
     [Required]
-    [Range(typeof(decimal), "0.01", "999999999")]
+    [Range(typeof(decimal), "0.01", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal ThicknessMm,
 
     [Required]
-    [Range(typeof(decimal), "0", "999999999")]
+    [Range(typeof(decimal), "0", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal PricePerSqm,
 
     [StringLength(200)]
@@ -28,11 +28,11 @@ public sealed record CreateGlassSpecRequest(
 
 public sealed record UpdateGlassSpecRequest(
     [Required]
-    [Range(typeof(decimal), "0.01", "999999999")]
+    [Range(typeof(decimal), "0.01", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal ThicknessMm,
 
     [Required]
-    [Range(typeof(decimal), "0", "999999999")]
+    [Range(typeof(decimal), "0", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal PricePerSqm,
 
     [StringLength(200)]

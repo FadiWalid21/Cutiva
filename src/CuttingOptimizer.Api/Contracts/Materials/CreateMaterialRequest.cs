@@ -21,7 +21,7 @@ public sealed record CreateMaterialRequest(
 
     MaterialCategory Category = MaterialCategory.Aluminum,
 
-    [Range(typeof(decimal), "0.01", "9999")]
+    [Range(typeof(decimal), "0.01", "9999", ParseLimitsInInvariantCulture = true)]
     decimal? ThicknessMm = null);
 
 public sealed record UpdateMaterialRequest(
@@ -34,7 +34,7 @@ public sealed record UpdateMaterialRequest(
 
     MaterialCategory Category = MaterialCategory.Aluminum,
 
-    [Range(typeof(decimal), "0.01", "9999")]
+    [Range(typeof(decimal), "0.01", "9999", ParseLimitsInInvariantCulture = true)]
     decimal? ThicknessMm = null,
 
     bool IsActive = true);

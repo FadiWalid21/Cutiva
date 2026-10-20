@@ -453,7 +453,8 @@
     "quickCreate": {
       "title": "Start a new project",
       "body": "Add windows or doors, enter lengths, then see what to buy.",
-      "cta": "New project"
+      "cta": "New project",
+      "guideCta": "User guide"
     },
     "status": {
       "optimized": "Ready",

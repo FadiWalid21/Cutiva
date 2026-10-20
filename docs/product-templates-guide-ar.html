@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>دليل وصفات المنتجات — Cutiva</title>
+  <style>
+    :root {
+      --ink: #142028;
+      --muted: #5c6b75;
+      --accent: #1f8f82;
+      --gold: #b8924f;
+      --line: #d8dee2;
+      --bg: #f7f9fa;
+      --card: #fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, "Noto Naskh Arabic", "Geeza Pro", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+    .wrap {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+    header.doc-head {
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    header.doc-head h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.85rem;
+      color: var(--accent);
+    }
+    header.doc-head p { margin: 0.25rem 0; color: var(--muted); }
+    h2 {
+      margin-top: 2.25rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.35rem;
+      color: var(--accent);
+    }
+    h3 { margin-top: 1.5rem; font-size: 1.1rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+      background: var(--card);
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.65rem;
+      text-align: right;
+      vertical-align: top;
+    }
+    th { background: #e8f3f1; }
+    pre, .formula {
+      background: #132028;
+      color: #e8f0f2;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.45;
+      direction: ltr;
+      text-align: left;
+    }
+    .formula-ar {
+      direction: rtl;
+      text-align: right;
+      font-family: inherit;
+      white-space: pre-wrap;
+    }
+    .callout {
+      background: color-mix(in srgb, var(--gold) 18%, #fff);
+      border: 1px solid color-mix(in srgb, var(--gold) 45%, #ccc);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin: 1rem 0;
+    }
+    .diagram {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1.25rem 0;
+      text-align: center;
+    }
+    .diagram svg { max-width: 100%; height: auto; }
+    .diagram figcaption {
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    ul, ol { padding-right: 1.25rem; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .toc a:hover { text-decoration: underline; }
+    .print-hint {
+      background: #e8f3f1;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .print-hint { display: none; }
+      .wrap { max-width: none; padding: 0; }
+      h2 { page-break-after: avoid; }
+      table, .diagram, .callout { page-break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="print-hint">
+      لحفظ PDF: من المتصفح اختر طباعة (Print) ثم «حفظ كملف PDF».
+      الملف المصدر للمراجعة في Git:
+      <code>docs/product-templates-guide-ar.md</code>
+    </p>
+
+    <header class="doc-head">
+      <h1>دليل وصفات المنتجات — شرح كامل للمبتدئين</h1>
+      <p>الصفحة في Cutiva: وصفات المنتجات (<code>/product-templates</code>)</p>
+      <p>يشرح كل قسم ومدخل وتأثيره على المقاسات مع أمثلة ورسوم.</p>
+    </header>
+
+    <nav class="toc">
+      <strong>المحتويات</strong>
+      <ol>
+        <li><a href="#intro">مقدمة</a></li>
+        <li><a href="#map">خريطة الصفحة</a></li>
+        <li><a href="#model">قسم الموديل</a></li>
+        <li><a href="#preview">جرّب المقاس</a></li>
+        <li><a href="#parts">أطوال القطع</a></li>
+        <li><a href="#drawings">رسوم القطع على الشباك</a></li>
+        <li><a href="#examples">أمثلة رقمية</a></li>
+        <li><a href="#glass">فتحات الزجاج</a></li>
+        <li><a href="#acc">الإكسسوارات</a></li>
+        <li><a href="#flow">من الوصفة للمشروع</a></li>
+        <li><a href="#mistakes">أخطاء شائعة</a></li>
+        <li><a href="#empty">لو سيّبت مدخل فاضي</a></li>
+        <li><a href="#table">جدول مرجعي سريع</a></li>
+      </ol>
+    </nav>
+
+    <h2 id="intro">1. مقدمة: ما هي «وصفة المنتج»؟</h2>
+    <p>
+      بدل ما تحسب يدويًا طول كل قطعة ألومنيوم لكل مقاس عميل، تعرّف
+      <strong>وصفة مرة واحدة</strong>: ممّا يتكوّن الشباك/الباب، وكيف يُحسب طول كل قطعة من العرض والارتفاع،
+      ومقاس الزجاج، وكمية الإكسسوارات.
+    </p>
+    <div class="formula formula-ar">الوصفة (قواعد عامة)  +  مقاس العميل (عرض × ارتفاع)  =  قائمة أطوال جاهزة</div>
+    <div class="callout">
+      الأرقام في الوصفات المبدوءة (Seed) <strong>تجريبية</strong>. عدّلها حسب مقاسات ورشتك قبل الاعتماد.
+    </div>
+
+    <h2 id="map">2. خريطة الصفحة</h2>
+    <ol>
+      <li><strong>أنواع المنتجات</strong> — باب، شباك، ثم الموديلات (سحاب، مفصلي، قلاب…).</li>
+      <li><strong>الموديل</strong> — الاسم، عدد الضلف، التداخل، نشط.</li>
+      <li><strong>جرّب المقاس</strong> — معاينة سريعة.</li>
+      <li><strong>أطوال القطع</strong> — معادلات الألومنيوم.</li>
+      <li><strong>فتحات الزجاج</strong>.</li>
+      <li><strong>الإكسسوارات</strong>.</li>
+    </ol>
+
+    <h2 id="model">3. قسم الموديل</h2>
+    <table>
+      <thead>
+        <tr><th>الحقل</th><th>المعنى</th><th>التأثير</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>الاسم</td><td>اسم العرض في القوائم</td><td>تنظيم فقط</td></tr>
+        <tr><td>عدد الضلف</td><td>كم ضلفة في الوحدة</td><td>تقسيم عرض الضلفة + إكسسوار لكل ضلفة</td></tr>
+        <tr><td>التداخل (سم)</td><td>تراكب الضلف (خصوصًا السحاب)</td><td>يُضاف للعرض الفعّال مع التقسيم</td></tr>
+        <tr><td>نشط</td><td>متاح للاستخدام؟</td><td>إتاحة الموديل</td></tr>
+      </tbody>
+    </table>
+    <p>احفظ بطاقة الموديل بعد التعديل. المعاينة تستخدم القيم <strong>المحفوظة</strong>.</p>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 520 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="رسم عرض ضلفتين مع تداخل">
+        <rect x="20" y="30" width="480" height="70" fill="none" stroke="#1f8f82" stroke-width="2"/>
+        <rect x="30" y="40" width="230" height="50" fill="#e8f3f1" stroke="#145f56"/>
+        <rect x="240" y="40" width="250" height="50" fill="#e8f3f1" stroke="#145f56"/>
+        <rect x="250" y="40" width="30" height="50" fill="#b8924f" opacity="0.85"/>
+        <text x="260" y="25" text-anchor="middle" font-size="12" fill="#5c6b75">تداخل O</text>
+        <text x="260" y="120" text-anchor="middle" font-size="13" fill="#142028">العرض الكلي W — العرض الفعّال للضلفة = (W ÷ عدد الضلف) + O</text>
+      </svg>
+      <figcaption>شباك سحاب بضلفتين: المنطقة الذهبية تمثّل التداخل بين الضلفتين.</figcaption>
+    </figure>
+
+    <h2 id="preview">4. جرّب المقاس</h2>
+    <p>
+      <strong>عرض تجريبي</strong> و<strong>ارتفاع تجريبي</strong> (مثل 100×120 سم) يعرضان نتيجة معادلات القطع المحفوظة فورًا.
+      القائمة للألومنيوم فقط (بدون زجاج).
+    </p>
+
+    <h2 id="parts">5. أطوال القطع — المعادلة</h2>
+    <div class="formula formula-ar">الطول (مم) = (عامل العرض × العرض الفعّال) + (عامل الارتفاع × الارتفاع) + التعديل
+العرض الفعّال = العرض   أو   (العرض ÷ عدد الضلف) + التداخل   إذا فُعّل «تقسيم عرض الضلفة»</div>
+    <p>10 مم = 1 سم في الواجهة.</p>
+
+    <h3>الجملة البسيطة</h3>
+    <p><code>الطول = [العرض أو الارتفاع] [زائد أو ناقص] [N] سم ، الكمية [N]</code></p>
+    <table>
+      <thead>
+        <tr><th>المدخل</th><th>التأثير</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>اسم القطعة</td><td>تسمية في القوائم والتقارير</td></tr>
+        <tr><td>العرض / الارتفاع</td><td>المحور الأساسي للطول</td></tr>
+        <tr><td>زائد / ناقص + N</td><td>زيادة أو خلوص بالسم</td></tr>
+        <tr><td>الكمية</td><td>تكرار القطعة بنفس الطول</td></tr>
+        <tr><td>ألومنيوم افتراضي</td><td>بروفايل السوق لهذه القطعة</td></tr>
+      </tbody>
+    </table>
+
+    <h3>الوضع المتقدم</h3>
+    <table>
+      <thead>
+        <tr><th>الحقل</th><th>التأثير</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>عامل العرض</td><td>مضاعف العرض الفعّال (1 = كامل، 0 = لا يدخل)</td></tr>
+        <tr><td>عامل الارتفاع</td><td>مضاعف الارتفاع</td></tr>
+        <tr><td>التعديل (سم)</td><td>ثابت يُضاف أو يُطرح بعد الضرب</td></tr>
+        <tr><td>تقسيم عرض الضلفة</td><td>يستخدم عرض الضلفة + التداخل بدل العرض الكلي</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="drawings">6. رسوم القطع على الشباك</h2>
+    <figure class="diagram">
+      <svg viewBox="0 0 420 280" xmlns="http://www.w3.org/2000/svg" role="img">
+        <rect x="60" y="40" width="280" height="180" fill="#f7f9fa" stroke="#1f8f82" stroke-width="6"/>
+        <text x="200" y="28" text-anchor="middle" font-size="13" fill="#1f8f82">Frame top — إطار علوي</text>
+        <text x="200" y="245" text-anchor="middle" font-size="13" fill="#1f8f82">Frame bottom — إطار سفلي</text>
+        <text x="28" y="135" text-anchor="middle" font-size="12" fill="#1f8f82" transform="rotate(-90 28 135)">قائم</text>
+        <text x="372" y="135" text-anchor="middle" font-size="12" fill="#1f8f82" transform="rotate(90 372 135)">قائم</text>
+        <line x1="60" y1="250" x2="340" y2="250" stroke="#b8924f" stroke-width="2" marker-end="url(#arrow)"/>
+        <text x="200" y="268" text-anchor="middle" font-size="12" fill="#8a6a3d">العرض W</text>
+        <line x1="50" y1="40" x2="50" y2="220" stroke="#b8924f" stroke-width="2"/>
+        <text x="18" y="135" font-size="12" fill="#8a6a3d">H</text>
+      </svg>
+      <figcaption>الإطار: علوي/سفلي عادة من العرض؛ القائمان من الارتفاع × 2.</figcaption>
+    </figure>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 420 260" xmlns="http://www.w3.org/2000/svg" role="img">
+        <rect x="80" y="40" width="240" height="160" fill="#fff" stroke="#145f56" stroke-width="4"/>
+        <rect x="100" y="55" width="200" height="130" fill="#e8f3f1" stroke="#3eb8a8" stroke-width="2"/>
+        <text x="200" y="28" text-anchor="middle" font-size="13" fill="#145f56">Sash rail — عارضة ضلفة</text>
+        <text x="200" y="230" text-anchor="middle" font-size="13" fill="#145f56">Sash rail</text>
+        <text x="55" y="130" font-size="12" fill="#145f56" transform="rotate(-90 55 130)">stile</text>
+        <text x="345" y="130" font-size="12" fill="#145f56" transform="rotate(90 345 130)">stile</text>
+        <text x="200" y="250" text-anchor="middle" font-size="12" fill="#5c6b75">غالبًا: stile = الارتفاع − خلوص · rail = العرض − خلوص</text>
+      </svg>
+      <figcaption>الضلفة أصغر من الإطار بخلوص (مثل 4 سم) عشان تدخل وتتحرك.</figcaption>
+    </figure>
+
+    <h2 id="examples">7. أمثلة رقمية (عرض 100 سم، ارتفاع 120 سم)</h2>
+    <ul>
+      <li><strong>إطار علوي:</strong> العرض + 0 ← <strong>100 سم × 1</strong></li>
+      <li><strong>قائم الضلفة:</strong> الارتفاع − 4 ← <strong>116 سم × 2</strong></li>
+      <li><strong>عارضة الضلفة:</strong> العرض − 4 ← <strong>96 سم × 2</strong></li>
+    </ul>
+    <p><strong>تقسيم ضلفة:</strong> W=200 سم، ضلفتان، تداخل 2.5 سم ← العرض الفعّال = 100 + 2.5 = <strong>102.5 سم</strong>.</p>
+
+    <h2 id="glass">8. فتحات الزجاج</h2>
+    <p>
+      لكل فتحة: الاسم، عدد الألواح، جملة عرض الزجاج وجملة الارتفاع، مطلوب، متقدم، وتقسيم الضلفة إن لزم.
+      المساحة التقريبية بالـ م² من حاصل ضرب الأبعاد بالمم ÷ مليون، ثم × الألواح.
+    </p>
+
+    <h2 id="acc">9. الإكسسوارات</h2>
+    <table>
+      <thead>
+        <tr><th>القاعدة</th><th>الحساب</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>لكل منتج</td><td>الكمية × عدد الوحدات</td></tr>
+        <tr><td>لكل ضلفة</td><td>الكمية × عدد الضلف × عدد الوحدات</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="flow">10. من الوصفة إلى المشروع</h2>
+    <ol>
+      <li>احفظ الوصفة هنا.</li>
+      <li>في المشروع: اختر الموديل + عرض وارتفاع العميل.</li>
+      <li>«احسب» يولّد الأطوال والكميات.</li>
+      <li>تدخل الأطوال في خطط القص والشراء.</li>
+    </ol>
+
+    <h2 id="mistakes">11. أخطاء شائعة</h2>
+    <ul>
+      <li>نسيان الحفظ → المعاينة والقوائم لا تتحدث.</li>
+      <li>تقسيم ضلفة على إطار علوي بالخطأ → طول ضلفة بدل عرض كامل.</li>
+      <li>ناقص أكبر من المقاس → طول صفر أو سالب (مرفوض عند الحساب).</li>
+      <li>خلط سم/مم: 4 سم = 40 مم داخليًا.</li>
+    </ul>
+
+    <h2 id="empty">12. لو سيّبت مدخل فاضي — إيه اللي يحصل؟</h2>
+    <p>
+      ليس كل فراغ يرفض الحفظ: بعض الحقول <strong>تُرفض فورًا</strong>، وبعضها
+      <strong>يُقبل لكن الحساب يفترض قيمة افتراضية</strong>، وبعضها يمرّ في الوصفة ثم
+      <strong>يوقف المشروع</strong> لاحقًا.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>المدخل / الخيار</th>
+          <th>لو فاضي أو غير مختار</th>
+          <th>عند الحفظ</th>
+          <th>عند الشغل والحساب</th>
+          <th>أثر الشغل</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>اسم الموديل / القطعة / الزجاج / الإكسسوار</td>
+          <td>نص فارغ</td>
+          <td><strong>مرفوض</strong></td>
+          <td>—</td>
+          <td>ما تقدرش تكمّل حفظ الوصفة</td>
+        </tr>
+        <tr>
+          <td>عدد الضلف</td>
+          <td>فارغ أو ≤ 0</td>
+          <td>مقبول</td>
+          <td>يُعامل كـ <strong>1</strong></td>
+          <td>تقسيم العرض وإكسسوار لكل ضلفة كأن الوحدة ضلفة واحدة</td>
+        </tr>
+        <tr>
+          <td>التداخل</td>
+          <td>فارغ</td>
+          <td>مقبول</td>
+          <td>يُحسب كـ <strong>0</strong></td>
+          <td>مفيش زيادة على عرض الضلفة عند التقسيم</td>
+        </tr>
+        <tr>
+          <td>كمية القطعة / الألواح / الإكسسوار</td>
+          <td>فارغ أو ≤ 0</td>
+          <td><strong>مرفوض</strong></td>
+          <td>—</td>
+          <td>لازم رقم أكبر من صفر قبل الحفظ</td>
+        </tr>
+        <tr>
+          <td>رقم زائد/ناقص في الجملة</td>
+          <td>فاضي</td>
+          <td>يُحفظ كـ <strong>0</strong></td>
+          <td>طول = عرض أو ارتفاع بدون خلوص</td>
+          <td>مقاس أكبر من خلوص الورشة المعتاد</td>
+        </tr>
+        <tr>
+          <td>ألومنيوم افتراضي (—)</td>
+          <td>غير مختار</td>
+          <td>مقبول</td>
+          <td>لازم اختيار خامة في المشروع وإلا فشل</td>
+          <td>توقف التكلفة وخطط القص</td>
+        </tr>
+        <tr>
+          <td>إكسسوار افتراضي (—)</td>
+          <td>غير مختار</td>
+          <td>مقبول</td>
+          <td>ما يدخلش الفاتورة إلا بعد الاختيار</td>
+          <td>نقص مقابض/عجلات من التكلفة</td>
+        </tr>
+        <tr>
+          <td>زجاج «مطلوب»</td>
+          <td>مفعّل وبدون اختيار في المشروع</td>
+          <td>الوصفة تمام</td>
+          <td>خطأ: فتحة زجاج مطلوبة ناقصة</td>
+          <td>المشروع ما يكتملش الحساب</td>
+        </tr>
+        <tr>
+          <td>زجاج غير مطلوب</td>
+          <td>مطفي وبدون اختيار</td>
+          <td>الوصفة تمام</td>
+          <td>الفتحة تُتخطى</td>
+          <td>لا زجاج ولا تكلفة لهذه الفتحة</td>
+        </tr>
+        <tr>
+          <td>تقسيم عرض الضلفة</td>
+          <td>مطفي</td>
+          <td>مقبول</td>
+          <td>العرض الفعّال = العرض الكلي</td>
+          <td>صحيح للإطار؛ غلط لو نسيته على ضلفة السحاب</td>
+        </tr>
+        <tr>
+          <td>عامل عرض وارتفاع = 0 معًا</td>
+          <td>طول ≤ 0</td>
+          <td>قد يُحفظ</td>
+          <td><strong>فشل الحساب</strong></td>
+          <td>صلّح المعادلة قبل القص/التكلفة</td>
+        </tr>
+        <tr>
+          <td>نشط مطفي</td>
+          <td>—</td>
+          <td>مقبول</td>
+          <td>غير متاح عمليًا</td>
+          <td>الورشة مش هتلاقي الموديل بسهولة</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <strong>خلاصة سريعة:</strong>
+      الأسماء والكميات لازم تتملّى؛ عدد الضلف والتداخل الفاضيين يتحوّلوا لصمت حسابي (1 و 0)؛
+      الخامات والإكسسوارات الافتراضية الفاضية تؤجّل المشكلة للمشروع؛ الزجاج المطلوب الفاضي يوقف الحساب.
+    </div>
+
+    <h2 id="table">13. جدول مرجعي سريع</h2>
+    <table>
+      <thead>
+        <tr><th>المدخل</th><th>يؤثر على الطول؟</th><th>لو فاضي؟</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>عدد الضلف / التداخل</td><td>نعم مع التقسيم أو إكسسوار لكل ضلفة</td><td>ضلف = 1 · تداخل = 0</td></tr>
+        <tr><td>محور عرض/ارتفاع + زائد/ناقص</td><td>نعم</td><td>N فاضي = 0</td></tr>
+        <tr><td>عامل العرض/الارتفاع + التعديل</td><td>نعم</td><td>الاثنان صفر → فشل إن الطول ≤ 0</td></tr>
+        <tr><td>تقسيم عرض الضلفة</td><td>نعم (على العرض الفعّال)</td><td>مطفي = عرض كلي</td></tr>
+        <tr><td>كمية القطعة / الإكسسوار</td><td>كمية فقط</td><td>≤ 0 = رفض الحفظ</td></tr>
+        <tr><td>اسم الموديل / اسم القطعة</td><td>لا</td><td>فارغ = رفض الحفظ</td></tr>
+        <tr><td>ألومنيوم / إكسسوار افتراضي</td><td>خامة/صنف لا طول</td><td>يؤجّل للمشروع أو يوقف الحساب</td></tr>
+        <tr><td>زجاج مطلوب</td><td>إلزام</td><td>بدون اختيار = فشل المشروع</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>خلاصة:</strong>
+      الطول = (جزء من العرض الفعّال) + (جزء من الارتفاع) + تعديل ثابت.
+      العرض الفعّال إما العرض كله، أو عرض الضلفة + التداخل.
+    </div>
+
+    <p style="color:var(--muted);font-size:0.9rem;margin-top:2.5rem">
+      مرجع تقني: <code>formula-sentence.ts</code> · <code>ProjectCostCalculator.cs</code> · شاشة <code>templates-page</code>
+    </p>
+  </div>
+</body>
+</html>

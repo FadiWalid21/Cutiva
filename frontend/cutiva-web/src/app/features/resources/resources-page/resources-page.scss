@@ -94,6 +94,20 @@
   padding: 0.5rem 0.15rem;
 }
 
+.profile-list__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+
+.profile-list__delete {
+  align-self: center;
+  padding-inline: 0.35rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
 .profile-list__item {
   width: 100%;
   text-align: start;

@@ -70,4 +70,8 @@ export class MaterialsApi {
   update(id: string, body: UpdateMaterialBody): Observable<Material> {
     return this.http.put<Material>(`${this.baseUrl}/${id}`, body);
   }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
 }

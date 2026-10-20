@@ -155,7 +155,7 @@
                 @if (previewRows().length) {
                   <ul class="preview-list">
                     @for (row of previewRows(); track row.id) {
-                      <li>
+                      <li [style.border-inline-start-color]="row.color">
                         <span>{{ row.name }}</span>
                         <strong
                           >{{ row.lengthCm }}
@@ -166,15 +166,31 @@
                     }
                   </ul>
                 }
+                @if (previewLegend().length) {
+                  <ul class="preview-legend">
+                    @for (role of previewLegend(); track role) {
+                      <li>
+                        <span
+                          class="preview-legend__swatch"
+                          [style.background]="roleColors[role]"
+                        ></span>
+                        {{ roleLabel(role) }}
+                      </li>
+                    }
+                  </ul>
+                }
               </div>
               <div class="preview-layout__diagram">
                 <app-frame-preview
                   [label]="previewLabel()"
-                  [sectorCode]="previewKindCode()"
+                  [sectorCode]="previewSectorCode()"
                   [sectorName]="selectedType()?.name || ''"
                   [widthMm]="previewWidthMm()"
                   [heightMm]="previewHeightMm()"
                   [quantity]="1"
+                  [layout]="previewLayout()"
+                  [paneStyle]="previewPaneStyle()"
+                  [roleColors]="roleColors"
                 />
               </div>
             </div>
@@ -200,7 +216,8 @@
                       <label class="field">
                         <span>{{ 'templates.displayName' | translate }}</span>
                         <input
-                          [(ngModel)]="part.displayName"
+                          [ngModel]="part.displayName"
+                          (ngModelChange)="onPartFieldChange(part, 'displayName', $event)"
                           [name]="'dn-' + part.id"
                         />
                       </label>
@@ -294,7 +311,8 @@
                             <input
                               type="number"
                               step="0.01"
-                              [(ngModel)]="part.widthCoef"
+                              [ngModel]="part.widthCoef"
+                              (ngModelChange)="onPartFieldChange(part, 'widthCoef', $event)"
                               [name]="'wc-' + part.id"
                             />
                           </label>
@@ -303,7 +321,8 @@
                             <input
                               type="number"
                               step="0.01"
-                              [(ngModel)]="part.heightCoef"
+                              [ngModel]="part.heightCoef"
+                              (ngModelChange)="onPartFieldChange(part, 'heightCoef', $event)"
                               [name]="'hc-' + part.id"
                             />
                           </label>
@@ -320,7 +339,10 @@
                           <label class="field field--check">
                             <input
                               type="checkbox"
-                              [(ngModel)]="part.useSashWidthDivision"
+                              [ngModel]="part.useSashWidthDivision"
+                              (ngModelChange)="
+                                onPartFieldChange(part, 'useSashWidthDivision', $event)
+                              "
                               [name]="'sash-' + part.id"
                             />
                             <span>{{

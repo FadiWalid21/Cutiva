@@ -109,4 +109,52 @@ public sealed class PasswordResetService(
         await db.SaveChangesAsync(cancellationToken);
         return PasswordResetOutcome.Succeeded;
     }
+
+    public async Task<ChangePasswordOutcome> ChangePasswordAsync(
+        string userId,
+        string currentPassword,
+        string newPassword,
+        bool arabic,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return ChangePasswordOutcome.UserNotFound;
+
+        var user = await userManager.FindByIdAsync(userId);
+        if (user is null)
+            return ChangePasswordOutcome.UserNotFound;
+
+        if (string.IsNullOrWhiteSpace(currentPassword) || string.IsNullOrWhiteSpace(newPassword))
+            return ChangePasswordOutcome.WeakPassword;
+
+        if (string.Equals(currentPassword, newPassword, StringComparison.Ordinal))
+            return ChangePasswordOutcome.SameAsCurrent;
+
+        var result = await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        if (!result.Succeeded)
+        {
+            if (result.Errors.Any(e =>
+                    string.Equals(e.Code, "PasswordMismatch", StringComparison.OrdinalIgnoreCase)))
+                return ChangePasswordOutcome.WrongCurrentPassword;
+
+            return ChangePasswordOutcome.WeakPassword;
+        }
+
+        try
+        {
+            await emailSender.SendAsync(
+                new EmailMessage(
+                    user.Email!,
+                    user.DisplayName,
+                    AuthEmailTemplates.PasswordChangedSubject(arabic),
+                    AuthEmailTemplates.PasswordChangedHtml(user.DisplayName, arabic)),
+                cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send password-changed alert to {Email}", user.Email);
+        }
+
+        return ChangePasswordOutcome.Succeeded;
+    }
 }

@@ -13,6 +13,9 @@ public static class AuthEmailTemplates
     public static string ResetSubject(bool arabic) =>
         arabic ? "رمز إعادة تعيين كلمة المرور" : "Your password reset code";
 
+    public static string PasswordChangedSubject(bool arabic) =>
+        arabic ? "تم تغيير كلمة المرور" : "Your password was changed";
+
     public static string WelcomeHtml(
         string displayName,
         string email,
@@ -51,6 +54,26 @@ public static class AuthEmailTemplates
 <div style=""text-align:center;margin:28px 0"">
   <span style=""display:inline-block;padding:14px 28px;background:#0f172a;color:#fff;font-size:28px;letter-spacing:0.35em;font-weight:700;border-radius:10px;font-family:ui-monospace,monospace"">{WebUtility.HtmlEncode(code)}</span>
 </div>");
+    }
+
+    public static string PasswordChangedHtml(string? displayName, bool arabic)
+    {
+        var name = string.IsNullOrWhiteSpace(displayName)
+            ? (arabic ? "عزيزي المستخدم" : "there")
+            : displayName.Trim();
+        var greeting = arabic
+            ? $"مرحباً {WebUtility.HtmlEncode(name)}،"
+            : $"Hello {WebUtility.HtmlEncode(name)},";
+        var body = arabic
+            ? "تم تغيير كلمة مرور حسابك في CUTIVA بنجاح. إذا لم تقم بهذا التغيير، أعد تعيين كلمة المرور فوراً أو تواصل مع الدعم."
+            : "Your CUTIVA account password was changed successfully. If you did not make this change, reset your password immediately or contact support.";
+        var note = arabic
+            ? "لأمانك، لا نرسل كلمة المرور الجديدة في البريد."
+            : "For your security, we never include your password in this email.";
+
+        return Wrap(arabic, greeting, $@"
+<p style=""margin:0 0 16px;color:#334155;line-height:1.6"">{body}</p>
+<p style=""margin:0;color:#64748b;font-size:13px;line-height:1.5"">{note}</p>");
     }
 
     public static string HashOtp(string code)

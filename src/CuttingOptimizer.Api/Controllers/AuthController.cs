@@ -125,6 +125,45 @@ public sealed class AuthController(
             me.Features));
     }
 
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+            ?? User.FindFirstValue(ClaimTypes.Name)
+            ?? User.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized();
+
+        var outcome = await passwordResetService.ChangePasswordAsync(
+            userId,
+            request.CurrentPassword ?? string.Empty,
+            request.NewPassword ?? string.Empty,
+            IsArabicRequest(),
+            cancellationToken);
+
+        return outcome switch
+        {
+            ChangePasswordOutcome.Succeeded => NoContent(),
+            ChangePasswordOutcome.WrongCurrentPassword => BadRequest(new
+            {
+                message = "auth.change.wrongCurrent"
+            }),
+            ChangePasswordOutcome.SameAsCurrent => BadRequest(new
+            {
+                message = "auth.change.sameAsCurrent"
+            }),
+            ChangePasswordOutcome.WeakPassword => BadRequest(new
+            {
+                message = "auth.change.weak"
+            }),
+            _ => Unauthorized()
+        };
+    }
+
     private bool IsArabicRequest()
     {
         var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;

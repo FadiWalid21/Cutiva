@@ -12,35 +12,105 @@
   }
 
   <div class="settings__grid">
-    @if (primaryWorkshop(); as workshop) {
-      <article class="card panel panel--workshop">
-        <h2>{{ 'settings.workshop' | translate }}</h2>
-        <p class="panel__hint">{{ 'settings.workshopHint' | translate }}</p>
-        <form class="workshop-rename" (ngSubmit)="renamePrimaryWorkshop()">
-          <label>
-            <span>{{ 'settings.workshopName' | translate }}</span>
-            <input
-              [(ngModel)]="workshopNameDraft"
-              name="workshopNameDraft"
-              required
-            />
-          </label>
-          <label>
-            <span>{{ 'settings.productionPricePerM2' | translate }}</span>
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              [(ngModel)]="productionPricePerM2"
-              name="productionPricePerM2"
-              [placeholder]="'settings.productionPricePerM2Ph' | translate"
-            />
-          </label>
-          <p class="panel__hint">{{ 'settings.productionPriceHint' | translate }}</p>
-          <button type="submit" class="btn btn--primary">{{ 'common.save' | translate }}</button>
-        </form>
+    <div class="settings__side">
+      @if (primaryWorkshop(); as workshop) {
+        <article class="card panel panel--workshop">
+          <h2>{{ 'settings.workshop' | translate }}</h2>
+          <p class="panel__hint">{{ 'settings.workshopHint' | translate }}</p>
+          <form class="workshop-rename" (ngSubmit)="renamePrimaryWorkshop()">
+            <label>
+              <span>{{ 'settings.workshopName' | translate }}</span>
+              <input
+                [(ngModel)]="workshopNameDraft"
+                name="workshopNameDraft"
+                required
+              />
+            </label>
+            <label>
+              <span>{{ 'settings.productionPricePerM2' | translate }}</span>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                [(ngModel)]="productionPricePerM2"
+                name="productionPricePerM2"
+                [placeholder]="'settings.productionPricePerM2Ph' | translate"
+              />
+            </label>
+            <p class="panel__hint">{{ 'settings.productionPriceHint' | translate }}</p>
+            <button type="submit" class="btn btn--primary">{{ 'common.save' | translate }}</button>
+          </form>
+        </article>
+      }
+
+      <article class="card panel panel--password">
+        <h2>{{ 'settings.passwordTitle' | translate }}</h2>
+        <p class="panel__hint">{{ 'settings.passwordHint' | translate }}</p>
+        <p class="password-steps">
+          {{ 'settings.passwordStep' | translate: { step: passwordStep() === 'current' ? 1 : 2 } }}
+        </p>
+
+        @if (passwordError(); as pwdErr) {
+          <p class="page__error">{{ pwdErr | translate }}</p>
+        }
+
+        @if (passwordStep() === 'current') {
+          <form class="workshop-rename" (ngSubmit)="continuePasswordStep()">
+            <label>
+              <span>{{ 'settings.passwordCurrent' | translate }}</span>
+              <input
+                type="password"
+                [(ngModel)]="currentPassword"
+                name="currentPassword"
+                autocomplete="current-password"
+                required
+              />
+            </label>
+            <button type="submit" class="btn btn--primary">
+              {{ 'settings.passwordContinue' | translate }}
+            </button>
+          </form>
+        } @else {
+          <form class="workshop-rename" (ngSubmit)="submitPasswordChange()">
+            <label>
+              <span>{{ 'settings.passwordNew' | translate }}</span>
+              <input
+                type="password"
+                [(ngModel)]="newPassword"
+                name="newPassword"
+                autocomplete="new-password"
+                required
+                minlength="8"
+              />
+            </label>
+            <label>
+              <span>{{ 'settings.passwordConfirm' | translate }}</span>
+              <input
+                type="password"
+                [(ngModel)]="confirmPassword"
+                name="confirmPassword"
+                autocomplete="new-password"
+                required
+                minlength="8"
+              />
+            </label>
+            <div class="password-actions">
+              <button
+                type="button"
+                class="btn btn--ghost"
+                (click)="backPasswordStep()"
+                [disabled]="passwordSaving()"
+              >
+                {{ 'common.back' | translate }}
+              </button>
+              <button type="submit" class="btn btn--primary" [disabled]="passwordSaving()">
+                {{ 'settings.passwordSubmit' | translate }}
+              </button>
+            </div>
+          </form>
+        }
       </article>
-    }
+    </div>
 
     <article class="card panel panel--elements">
       <h2>{{ 'settings.sectors' | translate }}</h2>

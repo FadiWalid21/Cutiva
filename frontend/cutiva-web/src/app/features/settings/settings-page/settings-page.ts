@@ -3,11 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
+import { AuthApi } from '../../../core/api/auth.api';
 import { Material, MaterialsApi } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { WorkshopsApi } from '../../../core/api/workshops.api';
 import { MARKET_MATERIALS_SECTOR_CODE } from '../../../core/constants/market';
+import { apiErrorMessage } from '../../../core/http/api-error';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
+
+type PasswordStep = 'current' | 'new';
 
 @Component({
   selector: 'app-settings-page',
@@ -19,6 +23,7 @@ export class SettingsPage implements OnInit {
   private readonly workshopsApi = inject(WorkshopsApi);
   private readonly sectorsApi = inject(SectorsApi);
   private readonly materialsApi = inject(MaterialsApi);
+  private readonly authApi = inject(AuthApi);
   readonly workshopContext = inject(WorkshopContextService);
   readonly marketLink = '/resources';
 
@@ -28,6 +33,13 @@ export class SettingsPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly notice = signal<string | null>(null);
   readonly linkDrafts = signal<Record<string, string>>({});
+
+  readonly passwordStep = signal<PasswordStep>('current');
+  readonly passwordSaving = signal(false);
+  readonly passwordError = signal<string | null>(null);
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
 
   readonly primaryWorkshop = computed(
     () =>
@@ -192,5 +204,68 @@ export class SettingsPage implements OnInit {
       return `${sector.materialCode} — ${sector.materialName}`;
     }
     return '';
+  }
+
+  continuePasswordStep(): void {
+    this.passwordError.set(null);
+    if (!this.currentPassword.trim()) {
+      this.passwordError.set('settings.passwordCurrentRequired');
+      return;
+    }
+    this.passwordStep.set('new');
+  }
+
+  backPasswordStep(): void {
+    this.passwordError.set(null);
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordStep.set('current');
+  }
+
+  submitPasswordChange(): void {
+    this.passwordError.set(null);
+    const current = this.currentPassword;
+    const next = this.newPassword;
+    const confirm = this.confirmPassword;
+
+    if (!next || next.length < 8) {
+      this.passwordError.set('auth.validation.passwordMin');
+      return;
+    }
+    if (next !== confirm) {
+      this.passwordError.set('settings.passwordMismatch');
+      return;
+    }
+    if (current === next) {
+      this.passwordError.set('auth.change.sameAsCurrent');
+      return;
+    }
+
+    this.passwordSaving.set(true);
+    this.authApi.changePassword({ currentPassword: current, newPassword: next }).subscribe({
+      next: () => {
+        this.passwordSaving.set(false);
+        this.resetPasswordForm();
+        this.notice.set('settings.passwordChanged');
+      },
+      error: (err) => {
+        this.passwordSaving.set(false);
+        const key = apiErrorMessage(err, 'settings.passwordChangeError');
+        this.passwordError.set(key);
+        if (key === 'auth.change.wrongCurrent') {
+          this.passwordStep.set('current');
+          this.newPassword = '';
+          this.confirmPassword = '';
+        }
+      },
+    });
+  }
+
+  private resetPasswordForm(): void {
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordStep.set('current');
+    this.passwordError.set(null);
   }
 }

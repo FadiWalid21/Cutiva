@@ -12,6 +12,13 @@ public interface IPasswordResetService
         string code,
         string newPassword,
         CancellationToken cancellationToken);
+
+    Task<ChangePasswordOutcome> ChangePasswordAsync(
+        string userId,
+        string currentPassword,
+        string newPassword,
+        bool arabic,
+        CancellationToken cancellationToken);
 }
 
 public enum ForgotPasswordOutcome
@@ -25,4 +32,13 @@ public enum PasswordResetOutcome
     Succeeded,
     InvalidOrExpired,
     WeakPassword
+}
+
+public enum ChangePasswordOutcome
+{
+    Succeeded,
+    UserNotFound,
+    WrongCurrentPassword,
+    WeakPassword,
+    SameAsCurrent
 }

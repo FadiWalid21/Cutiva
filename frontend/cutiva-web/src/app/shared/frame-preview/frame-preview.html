@@ -50,35 +50,79 @@
         </defs>
 
         @if (kind() === 'hopper') {
-          <!-- Side elevation: wall, vertical frame, top-hinged sash open downward -->
+          <!-- Side elevation: wall | frame section | top-hinged sash open inward -->
           <line
             [attr.x1]="geometry().wallX"
-            [attr.y1]="geometry().y - 2"
+            [attr.y1]="geometry().y - 4"
             [attr.x2]="geometry().wallX"
-            [attr.y2]="geometry().y + geometry().h + 2"
-            stroke="rgba(0,0,0,0.28)"
-            stroke-width="2.2"
+            [attr.y2]="geometry().sillY + 6"
+            stroke="rgba(0,0,0,0.3)"
+            stroke-width="2.4"
             stroke-linecap="round"
           />
+          <!-- Floor cue under sill -->
+          <line
+            [attr.x1]="geometry().wallX - 4"
+            [attr.y1]="geometry().sillY + 6"
+            [attr.x2]="geometry().frameBackX + 10"
+            [attr.y2]="geometry().sillY + 6"
+            stroke="rgba(0,0,0,0.14)"
+            stroke-width="1.2"
+            stroke-dasharray="3 2"
+          />
+          <!-- Frame outer face -->
           <rect
             [attr.x]="geometry().frameFrontX"
             [attr.y]="geometry().y"
             [attr.width]="geometry().frameDepth"
             [attr.height]="geometry().h"
-            rx="1.5"
+            rx="1.2"
             [attr.fill]="'url(#' + gradientId() + ')'"
             stroke="rgba(0,0,0,0.22)"
-            stroke-width="0.8"
+            stroke-width="0.75"
           />
-          <!-- Closed-position cue (dashed vertical) -->
+          <!-- Frame inner pocket -->
+          <rect
+            [attr.x]="geometry().pocketX"
+            [attr.y]="geometry().pocketY"
+            [attr.width]="geometry().pocketW"
+            [attr.height]="geometry().pocketH"
+            rx="0.6"
+            fill="rgba(20,30,40,0.14)"
+            stroke="rgba(0,0,0,0.12)"
+            stroke-width="0.4"
+          />
+          <!-- Head / sill lips -->
+          <rect
+            [attr.x]="geometry().lipX"
+            [attr.y]="geometry().y"
+            [attr.width]="geometry().lipW"
+            [attr.height]="geometry().headLipH"
+            rx="0.8"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.2)"
+            stroke-width="0.5"
+          />
+          <rect
+            [attr.x]="geometry().lipX"
+            [attr.y]="geometry().sillLipY"
+            [attr.width]="geometry().lipW"
+            [attr.height]="geometry().sillLipH"
+            rx="0.8"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.2)"
+            stroke-width="0.5"
+          />
+          <!-- Closed sash ghost -->
           <line
             [attr.x1]="geometry().closedSashX"
             [attr.y1]="geometry().hingeY"
             [attr.x2]="geometry().closedSashX"
-            [attr.y2]="geometry().hingeY + geometry().arcR"
-            stroke="rgba(0,0,0,0.22)"
-            stroke-width="1.1"
-            stroke-dasharray="2.5 2"
+            [attr.y2]="geometry().closedTipY"
+            stroke="rgba(0,0,0,0.28)"
+            stroke-width="1.35"
+            stroke-dasharray="2.8 2.2"
+            stroke-linecap="round"
           />
           <!-- Swing arc -->
           <path
@@ -86,7 +130,7 @@
               'M ' +
               geometry().closedSashX +
               ' ' +
-              (geometry().hingeY + geometry().arcR) +
+              geometry().closedTipY +
               ' A ' +
               geometry().arcR +
               ' ' +
@@ -97,42 +141,41 @@
               geometry().sashTipY
             "
             fill="none"
-            stroke="rgba(13,148,136,0.45)"
-            stroke-width="1.2"
-            stroke-dasharray="3 2.5"
+            stroke="rgba(13,148,136,0.5)"
+            stroke-width="1.15"
+            stroke-dasharray="3 2.4"
           />
+          <!-- Open sash glass -->
           <polygon
             [attr.points]="geometry().hopperPoints"
             [attr.fill]="'url(#' + gradientId() + '-glass)'"
-            stroke="rgba(0,0,0,0.35)"
-            stroke-width="0.9"
+            stroke="rgba(0,0,0,0.28)"
+            stroke-width="0.7"
+          />
+          <!-- Aluminum rails -->
+          <polygon
+            [attr.points]="geometry().hopperRailOuter"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.2)"
+            stroke-width="0.35"
+          />
+          <polygon
+            [attr.points]="geometry().hopperRailInner"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.2)"
+            stroke-width="0.35"
           />
           @if (isDouble()) {
             <line
-              [attr.x1]="geometry().hingeX - 1"
-              [attr.y1]="geometry().hingeY + geometry().arcR * 0.28"
-              [attr.x2]="geometry().sashTipX + 2"
-              [attr.y2]="geometry().sashTipY - geometry().arcR * 0.12"
+              [attr.x1]="geometry().glassMidX1"
+              [attr.y1]="geometry().glassMidY1"
+              [attr.x2]="geometry().glassMidX2"
+              [attr.y2]="geometry().glassMidY2"
               stroke="rgba(255,255,255,0.55)"
               [attr.stroke-width]="geometry().iguGap"
-              opacity="0.75"
+              opacity="0.8"
             />
           }
-          <!-- Hinge mark at top -->
-          <circle
-            [attr.cx]="geometry().hingeX"
-            [attr.cy]="geometry().hingeY"
-            r="2.4"
-            [attr.fill]="finish().dark"
-            stroke="rgba(0,0,0,0.25)"
-            stroke-width="0.4"
-          />
-          <circle
-            [attr.cx]="geometry().hingeX"
-            [attr.cy]="geometry().hingeY"
-            r="1"
-            [attr.fill]="finish().light"
-          />
         } @else if (kind() === 'window') {
           <!-- Outer aluminum frame -->
           <rect
@@ -343,6 +386,20 @@
 
         <!-- Handles drawn last so role-color overlays never hide them -->
         @if (kind() === 'hopper') {
+          <circle
+            [attr.cx]="geometry().hingeX"
+            [attr.cy]="geometry().hingeY"
+            [attr.r]="geometry().hopHingeR"
+            [attr.fill]="finish().dark"
+            stroke="rgba(0,0,0,0.25)"
+            stroke-width="0.4"
+          />
+          <circle
+            [attr.cx]="geometry().hingeX"
+            [attr.cy]="geometry().hingeY"
+            [attr.r]="geometry().hopHingeR * 0.4"
+            [attr.fill]="finish().light"
+          />
           <g
             [attr.transform]="
               'translate(' + geometry().hopHandleX + ',' + geometry().hopHandleY + ')'

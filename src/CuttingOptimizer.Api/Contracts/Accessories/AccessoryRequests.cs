@@ -9,7 +9,7 @@ public sealed record CreateAccessoryRequest(
     string Name,
 
     [Required]
-    [Range(typeof(decimal), "0.01", "999999999")]
+    [Range(typeof(decimal), "0.01", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal UnitPrice,
 
     [StringLength(100)]
@@ -23,7 +23,7 @@ public sealed record UpdateAccessoryRequest(
     string Name,
 
     [Required]
-    [Range(typeof(decimal), "0.01", "999999999")]
+    [Range(typeof(decimal), "0.01", "999999999", ParseLimitsInInvariantCulture = true)]
     decimal UnitPrice,
 
     [StringLength(100)]

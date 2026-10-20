@@ -183,6 +183,21 @@
           }
         </a>
       }
+      <a routerLink="/guide" routerLinkActive="is-active" [title]="'nav.userGuide' | translate">
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path
+              d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v16H7.5A2.5 2.5 0 0 0 5 21.5V5.5Z"
+              stroke-linejoin="round"
+            />
+            <path d="M5 19.5A2.5 2.5 0 0 1 7.5 17H19" stroke-linecap="round" />
+            <path d="M9 7h6M9 11h4" stroke-linecap="round" />
+          </svg>
+        </span>
+        @if (!collapsed()) {
+          <span>{{ 'nav.userGuide' | translate }}</span>
+        }
+      </a>
       <a routerLink="/settings" routerLinkActive="is-active" [title]="'nav.settings' | translate">
         <span class="sidebar__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

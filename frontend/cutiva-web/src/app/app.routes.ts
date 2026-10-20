@@ -19,6 +19,7 @@ import { SettingsPage } from './features/settings/settings-page/settings-page';
 import { QuotePage } from './features/quotes/quote-page/quote-page';
 import { QuotesList } from './features/quotes/quotes-list/quotes-list';
 import { ReportsPage } from './features/reports/reports-page/reports-page';
+import { GuidePage } from './features/guide/guide-page/guide-page';
 import { Login } from './features/auth/login/login';
 import { ForgotPassword } from './features/auth/forgot-password/forgot-password';
 import { LandingPage } from './features/landing/landing-page';
@@ -100,6 +101,7 @@ export const routes: Routes = [
         canActivate: [planFeatureActivate(PlanFeatureCodes.workshopReports)],
         component: ReportsPage,
       },
+      { path: 'guide', component: GuidePage },
       { path: 'settings', component: SettingsPage },
     ],
   },

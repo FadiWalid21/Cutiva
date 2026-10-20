@@ -1,0 +1,25 @@
+<figure class="diag" #diagram [class.diag--labels-off]="!showLabels()">
+  <svg viewBox="0 0 480 160" role="img" [attr.aria-label]="'guide.diagrams.overlapAria' | translate">
+    <rect class="diag__outer" x="24" y="36" width="432" height="72" rx="2" />
+    <rect class="diag__leaf" x="36" y="46" width="210" height="52" rx="1" />
+    <rect class="diag__leaf" x="226" y="46" width="218" height="52" rx="1" />
+    <rect class="diag__overlap-zone" x="226" y="46" width="28" height="52" rx="1" />
+
+    <g class="diag__labels">
+      <text x="140" y="76" text-anchor="middle">{{ 'guide.diagrams.sash1' | translate }}</text>
+      <text x="340" y="76" text-anchor="middle">{{ 'guide.diagrams.sash2' | translate }}</text>
+      <text x="240" y="28" text-anchor="middle" class="diag__o-label">
+        O — {{ 'guide.diagrams.overlap' | translate }}
+      </text>
+      <text x="240" y="132" text-anchor="middle">
+        W — {{ 'guide.diagrams.totalWidth' | translate }}
+      </text>
+      <text x="240" y="150" text-anchor="middle" class="diag__formula">
+        {{ 'guide.diagrams.effectiveWidth' | translate }}
+      </text>
+    </g>
+
+    <line class="diag__dim" x1="24" y1="118" x2="456" y2="118" />
+  </svg>
+  <figcaption>{{ 'guide.diagrams.overlapCaption' | translate }}</figcaption>
+</figure>

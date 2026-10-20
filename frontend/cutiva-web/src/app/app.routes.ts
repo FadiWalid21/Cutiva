@@ -26,6 +26,7 @@ import { LandingPage } from './features/landing/landing-page';
 import { AdminOverview } from './features/admin/admin-overview/admin-overview';
 import { AdminClients } from './features/admin/admin-clients/admin-clients';
 import { AdminPlans } from './features/admin/admin-plans/admin-plans';
+import { AdminFeedback } from './features/admin/admin-feedback/admin-feedback';
 
 export const routes: Routes = [
   {
@@ -55,6 +56,7 @@ export const routes: Routes = [
       { path: '', pathMatch: 'full', component: AdminOverview },
       { path: 'clients', component: AdminClients },
       { path: 'plans', component: AdminPlans },
+      { path: 'feedback', component: AdminFeedback },
     ],
   },
   {

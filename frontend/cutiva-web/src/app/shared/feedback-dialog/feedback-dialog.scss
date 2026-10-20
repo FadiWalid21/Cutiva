@@ -1,0 +1,142 @@
+.fb {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 14, 16, 0.45);
+  opacity: 0;
+}
+
+.fb__panel {
+  width: min(420px, 100%);
+  background: var(--color-surface-solid);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-soft);
+  padding: 1.15rem 1.25rem 1.3rem;
+  display: grid;
+  gap: 0.75rem;
+  opacity: 0;
+  transform: translateY(28px) scale(0.94);
+  will-change: transform, opacity;
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb,
+  .fb__panel {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+.fb__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fb__close {
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.35rem;
+}
+
+.fb__muted {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.fb__meta {
+  margin: 0;
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+
+  div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    justify-content: space-between;
+  }
+
+  dt {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+}
+
+.fb__stars {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.fb__star {
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-muted) 55%, #ccc);
+  font-size: 1.75rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.15rem;
+
+  &.is-on {
+    color: #b8924f;
+  }
+}
+
+.fb__comment {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+
+  textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+    font: inherit;
+    color: var(--color-text);
+    background: var(--color-surface-elevated, transparent);
+    border: 1px solid var(--color-border-strong, var(--color-border));
+    border-radius: 0.45rem;
+    padding: 0.55rem 0.65rem;
+  }
+}
+
+.fb__error {
+  margin: 0;
+  color: var(--color-danger-text, #9a2f2f);
+  font-size: 0.88rem;
+}
+
+.fb__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

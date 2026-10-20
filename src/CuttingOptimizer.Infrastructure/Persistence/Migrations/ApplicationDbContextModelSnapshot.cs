@@ -1193,6 +1193,56 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("Workshops");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OwnerDisplayName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Trigger")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<Guid?>("WorkshopId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAtUtc");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WorkshopId");
+
+                    b.ToTable("WorkshopFeedbacks", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1916,6 +1966,16 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Material");
 
                     b.Navigation("TemplatePart");
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopFeedback", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.Workshop", "Workshop")
+                        .WithMany()
+                        .HasForeignKey("WorkshopId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Workshop");
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.WorkshopSubscription", b =>

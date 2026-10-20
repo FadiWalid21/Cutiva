@@ -1,8 +1,11 @@
 using System.Globalization;
 using CuttingOptimizer.Application.Abstractions.Admin;
 using CuttingOptimizer.Application.Features.Admin;
+using CuttingOptimizer.Application.Features.Feedback;
+using CuttingOptimizer.Application.Features.Feedback.Queries.ListFeedback;
 using CuttingOptimizer.Domain.Constants;
 using CuttingOptimizer.Infrastructure.Admin;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +14,7 @@ namespace CuttingOptimizer.Api.Controllers;
 [Authorize(Roles = AppRoles.Admin)]
 [ApiController]
 [Route("api/admin")]
-public sealed class AdminController(IAdminClientService admin) : ControllerBase
+public sealed class AdminController(IAdminClientService admin, ISender sender) : ControllerBase
 {
     [HttpGet("clients")]
     public async Task<ActionResult<IReadOnlyList<AdminClientListItemDto>>> ListClients(
@@ -174,6 +177,15 @@ public sealed class AdminController(IAdminClientService admin) : ControllerBase
         CancellationToken cancellationToken)
     {
         return Ok(await admin.GetReportSummaryAsync(cancellationToken));
+    }
+
+    [HttpGet("feedback")]
+    public async Task<ActionResult<IReadOnlyList<WorkshopFeedbackDto>>> ListFeedback(
+        [FromQuery] int take = 100,
+        CancellationToken cancellationToken = default)
+    {
+        var items = await sender.Send(new ListFeedbackQuery(take), cancellationToken);
+        return Ok(items);
     }
 
     private static bool IsArabicRequest()

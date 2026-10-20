@@ -29,26 +29,14 @@ public sealed class CreateMaterialCommandHandler(
             ? null
             : request.Description.Trim();
 
-        var existing = await dbContext.Materials
-            .FirstOrDefaultAsync(
+        var codeExists = await dbContext.Materials
+            .AnyAsync(
                 material => material.SectorId == request.SectorId
                             && material.Code == code,
                 cancellationToken);
 
-        if (existing is not null)
-        {
-            if (existing.IsActive)
-                return new CreateMaterialCodeExists(code);
-
-            existing.Name = name;
-            existing.Description = description;
-            existing.Category = request.Category;
-            existing.ThicknessMm = request.ThicknessMm;
-            existing.IsActive = true;
-
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return new CreateMaterialSucceeded(existing.Id, code, Reactivated: true);
-        }
+        if (codeExists)
+            return new CreateMaterialCodeExists(code);
 
         var created = new Material
         {

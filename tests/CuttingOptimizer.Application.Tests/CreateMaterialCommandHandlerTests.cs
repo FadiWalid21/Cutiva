@@ -41,7 +41,7 @@ public sealed class CreateMaterialCommandHandlerTests
     }
 
     [Fact]
-    public async Task Create_AfterSoftDelete_ReactivatesSameRowWithNewValues()
+    public async Task Create_AfterHardDelete_InsertsNewRowWithSameCode()
     {
         await using var db = MaterialsTestDb.Create();
         var sectorId = await SeedMarketSectorAsync(db);
@@ -51,17 +51,41 @@ public sealed class CreateMaterialCommandHandlerTests
         var deleted = await new DeleteMaterialHandler(db)
             .Handle(new DeleteMaterialCommand(first.Id), CancellationToken.None);
         Assert.IsType<DeleteMaterialSucceeded>(deleted);
-        Assert.False((await db.Materials.SingleAsync()).IsActive);
+        Assert.Equal(0, await db.Materials.CountAsync());
 
         var result = await CreateAsync(db, sectorId, "al-01", "New name", thicknessMm: 1.4m);
 
         var ok = Assert.IsType<CreateMaterialSucceeded>(result);
-        Assert.True(ok.Reactivated);
-        Assert.Equal(first.Id, ok.Id);
+        Assert.False(ok.Reactivated);
+        Assert.NotEqual(first.Id, ok.Id);
         var saved = await db.Materials.SingleAsync();
-        Assert.True(saved.IsActive);
         Assert.Equal("New name", saved.Name);
         Assert.Equal(1.4m, saved.ThicknessMm);
+    }
+
+    [Fact]
+    public async Task Delete_WhenReferencedByRequiredCut_ReturnsInUse()
+    {
+        await using var db = MaterialsTestDb.Create();
+        var sectorId = await SeedMarketSectorAsync(db);
+        var created = Assert.IsType<CreateMaterialSucceeded>(
+            await CreateAsync(db, sectorId, "AL-01", "In use"));
+
+        db.RequiredCuts.Add(new RequiredCut
+        {
+            ProjectSectionId = Guid.NewGuid(),
+            MaterialId = created.Id,
+            Name = "rail",
+            LengthMm = 1000,
+            Quantity = 1
+        });
+        await db.SaveChangesAsync();
+
+        var deleted = await new DeleteMaterialHandler(db)
+            .Handle(new DeleteMaterialCommand(created.Id), CancellationToken.None);
+
+        Assert.IsType<DeleteMaterialInUse>(deleted);
+        Assert.Equal(1, await db.Materials.CountAsync());
     }
 
     [Fact]
@@ -104,6 +128,12 @@ internal sealed class MaterialsTestDbContext(DbContextOptions<MaterialsTestDbCon
     public DbSet<Sector> Sectors => Set<Sector>();
     public DbSet<Material> Materials => Set<Material>();
     public DbSet<StockBar> StockBars => Set<StockBar>();
+    public DbSet<RequiredCut> RequiredCuts => Set<RequiredCut>();
+    public DbSet<CuttingPlan> CuttingPlans => Set<CuttingPlan>();
+    public DbSet<CuttingPlanBar> CuttingPlanBars => Set<CuttingPlanBar>();
+    public DbSet<TemplatePart> TemplateParts => Set<TemplatePart>();
+    public DbSet<TemplatePartAllowedMaterial> TemplatePartAllowedMaterials => Set<TemplatePartAllowedMaterial>();
+    public DbSet<ProjectItemPartChoice> ProjectItemPartChoices => Set<ProjectItemPartChoice>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -116,6 +146,48 @@ internal sealed class MaterialsTestDbContext(DbContextOptions<MaterialsTestDbCon
         {
             b.Ignore(m => m.Sector);
             b.Ignore(m => m.RequiredCuts);
+            b.Ignore(m => m.StockBars);
+        });
+        modelBuilder.Entity<StockBar>(b =>
+        {
+            b.Ignore(s => s.Material);
+        });
+        modelBuilder.Entity<RequiredCut>(b =>
+        {
+            b.Ignore(c => c.ProjectSection);
+            b.Ignore(c => c.Material);
+            b.Ignore(c => c.SourceProjectItem);
+        });
+        modelBuilder.Entity<CuttingPlan>(b =>
+        {
+            b.Ignore(p => p.Workshop);
+            b.Ignore(p => p.Material);
+            b.Ignore(p => p.Project);
+            b.Ignore(p => p.Bars);
+            b.Ignore(p => p.UnallocatedPieces);
+        });
+        modelBuilder.Entity<CuttingPlanBar>(entity =>
+        {
+            entity.Ignore(x => x.CuttingPlan);
+            entity.Ignore(x => x.StockBar);
+            entity.Ignore(x => x.Pieces);
+        });
+        modelBuilder.Entity<TemplatePart>(b =>
+        {
+            b.Ignore(t => t.ProductVariant);
+            b.Ignore(t => t.DefaultAluminumMaterial);
+            b.Ignore(t => t.AllowedMaterials);
+        });
+        modelBuilder.Entity<TemplatePartAllowedMaterial>(b =>
+        {
+            b.Ignore(a => a.TemplatePart);
+            b.Ignore(a => a.Material);
+        });
+        modelBuilder.Entity<ProjectItemPartChoice>(b =>
+        {
+            b.Ignore(c => c.ProjectItem);
+            b.Ignore(c => c.TemplatePart);
+            b.Ignore(c => c.Material);
         });
     }
 }
@@ -132,6 +204,13 @@ internal sealed class MaterialsTestDb : IApplicationDbContext, IAsyncDisposable
     public DbSet<Sector> Sectors => context.Sectors;
     public DbSet<Material> Materials => context.Materials;
     public DbSet<StockBar> StockBars => context.StockBars;
+    public DbSet<RequiredCut> RequiredCuts => context.RequiredCuts;
+    public DbSet<CuttingPlan> CuttingPlans => context.CuttingPlans;
+    public DbSet<CuttingPlanBar> CuttingPlanBars => context.CuttingPlanBars;
+    public DbSet<TemplatePart> TemplateParts => context.TemplateParts;
+    public DbSet<TemplatePartAllowedMaterial> TemplatePartAllowedMaterials =>
+        context.TemplatePartAllowedMaterials;
+    public DbSet<ProjectItemPartChoice> ProjectItemPartChoices => context.ProjectItemPartChoices;
 
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         context.SaveChangesAsync(cancellationToken);
@@ -141,9 +220,6 @@ internal sealed class MaterialsTestDb : IApplicationDbContext, IAsyncDisposable
     public DbSet<Workshop> Workshops => throw new NotSupportedException();
     public DbSet<Project> Projects => throw new NotSupportedException();
     public DbSet<ProjectSection> ProjectSections => throw new NotSupportedException();
-    public DbSet<RequiredCut> RequiredCuts => throw new NotSupportedException();
-    public DbSet<CuttingPlan> CuttingPlans => throw new NotSupportedException();
-    public DbSet<CuttingPlanBar> CuttingPlanBars => throw new NotSupportedException();
     public DbSet<CuttingPlanPiece> CuttingPlanPieces => throw new NotSupportedException();
     public DbSet<CuttingPlanUnallocatedPiece> CuttingPlanUnallocatedPieces => throw new NotSupportedException();
     public DbSet<ClientQuote> ClientQuotes => throw new NotSupportedException();
@@ -160,13 +236,10 @@ internal sealed class MaterialsTestDb : IApplicationDbContext, IAsyncDisposable
     public DbSet<GlassSpec> GlassSpecs => throw new NotSupportedException();
     public DbSet<ProductType> ProductTypes => throw new NotSupportedException();
     public DbSet<ProductVariant> ProductVariants => throw new NotSupportedException();
-    public DbSet<TemplatePart> TemplateParts => throw new NotSupportedException();
-    public DbSet<TemplatePartAllowedMaterial> TemplatePartAllowedMaterials => throw new NotSupportedException();
     public DbSet<TemplateGlassSlot> TemplateGlassSlots => throw new NotSupportedException();
     public DbSet<TemplateAccessorySlot> TemplateAccessorySlots => throw new NotSupportedException();
     public DbSet<ProjectItem> ProjectItems => throw new NotSupportedException();
     public DbSet<ProjectItemInspection> ProjectItemInspections => throw new NotSupportedException();
-    public DbSet<ProjectItemPartChoice> ProjectItemPartChoices => throw new NotSupportedException();
     public DbSet<ProjectItemGlassChoice> ProjectItemGlassChoices => throw new NotSupportedException();
     public DbSet<ProjectItemAccessoryChoice> ProjectItemAccessoryChoices => throw new NotSupportedException();
     public DbSet<WorkshopFeedback> WorkshopFeedbacks => throw new NotSupportedException();

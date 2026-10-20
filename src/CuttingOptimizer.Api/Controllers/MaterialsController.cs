@@ -103,6 +103,10 @@ public sealed class MaterialsController(
             {
                 message = localizer["MaterialNotFound"].Value
             }),
+            DeleteMaterialInUse => Conflict(new
+            {
+                message = localizer["MaterialInUse"].Value
+            }),
             _ => StatusCode(500)
         };
     }

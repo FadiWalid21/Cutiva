@@ -9,3 +9,5 @@ public abstract record DeleteMaterialResult;
 public sealed record DeleteMaterialSucceeded : DeleteMaterialResult;
 
 public sealed record DeleteMaterialNotFound : DeleteMaterialResult;
+
+public sealed record DeleteMaterialInUse : DeleteMaterialResult;

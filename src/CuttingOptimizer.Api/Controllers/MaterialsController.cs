@@ -26,7 +26,7 @@ public sealed class MaterialsController(
         [FromBody] CreateMaterialRequest request,
         CancellationToken cancellationToken)
     {
-        var materialId = await sender.Send(
+        var result = await sender.Send(
             new CreateMaterialCommand(
                 request.SectorId,
                 request.Code,
@@ -36,26 +36,31 @@ public sealed class MaterialsController(
                 request.ThicknessMm),
             cancellationToken);
 
-        if (materialId is null)
+        return result switch
         {
-            return Conflict(new
+            CreateMaterialSucceeded ok => Created(
+                $"/api/materials/{ok.Id}",
+                new
+                {
+                    id = ok.Id,
+                    request.SectorId,
+                    code = ok.Code,
+                    request.Name,
+                    request.Description,
+                    request.Category,
+                    request.ThicknessMm,
+                    reactivated = ok.Reactivated
+                }),
+            CreateMaterialSectorNotFound => NotFound(new
             {
-                message = localizer["SectorNotFoundOrMaterialCodeExists"].Value
-            });
-        }
-
-        return Created(
-            $"/api/materials/{materialId}",
-            new
+                message = localizer["SectorNotFound"].Value
+            }),
+            CreateMaterialCodeExists exists => Conflict(new
             {
-                id = materialId,
-                request.SectorId,
-                code = request.Code.Trim().ToUpperInvariant(),
-                request.Name,
-                request.Description,
-                request.Category,
-                request.ThicknessMm
-            });
+                message = localizer["MaterialCodeExists", exists.Code].Value
+            }),
+            _ => StatusCode(500)
+        };
     }
 
     [HttpPut("{id:guid}")]

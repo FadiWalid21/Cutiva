@@ -40,6 +40,7 @@ public static class IdentityDataSeeder
         await EnsurePlansAsync(db);
         await EnsurePlanFeaturesAsync(db);
         await EnsureFxFallbackAsync(db);
+        await EnsureMarketSectorAsync(db);
 
         var admin = await userManager.FindByEmailAsync(DefaultAdminEmail);
         if (admin is null)
@@ -179,6 +180,22 @@ public static class IdentityDataSeeder
         }
 
         return [];
+    }
+
+    private static async Task EnsureMarketSectorAsync(ApplicationDbContext db)
+    {
+        var exists = await db.Sectors
+            .AnyAsync(s => s.Code.ToUpper() == MarketSector.Code);
+        if (exists)
+            return;
+
+        db.Sectors.Add(new Sector
+        {
+            Code = MarketSector.Code,
+            Name = MarketSector.Name,
+            MaterialId = null
+        });
+        await db.SaveChangesAsync();
     }
 
     private static async Task EnsureFxFallbackAsync(ApplicationDbContext db)

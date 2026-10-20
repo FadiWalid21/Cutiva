@@ -8,9 +8,8 @@ import {
 } from '../../core/api/accessories.api';
 import { GlassApi, GlassType } from '../../core/api/glass.api';
 import { MaterialsApi } from '../../core/api/materials.api';
-import { Sector, SectorsApi } from '../../core/api/sectors.api';
+import { SectorsApi } from '../../core/api/sectors.api';
 import {
-  MARKET_MATERIALS_SECTOR_CODE,
   MARKET_MATERIALS_SECTOR_NAME_AR,
   MARKET_MATERIALS_SECTOR_NAME_EN,
 } from '../../core/constants/market';
@@ -196,37 +195,10 @@ export class ResourceQuickAdd implements OnInit {
   }
 
   private ensureMarketSector() {
-    return this.sectorsApi.list().pipe(
-      switchMap((sectors) => {
-        const existing = sectors.find(
-          (s) => s.code.toUpperCase() === MARKET_MATERIALS_SECTOR_CODE,
-        );
-        if (existing) return of(existing);
-
-        const name =
-          this.language.currentLanguage() === 'ar'
-            ? MARKET_MATERIALS_SECTOR_NAME_AR
-            : MARKET_MATERIALS_SECTOR_NAME_EN;
-
-        return this.sectorsApi
-          .create({
-            code: MARKET_MATERIALS_SECTOR_CODE,
-            name,
-            materialId: null,
-          })
-          .pipe(
-            map(
-              (created): Sector => ({
-                id: created.id,
-                code: created.code,
-                name: created.name,
-                materialId: created.materialId,
-                materialCode: null,
-                materialName: null,
-              }),
-            ),
-          );
-      }),
+    return this.sectorsApi.ensureMarketSector(
+      this.language.currentLanguage() === 'ar'
+        ? MARKET_MATERIALS_SECTOR_NAME_AR
+        : MARKET_MATERIALS_SECTOR_NAME_EN,
     );
   }
 }

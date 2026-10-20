@@ -1,7 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
 import { API_BASE_URL } from '../config/api.config';
+import { MARKET_MATERIALS_SECTOR_CODE } from '../constants/market';
 
 export interface Sector {
   id: string;
@@ -47,5 +48,49 @@ export class SectorsApi {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  }
+
+  /**
+   * Returns the shared MAT sector, creating it when missing. A 409 means another
+   * request created it first, so the list is re-read instead of failing.
+   */
+  ensureMarketSector(name: string): Observable<Sector> {
+    const findMarket = (sectors: Sector[]) =>
+      sectors.find((s) => s.code.toUpperCase() === MARKET_MATERIALS_SECTOR_CODE);
+
+    return this.list().pipe(
+      switchMap((sectors) => {
+        const existing = findMarket(sectors);
+        if (existing) return of(existing);
+
+        return this.create({
+          code: MARKET_MATERIALS_SECTOR_CODE,
+          name,
+          materialId: null,
+        }).pipe(
+          map(
+            (created): Sector => ({
+              id: created.id,
+              code: created.code,
+              name: created.name,
+              materialId: created.materialId,
+              materialCode: null,
+              materialName: null,
+            }),
+          ),
+          catchError((err: unknown) => {
+            if (!(err instanceof HttpErrorResponse) || err.status !== 409) {
+              return throwError(() => err);
+            }
+            return this.list().pipe(
+              switchMap((retry) => {
+                const found = findMarket(retry);
+                return found ? of(found) : throwError(() => err);
+              }),
+            );
+          }),
+        );
+      }),
+    );
   }
 }

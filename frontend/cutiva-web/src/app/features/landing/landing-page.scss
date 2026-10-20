@@ -83,6 +83,8 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
+  /* Keep [mark][name] lockup in RTL — do not flip with dir=rtl flex axis. */
+  direction: ltr;
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0.14em;

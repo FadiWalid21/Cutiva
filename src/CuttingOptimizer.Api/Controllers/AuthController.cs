@@ -58,11 +58,19 @@ public sealed class AuthController(
         CancellationToken cancellationToken)
     {
         var arabic = IsArabicRequest();
-        await passwordResetService.RequestForgotPasswordAsync(
+        var outcome = await passwordResetService.RequestForgotPasswordAsync(
             request.Email ?? string.Empty,
             arabic,
             cancellationToken);
-        return NoContent();
+
+        return outcome switch
+        {
+            ForgotPasswordOutcome.Sent => NoContent(),
+            _ => NotFound(new
+            {
+                message = "auth.forgot.emailNotFound"
+            })
+        };
     }
 
     [AllowAnonymous]

@@ -144,12 +144,13 @@
 .sidebar__chevron {
   opacity: 1;
   color: var(--color-muted);
-  /* Flipped vs prior: collapse aims away from content into the rail. */
-  transform: scaleX(-1);
+  /* LTR: collapse aims into the left rail (no mirror). */
+  transform: scaleX(1);
 }
 
 html[dir='rtl'] .sidebar__chevron {
-  transform: scaleX(1);
+  /* RTL: mirror so collapse aims into the right rail. */
+  transform: scaleX(-1);
 }
 
 .sidebar__brand-btn:hover .sidebar__mark,
@@ -209,13 +210,13 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__logo-full {
 
 .app-shell.is-collapsed .sidebar__chevron {
   opacity: 0;
-  /* Expand aims into the content (opposite of collapse). */
-  transform: scaleX(1) scale(0.65);
+  /* LTR: expand aims toward content (opposite of collapse). */
+  transform: scaleX(-1) scale(0.65);
   pointer-events: none;
 }
 
 html[dir='rtl'] .app-shell.is-collapsed .sidebar__chevron {
-  transform: scaleX(-1) scale(0.65);
+  transform: scaleX(1) scale(0.65);
 }
 
 .app-shell.is-collapsed .sidebar__brand-btn:hover .sidebar__logo-mono,

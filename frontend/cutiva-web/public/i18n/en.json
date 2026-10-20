@@ -981,8 +981,17 @@
     "previewW": "Test width (cm)",
     "previewH": "Test height (cm)",
     "previewResult": "Resulting lengths",
+    "previewHint": "Change width and height to update the diagram and cut lengths from this recipe’s formulas.",
     "seededHint": "Sample numbers — edit lengths to match your workshop before use",
     "saved": "Saved.",
+    "roles": {
+      "FrameTop": "Frame top",
+      "FrameBottom": "Frame bottom",
+      "FrameJamb": "Frame jamb",
+      "SashStile": "Sash stile",
+      "SashRail": "Sash rail",
+      "InterlockStile": "Interlock stile"
+    },
     "rules": {
       "PerProduct": "Per product",
       "PerSash": "Per sash"

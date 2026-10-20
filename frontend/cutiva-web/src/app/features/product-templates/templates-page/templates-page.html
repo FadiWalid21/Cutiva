@@ -125,42 +125,59 @@
             <header class="editor-block__head">
               <h2>{{ 'glossary.livePreview' | translate }}</h2>
             </header>
-            <div class="preview-inputs">
-              <label class="field">
-                <span>{{ 'templates.previewW' | translate }}</span>
-                <input
-                  type="number"
-                  min="1"
-                  [ngModel]="previewWidthCm()"
-                  (ngModelChange)="previewWidthCm.set($event)"
-                  name="previewW"
-                />
-              </label>
-              <label class="field">
-                <span>{{ 'templates.previewH' | translate }}</span>
-                <input
-                  type="number"
-                  min="1"
-                  [ngModel]="previewHeightCm()"
-                  (ngModelChange)="previewHeightCm.set($event)"
-                  name="previewH"
-                />
-              </label>
-            </div>
-            @if (previewRows().length) {
-              <ul class="preview-list">
-                @for (row of previewRows(); track row.id) {
-                  <li>
-                    <span>{{ row.name }}</span>
-                    <strong
-                      >{{ row.lengthCm }}
-                      {{ 'glossary.cm' | translate }} ×
-                      {{ row.qty }}</strong
-                    >
-                  </li>
+            <p class="panel__hint preview-block__hint">
+              {{ 'templates.previewHint' | translate }}
+            </p>
+            <div class="preview-layout">
+              <div class="preview-layout__controls">
+                <div class="preview-inputs">
+                  <label class="field">
+                    <span>{{ 'templates.previewW' | translate }}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      [ngModel]="previewWidthCm()"
+                      (ngModelChange)="previewWidthCm.set($event)"
+                      name="previewW"
+                    />
+                  </label>
+                  <label class="field">
+                    <span>{{ 'templates.previewH' | translate }}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      [ngModel]="previewHeightCm()"
+                      (ngModelChange)="previewHeightCm.set($event)"
+                      name="previewH"
+                    />
+                  </label>
+                </div>
+                @if (previewRows().length) {
+                  <ul class="preview-list">
+                    @for (row of previewRows(); track row.id) {
+                      <li>
+                        <span>{{ row.name }}</span>
+                        <strong
+                          >{{ row.lengthCm }}
+                          {{ 'glossary.cm' | translate }} ×
+                          {{ row.qty }}</strong
+                        >
+                      </li>
+                    }
+                  </ul>
                 }
-              </ul>
-            }
+              </div>
+              <div class="preview-layout__diagram">
+                <app-frame-preview
+                  [label]="previewLabel()"
+                  [sectorCode]="previewKindCode()"
+                  [sectorName]="selectedType()?.name || ''"
+                  [widthMm]="previewWidthMm()"
+                  [heightMm]="previewHeightMm()"
+                  [quantity]="1"
+                />
+              </div>
+            </div>
           </section>
 
           <section class="editor-block">
@@ -176,7 +193,7 @@
                 @for (part of v.parts; track part.id) {
                   <form class="part-card" (ngSubmit)="savePart(part)">
                     <div class="part-card__role">
-                      <strong>{{ part.displayName || part.role }}</strong>
+                      <strong>{{ partHeading(part) }}</strong>
                     </div>
 
                     <div class="field-grid">

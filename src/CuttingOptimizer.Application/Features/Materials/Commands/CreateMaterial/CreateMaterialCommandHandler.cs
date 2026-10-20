@@ -2,11 +2,13 @@ using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CuttingOptimizer.Application.Features.Materials.Commands.CreateMaterial;
 
 public sealed class CreateMaterialCommandHandler(
-    IApplicationDbContext dbContext)
+    IApplicationDbContext dbContext,
+    ILogger<CreateMaterialCommandHandler> logger)
     : IRequestHandler<CreateMaterialCommand, Guid?>
 {
     public async Task<Guid?> Handle(
@@ -48,8 +50,37 @@ public sealed class CreateMaterialCommandHandler(
 
         dbContext.Materials.Add(material);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex) when (IsUniqueViolation(ex))
+        {
+            logger.LogWarning(
+                ex,
+                "Duplicate material code {Code} for sector {SectorId}",
+                code,
+                request.SectorId);
+            return null;
+        }
 
         return material.Id;
+    }
+
+    private static bool IsUniqueViolation(DbUpdateException ex)
+    {
+        for (Exception? current = ex; current is not null; current = current.InnerException)
+        {
+            var message = current.Message;
+            if (message.Contains("23505", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("IX_Materials_SectorId_Code", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("duplicate key", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("UNIQUE constraint", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

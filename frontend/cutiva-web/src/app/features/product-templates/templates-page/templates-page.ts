@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AccessoriesApi, Accessory } from '../../../core/api/accessories.api';
 import { Material, MaterialsApi } from '../../../core/api/materials.api';
 import {
@@ -21,10 +21,12 @@ import {
   TemplateAccessorySlot,
   TemplateGlassSlot,
   TemplatePart,
+  TemplatePartRole,
 } from '../../../core/api/product-templates.api';
 import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 import { MotionService } from '../../../core/motion/motion.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 import {
   FormulaAxis,
@@ -40,10 +42,11 @@ import {
   QuickAddResult,
   ResourceQuickAdd,
 } from '../../../shared/resource-quick-add/resource-quick-add';
+import { FramePreview } from '../../../shared/frame-preview/frame-preview';
 
 @Component({
   selector: 'app-templates-page',
-  imports: [FormsModule, TranslatePipe, ResourceQuickAdd],
+  imports: [FormsModule, TranslatePipe, ResourceQuickAdd, FramePreview],
   templateUrl: './templates-page.html',
   styleUrl: './templates-page.scss',
 })
@@ -54,6 +57,8 @@ export class TemplatesPage implements OnInit, AfterViewInit {
   private readonly workshopContext = inject(WorkshopContextService);
   private readonly motion = inject(MotionService);
   private readonly auth = inject(AuthService);
+  private readonly language = inject(LanguageService);
+  private readonly translate = inject(TranslateService);
 
   private readonly root = viewChild<ElementRef<HTMLElement>>('pageRoot');
 
@@ -86,11 +91,25 @@ export class TemplatesPage implements OnInit, AfterViewInit {
     () => this.types().find((t) => t.id === this.selectedTypeId()) ?? null,
   );
 
+  readonly previewWidthMm = computed(() => cmToMm(this.previewWidthCm()));
+  readonly previewHeightMm = computed(() => cmToMm(this.previewHeightCm()));
+
+  readonly previewKindCode = computed(() => {
+    const kind = this.selectedType()?.kind;
+    if (kind === 'Door') return 'DOOR';
+    return 'WIN';
+  });
+
+  readonly previewLabel = computed(
+    () => this.variant()?.name || this.selectedType()?.name || 'Preview',
+  );
+
   readonly previewRows = computed(() => {
     const v = this.variant();
     if (!v) return [];
-    const wMm = cmToMm(this.previewWidthCm());
-    const hMm = cmToMm(this.previewHeightCm());
+    const wMm = this.previewWidthMm();
+    const hMm = this.previewHeightMm();
+    const ar = this.language.currentLanguage() === 'ar';
     return v.parts.map((part) => {
       const lengthMm = computeLengthMm({
         widthMm: wMm,
@@ -104,12 +123,34 @@ export class TemplatesPage implements OnInit, AfterViewInit {
       });
       return {
         id: part.id,
-        name: part.displayName,
+        name: this.partLabel(part.displayName, part.role, ar),
         qty: part.qtyPerUnit,
         lengthCm: formatCm(Math.round(lengthMm)),
       };
     });
   });
+
+  partHeading(part: TemplatePart): string {
+    return this.partLabel(
+      part.displayName,
+      part.role,
+      this.language.currentLanguage() === 'ar',
+    );
+  }
+
+  private partLabel(
+    displayName: string,
+    role: TemplatePartRole,
+    arabic: boolean,
+  ): string {
+    const name = displayName?.trim() || role;
+    if (!arabic) return name;
+    const gloss = this.translate.instant(`templates.roles.${role}`);
+    if (!gloss || gloss === `templates.roles.${role}` || gloss === name) {
+      return name;
+    }
+    return `${name} · ${gloss}`;
+  }
 
   // Editable draft fields for variant header (overlap in cm in UI)
   variantName = '';

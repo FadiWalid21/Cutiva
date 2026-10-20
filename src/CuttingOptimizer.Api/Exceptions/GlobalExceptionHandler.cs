@@ -26,7 +26,9 @@ public sealed class GlobalExceptionHandler(
         {
             logger.LogError(
                 exception,
-                "An unexpected error occurred.");
+                "An unexpected error occurred at {Path}: {Error}",
+                httpContext.Request.Path.Value,
+                exception.GetBaseException().Message);
         }
 
         var problem = new ProblemDetails

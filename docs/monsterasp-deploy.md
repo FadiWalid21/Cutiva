@@ -66,7 +66,9 @@ CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 2. From Vercel login: `fadialhallag@gmail.com` / `Admin123!` (unless changed)
 3. Network: `POST /api/auth/login` → `200` or `401`, **not** `504`
 
-DB migrations and admin seed were applied earlier against the MonsterASP Postgres database.
+DB migrations run automatically on API startup via `MigrateAsync()` (IdentityDataSeeder). After each **Build & publish**, click **Restart** so pending EF migrations apply.
+
+If `POST /api/materials` returns Arabic 500 while `GET /api/materials` works, production may still have leftover glass-era columns (`Kind` NOT NULL). Migration `EnsureMaterialsSchemaAligned` drops those and ensures `Category` / `IsActive` / `ThicknessMm`. Confirm it appears in `__EFMigrationsHistory` after restart; check site logs for the Npgsql message if create still fails.
 
 ## Optional local fallback (not required)
 

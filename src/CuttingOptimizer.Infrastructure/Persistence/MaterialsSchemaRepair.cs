@@ -34,6 +34,37 @@ public static class MaterialsSchemaRepair
 
                 ALTER TABLE "Materials"
                     ADD COLUMN IF NOT EXISTS "ThicknessMm" numeric(10, 2) NULL;
+
+                -- Purge soft-deleted aluminum rows so codes can be reused after hard-delete.
+                UPDATE "Sectors"
+                SET "MaterialId" = NULL
+                WHERE "MaterialId" IN (
+                    SELECT "Id" FROM "Materials" WHERE "IsActive" = FALSE);
+
+                DELETE FROM "StockBars" sb
+                WHERE sb."MaterialId" IN (
+                    SELECT "Id" FROM "Materials" WHERE "IsActive" = FALSE)
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "CuttingPlanBars" cpb
+                    WHERE cpb."StockBarId" = sb."Id");
+
+                DELETE FROM "Materials" m
+                WHERE m."IsActive" = FALSE
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "RequiredCuts" rc WHERE rc."MaterialId" = m."Id")
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "CuttingPlans" cp WHERE cp."MaterialId" = m."Id")
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "TemplatePartAllowedMaterials" tam
+                    WHERE tam."MaterialId" = m."Id")
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "TemplateParts" tp
+                    WHERE tp."DefaultAluminumMaterialId" = m."Id")
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "ProjectItemPartChoices" pc
+                    WHERE pc."MaterialId" = m."Id")
+                  AND NOT EXISTS (
+                    SELECT 1 FROM "StockBars" sb WHERE sb."MaterialId" = m."Id");
                 """,
                 cancellationToken);
 

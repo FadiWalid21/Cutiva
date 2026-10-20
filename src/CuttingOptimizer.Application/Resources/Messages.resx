@@ -16,6 +16,7 @@
   <data name="SectorCodeExists" xml:space="preserve"><value>A sector with this code already exists.</value></data>
   <data name="SectorInUse" xml:space="preserve"><value>Cannot delete a sector used by project sections.</value></data>
   <data name="MaterialNotFound" xml:space="preserve"><value>Material not found.</value></data>
+  <data name="MaterialInUse" xml:space="preserve"><value>Cannot delete a material that is used in a project, template, or cutting plan.</value></data>
   <data name="SectorNotFoundOrMaterialCodeExists" xml:space="preserve"><value>Sector not found or material code already exists.</value></data>
   <data name="MaterialCodeExists" xml:space="preserve"><value>Code {0} is already in the catalog. Use a different code or edit the existing item.</value></data>
   <data name="MaterialNotFoundSimple" xml:space="preserve"><value>The specified material was not found.</value></data>

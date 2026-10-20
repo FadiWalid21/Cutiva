@@ -4,9 +4,13 @@ Production API: `https://cutiva.runasp.net`
 Frontend (Vercel): `https://cutiva-kappa.vercel.app`  
 Repo: `https://github.com/FadiWalid21/Cutiva.git`
 
-## Why login returns 504
+## Why login returns 504 / 500.30
 
-If the site still shows MonsterASP’s **“Your website is ready…”** page, `\wwwroot` has no published API. Fix that with **Git deploy → Build .NET app** (no FTP upload).
+| Symptom | Meaning | Fix |
+|---------|---------|-----|
+| Placeholder “Your website is ready…” | `\wwwroot` has no published API | Git deploy → **Build .NET app** |
+| Browser **504** Gateway Timeout on `/api/auth/login` | Often IIS/proxy while the worker is down or restarting | Check if the site itself returns **500.30** |
+| **HTTP Error 500.30** — ASP.NET Core app failed to start | Process crashed during startup (seed/DB/env) **before** `app.Run()` | Read stdout/event logs; verify `ConnectionStrings__DefaultConnection` (quote `Password='…'` if it contains `=`); **Restart**. Schema repair is best-effort and must not kill startup. |
 
 DevTools **Source: Service Worker** on the login request is normal for the PWA; it does not cause the 504.
 
@@ -67,9 +71,10 @@ CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
 ### Smoke test
 
-1. `https://cutiva.runasp.net/` — must **not** be the placeholder page
-2. From Vercel login: `fadialhallag@gmail.com` / `Admin123!` (unless changed)
-3. Network: `POST /api/auth/login` → `200` or `401`, **not** `504`
+1. `https://cutiva.runasp.net/` — must **not** be the placeholder page or **500.30**
+2. `curl -sS https://cutiva.runasp.net/api/diagnostics/build` → **200** JSON
+3. From Vercel login: `fadialhallag@gmail.com` / `Admin123!` (unless changed)
+4. Network: `POST /api/auth/login` → `200` or `401`, **not** `504` / `500.30`
 
 DB migrations run automatically on API startup via `MigrateAsync()` (IdentityDataSeeder). After each **Build & publish**, click **Restart** so pending EF migrations apply.
 

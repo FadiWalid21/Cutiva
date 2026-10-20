@@ -208,8 +208,20 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-await CuttingOptimizer.Infrastructure.Persistence.IdentityDataSeeder.SeedAllAsync(
-    app.Services);
+try
+{
+    await CuttingOptimizer.Infrastructure.Persistence.IdentityDataSeeder.SeedAllAsync(
+        app.Services);
+}
+catch (Exception ex)
+{
+    var startupLogger = app.Services
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger("Startup");
+    startupLogger.LogCritical(
+        ex,
+        "Startup seed failed — API will still listen. Fix DB/connection string and restart.");
+}
 
 app.Run();
 

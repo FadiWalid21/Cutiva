@@ -1,5 +1,6 @@
 using CuttingOptimizer.Api.Contracts.Materials;
 using CuttingOptimizer.Application.Features.Materials.Commands.CreateMaterial;
+using CuttingOptimizer.Application.Features.Materials.Commands.DeleteMaterial;
 using CuttingOptimizer.Application.Features.Materials.Commands.UpdateMaterial;
 using CuttingOptimizer.Application.Features.Materials.Queries;
 using CuttingOptimizer.Application.Features.Materials.Queries.GetMaterialById;
@@ -77,6 +78,23 @@ public sealed class MaterialsController(
         {
             UpdateMaterialSucceeded ok => Ok(ok.Material),
             UpdateMaterialNotFound => NotFound(new
+            {
+                message = localizer["MaterialNotFound"].Value
+            }),
+            _ => StatusCode(500)
+        };
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new DeleteMaterialCommand(id), cancellationToken);
+        return result switch
+        {
+            DeleteMaterialSucceeded => NoContent(),
+            DeleteMaterialNotFound => NotFound(new
             {
                 message = localizer["MaterialNotFound"].Value
             }),

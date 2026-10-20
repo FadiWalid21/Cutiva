@@ -42,7 +42,13 @@ import {
   QuickAddResult,
   ResourceQuickAdd,
 } from '../../../shared/resource-quick-add/resource-quick-add';
-import { FramePreview } from '../../../shared/frame-preview/frame-preview';
+import {
+  DEFAULT_ROLE_COLORS,
+  FramePreview,
+  PreviewLayout,
+  PreviewPaneStyle,
+  PreviewRole,
+} from '../../../shared/frame-preview/frame-preview';
 
 @Component({
   selector: 'app-templates-page',
@@ -51,6 +57,16 @@ import { FramePreview } from '../../../shared/frame-preview/frame-preview';
   styleUrl: './templates-page.scss',
 })
 export class TemplatesPage implements OnInit, AfterViewInit {
+  readonly roleColors = DEFAULT_ROLE_COLORS;
+  readonly roleLegend: PreviewRole[] = [
+    'FrameTop',
+    'FrameBottom',
+    'FrameJamb',
+    'SashStile',
+    'SashRail',
+    'InterlockStile',
+  ];
+
   private readonly templatesApi = inject(ProductTemplatesApi);
   private readonly materialsApi = inject(MaterialsApi);
   private readonly accessoriesApi = inject(AccessoriesApi);
@@ -94,15 +110,52 @@ export class TemplatesPage implements OnInit, AfterViewInit {
   readonly previewWidthMm = computed(() => cmToMm(this.previewWidthCm()));
   readonly previewHeightMm = computed(() => cmToMm(this.previewHeightCm()));
 
-  readonly previewKindCode = computed(() => {
-    const kind = this.selectedType()?.kind;
-    if (kind === 'Door') return 'DOOR';
-    return 'WIN';
-  });
-
   readonly previewLabel = computed(
     () => this.variant()?.name || this.selectedType()?.name || 'Preview',
   );
+
+  readonly previewLayout = computed<PreviewLayout>(() => {
+    const v = this.variant();
+    const type = this.selectedType();
+    const code = (v?.code ?? '').toUpperCase();
+    const name = `${v?.name ?? ''} ${type?.name ?? ''}`.toUpperCase();
+    if (
+      code.includes('TILT') ||
+      name.includes('TILT') ||
+      name.includes('قلاب')
+    ) {
+      return 'tilt';
+    }
+    if (type?.kind === 'Door' || code.includes('DOOR') || name.includes('باب')) {
+      return 'door';
+    }
+    if (
+      (v?.sashCount ?? 0) >= 2 ||
+      code.includes('SLID') ||
+      name.includes('SLID') ||
+      name.includes('سحاب')
+    ) {
+      return 'sliding';
+    }
+    return 'casement';
+  });
+
+  readonly previewPaneStyle = computed<PreviewPaneStyle>(() => {
+    const v = this.variant();
+    const hasGlass = (v?.glassSlots?.length ?? 0) > 0;
+    if (this.previewLayout() === 'door') {
+      return hasGlass ? 'Structure' : 'Solid';
+    }
+    return 'Double';
+  });
+
+  readonly previewSectorCode = computed(() => {
+    const layout = this.previewLayout();
+    if (layout === 'door') return 'DOOR';
+    if (layout === 'tilt') return 'TILT';
+    if (layout === 'sliding') return 'WIN-SLIDING';
+    return 'WIN-CASEMENT';
+  });
 
   readonly previewRows = computed(() => {
     const v = this.variant();
@@ -123,11 +176,18 @@ export class TemplatesPage implements OnInit, AfterViewInit {
       });
       return {
         id: part.id,
+        role: part.role,
+        color: DEFAULT_ROLE_COLORS[part.role as PreviewRole] ?? '#64748b',
         name: this.partLabel(part.displayName, part.role, ar),
         qty: part.qtyPerUnit,
         lengthCm: formatCm(Math.round(lengthMm)),
       };
     });
+  });
+
+  readonly previewLegend = computed(() => {
+    const roles = new Set(this.previewRows().map((r) => r.role));
+    return this.roleLegend.filter((role) => roles.has(role));
   });
 
   partHeading(part: TemplatePart): string {
@@ -354,12 +414,31 @@ export class TemplatesPage implements OnInit, AfterViewInit {
 
   setOffsetCm(part: TemplatePart, cm: number): void {
     part.offsetMm = cmToMm(Number(cm) || 0);
+    this.bumpVariant();
   }
 
   setGlassOffsetCm(slot: TemplateGlassSlot, dim: 'W' | 'H', cm: number): void {
     const mm = cmToMm(Number(cm) || 0);
     if (dim === 'W') slot.offsetWMm = mm;
     else slot.offsetHMm = mm;
+    this.bumpVariant();
+  }
+
+  onPartFieldChange(
+    part: TemplatePart,
+    field: 'displayName' | 'widthCoef' | 'heightCoef' | 'useSashWidthDivision' | 'qtyPerUnit',
+    value: string | number | boolean,
+  ): void {
+    if (field === 'displayName') part.displayName = String(value);
+    else if (field === 'widthCoef') part.widthCoef = Number(value) || 0;
+    else if (field === 'heightCoef') part.heightCoef = Number(value) || 0;
+    else if (field === 'useSashWidthDivision') part.useSashWidthDivision = !!value;
+    else if (field === 'qtyPerUnit') part.qtyPerUnit = Math.max(1, Number(value) || 1);
+    this.bumpVariant();
+  }
+
+  roleLabel(role: PreviewRole): string {
+    return this.translate.instant(`templates.roles.${role}`);
   }
 
   savePart(part: TemplatePart): void {

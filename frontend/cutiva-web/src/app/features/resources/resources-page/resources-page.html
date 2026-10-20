@@ -61,7 +61,7 @@
             </li>
           } @else {
             @for (material of materials(); track material.id) {
-              <li>
+              <li class="profile-list__row">
                 <button
                   type="button"
                   class="profile-list__item"
@@ -75,6 +75,14 @@
                       · {{ material.thicknessMm }} mm
                     }
                   </span>
+                </button>
+                <button
+                  type="button"
+                  class="link-danger profile-list__delete"
+                  (click)="deleteMaterial(material, $event)"
+                  [attr.aria-label]="'resources.aluminum.delete' | translate"
+                >
+                  {{ 'common.delete' | translate }}
                 </button>
               </li>
             }

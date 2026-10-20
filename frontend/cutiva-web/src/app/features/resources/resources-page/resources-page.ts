@@ -336,6 +336,23 @@ export class ResourcesPage implements OnInit, AfterViewInit {
     });
   }
 
+  deleteMaterial(material: Material, event: Event): void {
+    event.stopPropagation();
+    if (!confirm(this.translate.instant('resources.aluminum.deleteConfirm'))) {
+      return;
+    }
+    this.materialsApi.delete(material.id).subscribe({
+      next: () => {
+        if (this.selectedMaterialId() === material.id) {
+          this.selectedMaterialId.set(null);
+          this.stockBars.set([]);
+        }
+        this.reloadMaterials();
+      },
+      error: (err) => this.error.set(apiErrorMessage(err, 'common.deleteError')),
+    });
+  }
+
   reloadGlass(workshopId: string): void {
     this.glassApi.listTypes(workshopId, false).subscribe({
       next: (types) => this.glassTypes.set(types),

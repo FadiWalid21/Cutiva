@@ -3,6 +3,7 @@
   [class.frame-preview--door]="kind() === 'door'"
   [class.frame-preview--hopper]="kind() === 'hopper'"
   [class.frame-preview--structure]="isStructure()"
+  [class.frame-preview--solid]="isSolid()"
   [class.frame-preview--compact]="compact()"
 >
   <figcaption class="frame-preview__cap">
@@ -61,7 +62,6 @@
         />
 
         @if (kind() === 'hopper') {
-          <!-- Awning / hopper: glass sash hinged at top, tilted out at bottom -->
           <rect
             [attr.x]="geometry().innerX"
             [attr.y]="geometry().innerY"
@@ -87,7 +87,6 @@
               opacity="0.75"
             />
           }
-          <!-- Top hinge line -->
           <line
             [attr.x1]="geometry().hingeX1"
             [attr.y1]="geometry().hingeY"
@@ -138,15 +137,17 @@
               (geometry().innerY + geometry().innerH * 0.55)
             "
           />
-          <rect
-            [attr.x]="geometry().midX - geometry().mullionW / 2"
-            [attr.y]="geometry().innerY"
-            [attr.width]="geometry().mullionW"
-            [attr.height]="geometry().innerH"
-            [attr.fill]="'url(#' + gradientId() + ')'"
-            stroke="rgba(0,0,0,0.15)"
-            stroke-width="0.4"
-          />
+          @if (showMullion()) {
+            <rect
+              [attr.x]="geometry().midX - geometry().mullionW / 2"
+              [attr.y]="geometry().innerY"
+              [attr.width]="geometry().mullionW"
+              [attr.height]="geometry().innerH"
+              [attr.fill]="'url(#' + gradientId() + ')'"
+              stroke="rgba(0,0,0,0.15)"
+              stroke-width="0.4"
+            />
+          }
           <g
             [attr.transform]="
               'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
@@ -173,7 +174,6 @@
             />
           </g>
         } @else {
-          <!-- Door: structure glass when Structure; solid panel otherwise -->
           @if (isStructure()) {
             <rect
               [attr.x]="geometry().innerX"
@@ -239,6 +239,95 @@
               stroke-width="0.35"
             />
           </g>
+        }
+
+        @if (hasRoleColors()) {
+          <!-- Role-colored frame edges -->
+          @if (roleColor('FrameTop'); as c) {
+            <rect
+              [attr.x]="geometry().x"
+              [attr.y]="geometry().y"
+              [attr.width]="geometry().w"
+              [attr.height]="geometry().frame"
+              [attr.fill]="c"
+              opacity="0.92"
+            />
+          }
+          @if (roleColor('FrameBottom'); as c) {
+            <rect
+              [attr.x]="geometry().x"
+              [attr.y]="geometry().y + geometry().h - geometry().frame"
+              [attr.width]="geometry().w"
+              [attr.height]="geometry().frame"
+              [attr.fill]="c"
+              opacity="0.92"
+            />
+          }
+          @if (roleColor('FrameJamb'); as c) {
+            <rect
+              [attr.x]="geometry().x"
+              [attr.y]="geometry().y + geometry().frame"
+              [attr.width]="geometry().frame"
+              [attr.height]="geometry().h - geometry().frame * 2"
+              [attr.fill]="c"
+              opacity="0.92"
+            />
+            <rect
+              [attr.x]="geometry().x + geometry().w - geometry().frame"
+              [attr.y]="geometry().y + geometry().frame"
+              [attr.width]="geometry().frame"
+              [attr.height]="geometry().h - geometry().frame * 2"
+              [attr.fill]="c"
+              opacity="0.92"
+            />
+          }
+          <!-- Sash outline -->
+          @if (roleColor('SashRail'); as c) {
+            <rect
+              [attr.x]="geometry().sashX"
+              [attr.y]="geometry().sashY"
+              [attr.width]="geometry().sashW"
+              [attr.height]="geometry().sashStroke"
+              [attr.fill]="c"
+              opacity="0.95"
+            />
+            <rect
+              [attr.x]="geometry().sashX"
+              [attr.y]="geometry().sashY + geometry().sashH - geometry().sashStroke"
+              [attr.width]="geometry().sashW"
+              [attr.height]="geometry().sashStroke"
+              [attr.fill]="c"
+              opacity="0.95"
+            />
+          }
+          @if (roleColor('SashStile'); as c) {
+            <rect
+              [attr.x]="geometry().sashX"
+              [attr.y]="geometry().sashY + geometry().sashStroke"
+              [attr.width]="geometry().sashStroke"
+              [attr.height]="geometry().sashH - geometry().sashStroke * 2"
+              [attr.fill]="c"
+              opacity="0.95"
+            />
+            <rect
+              [attr.x]="geometry().sashX + geometry().sashW - geometry().sashStroke"
+              [attr.y]="geometry().sashY + geometry().sashStroke"
+              [attr.width]="geometry().sashStroke"
+              [attr.height]="geometry().sashH - geometry().sashStroke * 2"
+              [attr.fill]="c"
+              opacity="0.95"
+            />
+          }
+          @if (showMullion() && roleColor('InterlockStile'); as c) {
+            <rect
+              [attr.x]="geometry().midX - geometry().mullionW / 2"
+              [attr.y]="geometry().innerY"
+              [attr.width]="geometry().mullionW"
+              [attr.height]="geometry().innerH"
+              [attr.fill]="c"
+              opacity="0.9"
+            />
+          }
         }
 
         <text

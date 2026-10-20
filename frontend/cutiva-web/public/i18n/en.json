@@ -914,7 +914,9 @@
       "add": "Add profile",
       "empty": "No aluminum profiles yet. Add one below.",
       "emptyStock": "No lengths for this profile yet.",
-      "select": "Select a profile to manage market lengths."
+      "select": "Select a profile to manage market lengths.",
+      "delete": "Delete profile",
+      "deleteConfirm": "Deactivate this aluminum profile and its market lengths?"
     },
     "glass": {
       "types": "Glass types",

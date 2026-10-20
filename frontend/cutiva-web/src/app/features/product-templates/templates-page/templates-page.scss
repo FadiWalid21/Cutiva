@@ -339,6 +339,35 @@
   margin-bottom: 0.85rem;
 }
 
+.preview-list li {
+  border-inline-start: 3px solid transparent;
+  padding-inline-start: 0.55rem;
+}
+
+.preview-legend {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+.preview-legend__swatch {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 @media (max-width: 900px) {
   .preview-layout {
     grid-template-columns: 1fr;

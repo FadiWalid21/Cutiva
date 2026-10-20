@@ -6,7 +6,26 @@ import { formatCm } from '../../core/units/length';
 
 export type FrameKind = 'window' | 'door' | 'hopper';
 /** Visual pane style for preview SVG (not tied to catalog materials). */
-export type PreviewPaneStyle = 'Structure' | 'Double';
+export type PreviewPaneStyle = 'Structure' | 'Double' | 'Solid';
+/** Joinery layout for recipes try-size (quotes can leave `auto`). */
+export type PreviewLayout = 'auto' | 'sliding' | 'casement' | 'tilt' | 'door';
+
+export type PreviewRole =
+  | 'FrameTop'
+  | 'FrameBottom'
+  | 'FrameJamb'
+  | 'SashStile'
+  | 'SashRail'
+  | 'InterlockStile';
+
+export const DEFAULT_ROLE_COLORS: Record<PreviewRole, string> = {
+  FrameTop: '#0d9488',
+  FrameBottom: '#d97706',
+  FrameJamb: '#16a34a',
+  SashStile: '#2563eb',
+  SashRail: '#7c3aed',
+  InterlockStile: '#e11d48',
+};
 
 @Component({
   selector: 'app-frame-preview',
@@ -26,36 +45,55 @@ export class FramePreview {
   readonly quantity = input<number | null>(1);
   readonly compact = input(false);
   readonly paneStyle = input<PreviewPaneStyle | null>(null);
+  readonly layout = input<PreviewLayout>('auto');
+  /** When set, draw colored role strokes over the frame/sash. */
+  readonly roleColors = input<Partial<Record<PreviewRole, string>> | null>(null);
 
   readonly formatCm = formatCm;
   readonly finish = this.finishService.finish;
   readonly glass = this.glassService.tint;
 
-  readonly resolvedPaneStyle = computed<PreviewPaneStyle>(() => {
-    const explicit = this.paneStyle();
-    if (explicit) return explicit;
-    if (this.kind() === 'door') return 'Structure';
-    if (this.kind() === 'hopper') return 'Double';
-    return 'Double';
-  });
-
-  readonly gradientId = computed(
-    () =>
-      `alum-${this.label().replace(/\W+/g, '')}-${this.kind()}-${this.finish().id}-${this.glass().id}-${this.resolvedPaneStyle()}`,
-  );
-
-  readonly hasSize = computed(() => {
-    const h = this.heightMm();
-    const w = this.widthMm();
-    return !!h && h > 0 && !!w && w > 0;
+  readonly resolvedLayout = computed<PreviewLayout>(() => {
+    const explicit = this.layout();
+    if (explicit !== 'auto') return explicit;
+    // Heuristic for callers that only pass sector codes (quotes/projects).
+    const code = this.sectorCode().toUpperCase();
+    const name = `${this.sectorName()} ${this.label()}`.toUpperCase();
+    if (code.includes('TILT') || name.includes('TILT') || name.includes('قلاب')) {
+      return 'tilt';
+    }
+    if (code.includes('DOOR') || name.includes('DOOR') || name.includes('باب')) {
+      return 'door';
+    }
+    if (
+      code.includes('SLID') ||
+      name.includes('SLID') ||
+      name.includes('سحاب')
+    ) {
+      return 'sliding';
+    }
+    if (
+      code.includes('CASE') ||
+      name.includes('CASE') ||
+      name.includes('مفصلي')
+    ) {
+      return 'casement';
+    }
+    return 'sliding';
   });
 
   readonly kind = computed<FrameKind>(() => {
+    const layout = this.resolvedLayout();
+    if (layout === 'tilt') return 'hopper';
+    if (layout === 'door') return 'door';
+    if (layout === 'sliding' || layout === 'casement') return 'window';
+
     const code = this.sectorCode().toUpperCase();
     const name = this.sectorName().toUpperCase();
     if (
       code.includes('HOPPER') ||
       code === 'HOP' ||
+      code.includes('TILT') ||
       name.includes('HOPPER') ||
       name.includes('قلاب')
     ) {
@@ -70,6 +108,35 @@ export class FramePreview {
       return 'door';
     }
     return 'window';
+  });
+
+  readonly resolvedPaneStyle = computed<PreviewPaneStyle>(() => {
+    const explicit = this.paneStyle();
+    if (explicit) return explicit;
+    // Safer default: solid aluminum door (not glass) when caller is silent.
+    if (this.kind() === 'door') return 'Solid';
+    if (this.kind() === 'hopper') return 'Double';
+    return 'Double';
+  });
+
+  readonly gradientId = computed(
+    () =>
+      `alum-${this.label().replace(/\W+/g, '')}-${this.kind()}-${this.finish().id}-${this.glass().id}-${this.resolvedPaneStyle()}-${this.resolvedLayout()}`,
+  );
+
+  readonly hasSize = computed(() => {
+    const h = this.heightMm();
+    const w = this.widthMm();
+    return !!h && h > 0 && !!w && w > 0;
+  });
+
+  readonly showMullion = computed(
+    () => this.kind() === 'window' && this.resolvedLayout() === 'sliding',
+  );
+
+  readonly hasRoleColors = computed(() => {
+    const map = this.roleColors();
+    return !!map && Object.keys(map).length > 0;
   });
 
   readonly geometry = computed(() => {
@@ -98,7 +165,6 @@ export class FramePreview {
     const handleY = midY;
     const s = handleScale;
 
-    // Hopper: sash tilts out from bottom (awning); hinge along top inner edge
     const tilt = Math.min(innerH * 0.28, 22);
     const sashBottomY = innerY + innerH - 2;
     const sashTopY = innerY + 2;
@@ -108,6 +174,13 @@ export class FramePreview {
       `${innerX + innerW - 6},${sashBottomY - tilt}`,
       `${innerX + 6},${sashBottomY - tilt}`,
     ].join(' ');
+
+    const sashInset = Math.max(2.5, frame * 0.35);
+    const sashX = innerX + sashInset;
+    const sashY = innerY + sashInset;
+    const sashW = Math.max(4, innerW - sashInset * 2);
+    const sashH = Math.max(4, innerH - sashInset * 2);
+    const sashStroke = Math.max(2.2, frame * 0.28);
 
     return {
       viewW: iw + sidePad * 2,
@@ -144,6 +217,11 @@ export class FramePreview {
       hingeY: sashTopY,
       hingeX1: innerX + 4,
       hingeX2: innerX + innerW - 4,
+      sashX,
+      sashY,
+      sashW,
+      sashH,
+      sashStroke,
     };
   });
 
@@ -151,6 +229,7 @@ export class FramePreview {
 
   readonly isStructure = computed(() => this.resolvedPaneStyle() === 'Structure');
   readonly isDouble = computed(() => this.resolvedPaneStyle() === 'Double');
+  readonly isSolid = computed(() => this.resolvedPaneStyle() === 'Solid');
 
   readonly glassStops = computed(() => {
     const g = this.glass();
@@ -162,5 +241,10 @@ export class FramePreview {
       bottomOpacity: Math.min(1, g.bottomOpacity * boost),
     };
   });
-}
 
+  roleColor(role: PreviewRole): string | null {
+    const map = this.roleColors();
+    if (!map) return null;
+    return map[role] ?? DEFAULT_ROLE_COLORS[role] ?? null;
+  }
+}

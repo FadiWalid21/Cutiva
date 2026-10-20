@@ -122,17 +122,17 @@ export class GuidePage implements AfterViewInit, OnDestroy {
         {
           opacity: 1,
           scale: 1,
-          duration: 0.35,
+          duration: 0.55,
           ease: 'power2.out',
           onStart: () => {
             step.classList.add('is-lit');
             this.flowStep.set(i + 1);
           },
         },
-        i * 0.55,
+        i * 1.1,
       );
       if (arrows[i]) {
-        tl.to(arrows[i], { opacity: 1, duration: 0.25 }, i * 0.55 + 0.2);
+        tl.to(arrows[i], { opacity: 1, duration: 0.4 }, i * 1.1 + 0.35);
       }
     });
   }

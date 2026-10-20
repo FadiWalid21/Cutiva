@@ -6,24 +6,39 @@
       }}
     </button>
   </div>
-  <svg viewBox="0 0 420 240" role="img" [attr.aria-label]="'guide.diagrams.clearanceAria' | translate">
-    <rect class="diag__frame" x="40" y="30" width="280" height="160" />
-    <rect class="diag__sash" x="40" y="30" width="280" height="160" />
+  <svg viewBox="0 0 420 250" role="img" [attr.aria-label]="'guide.diagrams.clearanceAria' | translate">
+    <defs>
+      <pattern id="clrGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+        <path d="M16 0H0V16" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.18" />
+      </pattern>
+      <linearGradient id="clrSashFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#d4b06a" stop-opacity="0.35" />
+        <stop offset="100%" stop-color="#b8924f" stop-opacity="0.12" />
+      </linearGradient>
+    </defs>
+
+    <rect class="diag__grid" x="20" y="16" width="320" height="188" fill="url(#clrGrid)" />
+
+    <!-- Soft glow in the clearance gap (shown while teaching) -->
+    <rect class="diag__gap-glow" x="40" y="30" width="280" height="160" rx="3" />
+
+    <rect class="diag__frame" x="40" y="30" width="280" height="160" rx="3" />
+    <rect class="diag__sash" x="40" y="30" width="280" height="160" rx="2" fill="url(#clrSashFill)" />
 
     <g class="diag-annotate diag__gap">
       <line x1="180" y1="30" x2="180" y2="50" />
-      <polygon points="180,30 176,38 184,38" />
-      <polygon points="180,50 176,42 184,42" />
-      <text x="198" y="44">{{ 'guide.diagrams.clearance' | translate }}</text>
+      <polygon points="180,30 175,39 185,39" />
+      <polygon points="180,50 175,41 185,41" />
+      <text x="204" y="44">{{ 'guide.diagrams.clearance' | translate }}</text>
     </g>
     <g class="diag-annotate diag__gap">
       <line x1="40" y1="110" x2="60" y2="110" />
-      <polygon points="40,110 48,106 48,114" />
-      <polygon points="60,110 52,106 52,114" />
-      <text x="28" y="100" text-anchor="end">{{ 'guide.diagrams.clearance' | translate }}</text>
+      <polygon points="40,110 49,105 49,115" />
+      <polygon points="60,110 51,105 51,115" />
+      <text x="28" y="98" text-anchor="end">{{ 'guide.diagrams.clearance' | translate }}</text>
     </g>
 
-    <text class="diag-annotate diag__formula-line" x="180" y="220" text-anchor="middle">
+    <text class="diag-annotate diag__formula-line" x="180" y="230" text-anchor="middle">
       {{ 'guide.diagrams.clearanceExample' | translate }}
     </text>
   </svg>

@@ -6,55 +6,79 @@
       }}
     </button>
   </div>
-  <svg viewBox="0 0 440 300" role="img" [attr.aria-label]="'guide.diagrams.frameSashAria' | translate">
-    <rect class="diag__frame" x="48" y="36" width="300" height="200" rx="2" />
-    <rect class="diag__sash" x="72" y="56" width="252" height="160" rx="1" />
-    <rect class="diag__glass" x="92" y="72" width="212" height="128" rx="1" />
+  <svg viewBox="0 0 440 310" role="img" [attr.aria-label]="'guide.diagrams.frameSashAria' | translate">
+    <defs>
+      <linearGradient id="fsGlass" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#9fd9d1" stop-opacity="0.55" />
+        <stop offset="100%" stop-color="#e8f4f2" stop-opacity="0.35" />
+      </linearGradient>
+      <linearGradient id="fsFrame" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1f8f82" stop-opacity="0.22" />
+        <stop offset="100%" stop-color="#1f8f82" stop-opacity="0.08" />
+      </linearGradient>
+      <marker id="fsArrowR" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+        <path d="M0,0 L7,3.5 L0,7 Z" class="diag__arrow-dim" />
+      </marker>
+      <marker id="fsArrowL" markerWidth="9" markerHeight="9" refX="2" refY="3.5" orient="auto">
+        <path d="M7,0 L0,3.5 L7,7 Z" class="diag__arrow-dim" />
+      </marker>
+      <marker id="fsArrowD" markerWidth="9" markerHeight="9" refX="3.5" refY="7" orient="auto">
+        <path d="M0,0 L3.5,7 L7,0 Z" class="diag__arrow-dim" />
+      </marker>
+      <marker id="fsArrowU" markerWidth="9" markerHeight="9" refX="3.5" refY="2" orient="auto">
+        <path d="M0,7 L3.5,0 L7,7 Z" class="diag__arrow-dim" />
+      </marker>
+    </defs>
+
+    <rect class="diag__frame" x="52" y="40" width="300" height="200" rx="4" fill="url(#fsFrame)" />
+    <!-- Frame profile thickness hint -->
+    <rect class="diag__frame-inner" x="62" y="50" width="280" height="180" rx="2" />
+    <rect class="diag__sash" x="76" y="60" width="252" height="160" rx="3" />
+    <rect class="diag__glass" x="96" y="76" width="212" height="128" rx="2" fill="url(#fsGlass)" />
 
     <g class="diag-annotate diag__clearance">
-      <line x1="48" y1="28" x2="72" y2="28" />
-      <line x1="48" y1="24" x2="48" y2="32" />
-      <line x1="72" y1="24" x2="72" y2="32" />
-      <text x="60" y="22" text-anchor="middle">{{ 'guide.diagrams.clearance' | translate }}</text>
+      <line x1="52" y1="28" x2="76" y2="28" />
+      <line x1="52" y1="23" x2="52" y2="33" />
+      <line x1="76" y1="23" x2="76" y2="33" />
+      <text x="64" y="20" text-anchor="middle">{{ 'guide.diagrams.clearance' | translate }}</text>
     </g>
 
     <g class="diag-annotate diag__dim">
-      <line x1="48" y1="260" x2="348" y2="260" marker-end="url(#fsArrowR)" marker-start="url(#fsArrowL)" />
-      <text x="198" y="280" text-anchor="middle">W — {{ 'glossary.width' | translate }}</text>
+      <line
+        x1="52"
+        y1="268"
+        x2="352"
+        y2="268"
+        marker-end="url(#fsArrowR)"
+        marker-start="url(#fsArrowL)"
+      />
+      <text x="202" y="290" text-anchor="middle">W — {{ 'glossary.width' | translate }}</text>
     </g>
 
     <g class="diag-annotate diag__dim">
-      <line x1="28" y1="36" x2="28" y2="236" marker-end="url(#fsArrowD)" marker-start="url(#fsArrowU)" />
-      <text x="14" y="140" text-anchor="middle" transform="rotate(-90 14 140)">
+      <line
+        x1="28"
+        y1="40"
+        x2="28"
+        y2="240"
+        marker-end="url(#fsArrowD)"
+        marker-start="url(#fsArrowU)"
+      />
+      <text x="14" y="145" text-anchor="middle" transform="rotate(-90 14 145)">
         H — {{ 'glossary.height' | translate }}
       </text>
     </g>
 
     <g class="diag-annotate diag__labels">
-      <text x="198" y="52" text-anchor="middle">{{ 'guide.diagrams.frameTop' | translate }}</text>
-      <text x="198" y="228" text-anchor="middle">{{ 'guide.diagrams.frameBottom' | translate }}</text>
-      <text x="60" y="140" text-anchor="middle" transform="rotate(-90 60 140)">
+      <text x="202" y="56" text-anchor="middle">{{ 'guide.diagrams.frameTop' | translate }}</text>
+      <text x="202" y="232" text-anchor="middle">{{ 'guide.diagrams.frameBottom' | translate }}</text>
+      <text x="68" y="145" text-anchor="middle" transform="rotate(-90 68 145)">
         {{ 'guide.diagrams.jamb' | translate }}
       </text>
-      <text x="198" y="148" text-anchor="middle" class="diag__sash-label">
+      <text x="202" y="152" text-anchor="middle" class="diag__sash-label">
         {{ 'glossary.sash' | translate }}
       </text>
     </g>
-
-    <defs>
-      <marker id="fsArrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-        <path d="M0,0 L6,3 L0,6 Z" class="diag__arrow-fill" />
-      </marker>
-      <marker id="fsArrowL" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
-        <path d="M6,0 L0,3 L6,6 Z" class="diag__arrow-fill" />
-      </marker>
-      <marker id="fsArrowD" markerWidth="8" markerHeight="8" refX="3" refY="6" orient="auto">
-        <path d="M0,0 L3,6 L6,0 Z" class="diag__arrow-fill" />
-      </marker>
-      <marker id="fsArrowU" markerWidth="8" markerHeight="8" refX="3" refY="2" orient="auto">
-        <path d="M0,6 L3,0 L6,6 Z" class="diag__arrow-fill" />
-      </marker>
-    </defs>
   </svg>
   <p class="diag__step">{{ stepKey() | translate }}</p>
   <figcaption>{{ 'guide.diagrams.frameSashCaption' | translate }}</figcaption>

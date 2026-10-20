@@ -201,7 +201,7 @@ export class ResourcesPage implements OnInit, AfterViewInit {
 
   reloadMaterials(): void {
     this.materialsApi
-      .list({ category: 'Aluminum', activeOnly: false })
+      .list({ category: 'Aluminum', activeOnly: true })
       .subscribe({
         next: (materials) => this.materials.set(materials),
         error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
@@ -341,6 +341,7 @@ export class ResourcesPage implements OnInit, AfterViewInit {
     if (!confirm(this.translate.instant('resources.aluminum.deleteConfirm'))) {
       return;
     }
+    this.error.set(null);
     this.materialsApi.delete(material.id).subscribe({
       next: () => {
         if (this.selectedMaterialId() === material.id) {

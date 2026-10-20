@@ -24,6 +24,7 @@ public static class IdentityDataSeeder
         var userManager = sp.GetRequiredService<UserManager<ApplicationUser>>();
 
         await db.Database.MigrateAsync();
+        await MaterialsSchemaRepair.ApplyAsync(db, logger);
 
         foreach (var role in new[]
                  {

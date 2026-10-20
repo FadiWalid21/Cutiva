@@ -68,7 +68,7 @@ CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
 DB migrations run automatically on API startup via `MigrateAsync()` (IdentityDataSeeder). After each **Build & publish**, click **Restart** so pending EF migrations apply.
 
-If `POST /api/materials` returns Arabic 500 while `GET /api/materials` works, production may still have leftover glass-era columns (`Kind` NOT NULL). Migration `EnsureMaterialsSchemaAligned` drops those and ensures `Category` / `IsActive` / `ThicknessMm`. Confirm it appears in `__EFMigrationsHistory` after restart; check site logs for the Npgsql message if create still fails.
+If `POST /api/materials` returns Arabic 500 while `GET /api/materials` works, production may still have leftover glass-era columns (`Kind` NOT NULL). Migration `EnsureMaterialsSchemaAligned` plus startup `MaterialsSchemaRepair` drop those and ensure `Category` / `IsActive` / `ThicknessMm`. After deploy, **Restart** the site so repair SQL runs; check site logs for “Materials schema repair applied” or the Npgsql message if create still fails.
 
 ## Optional local fallback (not required)
 

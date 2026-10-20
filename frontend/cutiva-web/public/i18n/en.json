@@ -234,6 +234,7 @@
     "from": "From",
     "to": "To",
     "apply": "Apply",
+    "exportExcel": "Export Excel",
     "loadError": "Could not load the report.",
     "empty": "No data in this range.",
     "materialsTitle": "Top materials by cost",

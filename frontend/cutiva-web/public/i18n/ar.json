@@ -234,6 +234,7 @@
     "from": "من",
     "to": "إلى",
     "apply": "تطبيق",
+    "exportExcel": "تصدير Excel",
     "loadError": "تعذر تحميل التقرير.",
     "empty": "لا بيانات في هذه الفترة.",
     "materialsTitle": "أعلى الخامات تكلفة",

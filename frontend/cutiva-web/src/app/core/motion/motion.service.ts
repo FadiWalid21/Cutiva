@@ -13,7 +13,8 @@ export class MotionService {
   pageEnter(root: HTMLElement | null): gsap.core.Tween | null {
     if (!root || this.prefersReducedMotion()) {
       if (root) {
-        gsap.set(root, { clearProps: 'all', opacity: 1, y: 0 });
+        // Do not set y:0 — that re-applies a transform and breaks position:fixed children.
+        gsap.set(root, { clearProps: 'all', opacity: 1 });
       }
       return null;
     }
@@ -21,7 +22,14 @@ export class MotionService {
     return gsap.fromTo(
       root,
       { opacity: 0, y: 18 },
-      { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.55,
+        ease: 'power2.out',
+        // Clear transform so fixed chrome (e.g. burger) stays viewport-fixed after enter.
+        clearProps: 'transform',
+      },
     );
   }
 

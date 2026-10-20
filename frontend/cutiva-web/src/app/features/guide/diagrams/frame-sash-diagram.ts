@@ -78,35 +78,39 @@ export class FrameSashDiagram implements AfterViewInit, OnDestroy {
     this.tl = tl;
 
     tl.call(() => this.stepKey.set('guide.diagrams.stepFrame1'));
-    tl.fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.45 });
+    tl.fromTo(frame, { opacity: 0 }, { opacity: 1, duration: 0.9 });
+    tl.to({}, { duration: 1.5 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepFrame2'));
     tl.fromTo(
       [sash, glass],
       { opacity: 0 },
-      { opacity: 1, duration: 0.45, stagger: 0.08 },
+      { opacity: 1, duration: 0.85, stagger: 0.18 },
     );
+    tl.to({}, { duration: 1.45 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepFrame3'));
     tl.fromTo(
       dims,
       { opacity: 0 },
       {
         opacity: this.showLabels() ? 1 : 0,
-        duration: 0.4,
-        stagger: 0.08,
+        duration: 0.75,
+        stagger: 0.15,
       },
     );
     tl.fromTo(
       clearance,
       { opacity: 0 },
-      { opacity: this.showLabels() ? 1 : 0, duration: 0.35 },
-      '-=0.15',
+      { opacity: this.showLabels() ? 1 : 0, duration: 0.7 },
+      '-=0.2',
     );
+    tl.to({}, { duration: 1.4 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepFrame4'));
     tl.fromTo(
       labels,
       { opacity: 0 },
-      { opacity: this.showLabels() ? 1 : 0, duration: 0.4, stagger: 0.05 },
+      { opacity: this.showLabels() ? 1 : 0, duration: 0.75, stagger: 0.12 },
     );
+    tl.to({}, { duration: 1.3 });
   }
 
   private resetPose(setIdle: boolean): void {

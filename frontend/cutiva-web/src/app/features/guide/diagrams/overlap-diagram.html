@@ -6,23 +6,48 @@
       }}
     </button>
   </div>
-  <svg viewBox="0 0 480 170" role="img" [attr.aria-label]="'guide.diagrams.overlapAria' | translate">
-    <rect class="diag__outer" x="24" y="36" width="432" height="72" rx="2" />
-    <rect class="diag__leaf diag__leaf1" x="36" y="46" width="210" height="52" rx="1" />
-    <rect class="diag__leaf diag__leaf2" x="246" y="46" width="218" height="52" rx="1" />
-    <rect class="diag__overlap-zone" x="226" y="46" width="0" height="52" rx="1" />
+  <svg viewBox="0 0 480 180" role="img" [attr.aria-label]="'guide.diagrams.overlapAria' | translate">
+    <defs>
+      <linearGradient id="ovLeaf" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#1f8f82" stop-opacity="0.16" />
+        <stop offset="100%" stop-color="#1f8f82" stop-opacity="0.06" />
+      </linearGradient>
+      <filter id="ovGlow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.2" result="b" />
+        <feMerge>
+          <feMergeNode in="b" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+
+    <rect class="diag__outer" x="24" y="40" width="432" height="72" rx="4" />
+    <rect class="diag__leaf diag__leaf1" x="36" y="50" width="210" height="52" rx="3" fill="url(#ovLeaf)" />
+    <rect class="diag__leaf diag__leaf2" x="268" y="50" width="218" height="52" rx="3" fill="url(#ovLeaf)" />
+    <rect
+      class="diag__overlap-zone"
+      x="246"
+      y="50"
+      width="0"
+      height="52"
+      rx="2"
+      filter="url(#ovGlow)"
+    />
+    <text class="diag__o-inzone diag-annotate" x="234" y="82" text-anchor="middle">O</text>
 
     <g class="diag-annotate">
-      <text x="140" y="76" text-anchor="middle">{{ 'guide.diagrams.sash1' | translate }}</text>
-      <text x="340" y="76" text-anchor="middle">{{ 'guide.diagrams.sash2' | translate }}</text>
+      <text x="140" y="80" text-anchor="middle">{{ 'guide.diagrams.sash1' | translate }}</text>
+      <text x="360" y="80" text-anchor="middle">{{ 'guide.diagrams.sash2' | translate }}</text>
       <text x="240" y="28" text-anchor="middle" class="diag__o-label">
         O — {{ 'guide.diagrams.overlap' | translate }}
       </text>
-      <line class="diag__dim" x1="24" y1="122" x2="456" y2="122" />
-      <text x="240" y="140" text-anchor="middle">
+      <line class="diag__dim" x1="24" y1="128" x2="456" y2="128" />
+      <line class="diag__dim-tick" x1="24" y1="122" x2="24" y2="134" />
+      <line class="diag__dim-tick" x1="456" y1="122" x2="456" y2="134" />
+      <text x="240" y="148" text-anchor="middle">
         W — {{ 'guide.diagrams.totalWidth' | translate }}
       </text>
-      <text x="240" y="158" text-anchor="middle" class="diag__formula">
+      <text x="240" y="168" text-anchor="middle" class="diag__formula">
         {{ 'guide.diagrams.effectiveWidth' | translate }}
       </text>
     </g>

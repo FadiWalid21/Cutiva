@@ -55,8 +55,8 @@ export class OverlapDiagram implements AfterViewInit, OnDestroy {
     const annotate = el.querySelectorAll('.diag-annotate');
 
     if (this.motion.prefersReducedMotion()) {
-      gsap.set(leaf2, { attr: { x: 226 } });
-      gsap.set(zone, { attr: { width: 28 }, opacity: 1 });
+      gsap.set(leaf2, { attr: { x: 216 } });
+      gsap.set(zone, { attr: { x: 216, width: 36 }, opacity: 1 });
       gsap.set(annotate, { opacity: this.showLabels() ? 1 : 0 });
       this.stepKey.set('guide.diagrams.stepOverlap3');
       this.playing.set(false);
@@ -67,29 +67,41 @@ export class OverlapDiagram implements AfterViewInit, OnDestroy {
     this.tl = tl;
 
     tl.call(() => this.stepKey.set('guide.diagrams.stepOverlap1'));
-    tl.to({}, { duration: 0.65 });
+    tl.to({}, { duration: 1.6 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepOverlap2'));
-    tl.to(leaf2, { attr: { x: 226 }, duration: 0.9, ease: 'power2.inOut' });
+    tl.to(leaf2, { attr: { x: 216 }, duration: 1.5, ease: 'power2.inOut' });
     tl.to(
       zone,
-      { attr: { width: 28 }, opacity: 1, duration: 0.45, ease: 'power2.out' },
-      '-=0.35',
+      {
+        attr: { x: 216, width: 36 },
+        opacity: 1,
+        duration: 0.85,
+        ease: 'power2.out',
+      },
+      '-=0.65',
     );
+    tl.to(
+      zone,
+      { opacity: 0.55, duration: 0.4, yoyo: true, repeat: 2 },
+      '-=0.1',
+    );
+    tl.to({}, { duration: 1.4 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepOverlap3'));
     tl.to(annotate, {
       opacity: this.showLabels() ? 1 : 0,
-      duration: 0.4,
-      stagger: 0.05,
+      duration: 0.75,
+      stagger: 0.1,
     });
+    tl.to({}, { duration: 1.4 });
   }
 
   private resetPose(setIdle: boolean): void {
     const el = this.root()?.nativeElement;
     if (!el) return;
-    // Start: leaf2 abutting leaf1 with no overlap (x = 246)
-    gsap.set(el.querySelector('.diag__leaf2'), { attr: { x: 246 } });
+    // Start farther apart so the slide is easy to see.
+    gsap.set(el.querySelector('.diag__leaf2'), { attr: { x: 268 } });
     gsap.set(el.querySelector('.diag__overlap-zone'), {
-      attr: { width: 0 },
+      attr: { x: 246, width: 0 },
       opacity: 0,
     });
     gsap.set(el.querySelectorAll('.diag-annotate'), { opacity: 0 });
@@ -100,7 +112,7 @@ export class OverlapDiagram implements AfterViewInit, OnDestroy {
     const el = this.root()?.nativeElement;
     if (!el || this.playing()) return;
     const zone = el.querySelector('.diag__overlap-zone');
-    const overlapped = zone?.getAttribute('width') === '28';
+    const overlapped = zone?.getAttribute('width') === '36';
     if (overlapped) {
       gsap.set(el.querySelectorAll('.diag-annotate'), {
         opacity: this.showLabels() ? 1 : 0,

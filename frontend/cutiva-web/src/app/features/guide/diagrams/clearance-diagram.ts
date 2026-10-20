@@ -52,11 +52,13 @@ export class ClearanceDiagram implements AfterViewInit, OnDestroy {
     this.resetPose(false);
 
     const sash = el.querySelector('.diag__sash');
+    const gapGlow = el.querySelector('.diag__gap-glow');
     const annotate = el.querySelectorAll('.diag-annotate');
     const formula = el.querySelector('.diag__formula-line');
 
     if (this.motion.prefersReducedMotion()) {
       gsap.set(sash, { attr: { x: 60, y: 50, width: 240, height: 120 } });
+      gsap.set(gapGlow, { opacity: 0.55 });
       gsap.set(annotate, { opacity: this.showLabels() ? 1 : 0 });
       gsap.set(formula, { opacity: this.showLabels() ? 1 : 0 });
       this.stepKey.set('guide.diagrams.stepClearance3');
@@ -66,6 +68,7 @@ export class ClearanceDiagram implements AfterViewInit, OnDestroy {
 
     gsap.set(annotate, { opacity: 0 });
     gsap.set(formula, { opacity: 0 });
+    gsap.set(gapGlow, { opacity: 0 });
     gsap.set(sash, { attr: { x: 40, y: 30, width: 280, height: 160 } });
 
     const tl = gsap.timeline({
@@ -74,27 +77,42 @@ export class ClearanceDiagram implements AfterViewInit, OnDestroy {
     this.tl = tl;
 
     tl.call(() => this.stepKey.set('guide.diagrams.stepClearance1'));
-    tl.to({}, { duration: 0.7 });
+    tl.to({}, { duration: 1.6 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepClearance2'));
     tl.to(sash, {
       attr: { x: 60, y: 50, width: 240, height: 120 },
-      duration: 0.85,
+      duration: 1.45,
       ease: 'power2.inOut',
     });
+    tl.to(gapGlow, { opacity: 0.55, duration: 0.7 }, '-=0.55');
     tl.to(
       annotate,
       {
         opacity: this.showLabels() ? 1 : 0,
-        duration: 0.4,
-        stagger: 0.06,
+        duration: 0.75,
+        stagger: 0.12,
+      },
+      '-=0.25',
+    );
+    tl.to(
+      annotate,
+      {
+        scale: 1.06,
+        duration: 0.35,
+        yoyo: true,
+        repeat: 1,
+        transformOrigin: 'center',
+        stagger: 0.05,
       },
       '-=0.2',
     );
+    tl.to({}, { duration: 1.5 });
     tl.call(() => this.stepKey.set('guide.diagrams.stepClearance3'));
     tl.to(formula, {
       opacity: this.showLabels() ? 1 : 0,
-      duration: 0.35,
+      duration: 0.7,
     });
+    tl.to({}, { duration: 1.4 });
   }
 
   private resetPose(setIdleCopy: boolean): void {
@@ -102,6 +120,7 @@ export class ClearanceDiagram implements AfterViewInit, OnDestroy {
     if (!el) return;
     const sash = el.querySelector('.diag__sash');
     gsap.set(sash, { attr: { x: 40, y: 30, width: 280, height: 160 } });
+    gsap.set(el.querySelector('.diag__gap-glow'), { opacity: 0 });
     gsap.set(el.querySelectorAll('.diag-annotate'), { opacity: 0 });
     gsap.set(el.querySelector('.diag__formula-line'), { opacity: 0 });
     if (setIdleCopy) {

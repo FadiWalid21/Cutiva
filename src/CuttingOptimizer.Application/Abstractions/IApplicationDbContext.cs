@@ -39,6 +39,7 @@ public interface IApplicationDbContext
     DbSet<ProjectItemPartChoice> ProjectItemPartChoices { get; }
     DbSet<ProjectItemGlassChoice> ProjectItemGlassChoices { get; }
     DbSet<ProjectItemAccessoryChoice> ProjectItemAccessoryChoices { get; }
+    DbSet<WorkshopFeedback> WorkshopFeedbacks { get; }
     Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default);
 }

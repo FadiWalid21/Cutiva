@@ -12,18 +12,20 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MotionService } from '../../core/motion/motion.service';
 import { AuthService } from '../../core/services/auth.service';
+import { FeedbackPromptService } from '../../core/services/feedback-prompt.service';
 import { PlanEntitlementsService } from '../../core/services/plan-entitlements.service';
 import { AppLanguage, LanguageService } from '../../core/services/language.service';
 import { PwaInstallService } from '../../core/services/pwa-install.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { WorkshopContextService } from '../../core/services/workshop-context.service';
+import { FeedbackDialog } from '../../shared/feedback-dialog/feedback-dialog';
 
 const SIDEBAR_KEY = 'cutiva.sidebarCollapsed';
 const NARROW_MQ = '(max-width: 900px)';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe, FeedbackDialog],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -32,6 +34,7 @@ export class Shell implements AfterViewInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly auth = inject(AuthService);
   private readonly motion = inject(MotionService);
+  private readonly feedbackPrompts = inject(FeedbackPromptService);
   readonly pwa = inject(PwaInstallService);
   readonly workshopContext = inject(WorkshopContextService);
   readonly entitlements = inject(PlanEntitlementsService);
@@ -88,10 +91,15 @@ export class Shell implements AfterViewInit, OnDestroy {
     if (nav && !this.collapsed()) {
       this.motion.staggerIn(nav.querySelectorAll('a'));
     }
+
+    if (!this.auth.isAdmin()) {
+      this.feedbackPrompts.startSessionWatch();
+    }
   }
 
   ngOnDestroy(): void {
     this.narrowMql?.removeEventListener('change', this.onNarrowChange);
+    this.feedbackPrompts.stopSessionWatch();
   }
 
   toggleSidebar(): void {

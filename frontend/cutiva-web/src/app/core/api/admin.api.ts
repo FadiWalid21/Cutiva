@@ -67,6 +67,18 @@ export interface AdminReportSummary {
   byPlan: { planCode: string; planName: string; count: number }[];
 }
 
+export interface AdminWorkshopFeedback {
+  id: string;
+  userId: string;
+  workshopId: string | null;
+  ownerDisplayName: string;
+  companyName: string;
+  rating: number;
+  comment: string | null;
+  trigger: 'AfterCalculate' | 'LoginIdle' | string;
+  createdAtUtc: string;
+}
+
 export type PaymentStatus = 'Pending' | 'Confirmed' | 'Waived';
 
 export interface CreateAdminClientBody {
@@ -215,5 +227,11 @@ export class AdminApi {
 
   reportSummary(): Observable<AdminReportSummary> {
     return this.http.get<AdminReportSummary>(`${this.base}/reports/summary`);
+  }
+
+  listFeedback(take = 100): Observable<AdminWorkshopFeedback[]> {
+    return this.http.get<AdminWorkshopFeedback[]>(`${this.base}/feedback`, {
+      params: { take: String(take) },
+    });
   }
 }

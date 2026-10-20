@@ -90,6 +90,8 @@ public class ApplicationDbContext(
     public DbSet<ProjectItemAccessoryChoice> ProjectItemAccessoryChoices =>
         Set<ProjectItemAccessoryChoice>();
 
+    public DbSet<WorkshopFeedback> WorkshopFeedbacks => Set<WorkshopFeedback>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -128,6 +130,7 @@ public class ApplicationDbContext(
         ConfigureProjectItemPartChoice(modelBuilder);
         ConfigureProjectItemGlassChoice(modelBuilder);
         ConfigureProjectItemAccessoryChoice(modelBuilder);
+        ConfigureWorkshopFeedback(modelBuilder);
     }
 
     private static void ConfigureApplicationUser(ModelBuilder modelBuilder)
@@ -1162,6 +1165,43 @@ public class ApplicationDbContext(
                 .WithMany()
                 .HasForeignKey(x => x.AccessoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+
+    private static void ConfigureWorkshopFeedback(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<WorkshopFeedback>(entity =>
+        {
+            entity.ToTable("WorkshopFeedbacks");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.UserId)
+                .HasMaxLength(450)
+                .IsRequired();
+
+            entity.Property(x => x.OwnerDisplayName)
+                .HasMaxLength(150)
+                .IsRequired();
+
+            entity.Property(x => x.CompanyName)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            entity.Property(x => x.Comment)
+                .HasMaxLength(1000);
+
+            entity.Property(x => x.Trigger)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            entity.HasIndex(x => x.CreatedAtUtc);
+            entity.HasIndex(x => x.UserId);
+
+            entity.HasOne(x => x.Workshop)
+                .WithMany()
+                .HasForeignKey(x => x.WorkshopId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

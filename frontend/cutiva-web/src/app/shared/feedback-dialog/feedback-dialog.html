@@ -1,0 +1,77 @@
+@if (open()) {
+  <div
+    #fbBackdrop
+    class="fb"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'feedback.title' | translate"
+  >
+    <div #fbPanel class="fb__panel">
+      @if (thanks()) {
+        <h2>{{ 'feedback.thanksTitle' | translate }}</h2>
+        <p class="fb__muted">{{ 'feedback.thanksBody' | translate }}</p>
+      } @else {
+        <div class="fb__head">
+          <h2>{{ 'feedback.title' | translate }}</h2>
+          <button type="button" class="fb__close" (click)="later()" [attr.aria-label]="'common.cancel' | translate">
+            ×
+          </button>
+        </div>
+        <p class="fb__muted">{{ 'feedback.subtitle' | translate }}</p>
+
+        <dl class="fb__meta">
+          <div>
+            <dt>{{ 'feedback.owner' | translate }}</dt>
+            <dd>{{ ownerName() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'feedback.company' | translate }}</dt>
+            <dd>{{ companyName() }}</dd>
+          </div>
+        </dl>
+
+        <div class="fb__stars" role="group" [attr.aria-label]="'feedback.rating' | translate">
+          @for (n of [1, 2, 3, 4, 5]; track n) {
+            <button
+              type="button"
+              class="fb__star"
+              [class.is-on]="rating() >= n"
+              (click)="setRating(n)"
+            >
+              ★
+            </button>
+          }
+        </div>
+
+        <label class="fb__comment">
+          <span>{{ 'feedback.comment' | translate }}</span>
+          <textarea
+            rows="3"
+            maxlength="1000"
+            [ngModel]="comment()"
+            (ngModelChange)="comment.set($event)"
+            [placeholder]="'feedback.commentPlaceholder' | translate"
+          ></textarea>
+        </label>
+
+        @if (error(); as err) {
+          <p class="fb__error">{{ err | translate }}</p>
+        }
+
+        <div class="fb__actions">
+          <button type="button" class="btn btn--ghost" (click)="later()" [disabled]="saving()">
+            {{ 'feedback.later' | translate }}
+          </button>
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="submit()"
+            [disabled]="saving() || rating() < 1"
+          >
+            {{ 'feedback.submit' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

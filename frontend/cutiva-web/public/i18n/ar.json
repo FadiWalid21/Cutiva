@@ -18,6 +18,21 @@
     "no": "لا",
     "cm": "سم"
   },
+  "feedback": {
+    "title": "رأيك يهمنا",
+    "subtitle": "تقييم قصير يساعدنا نطوّر Cutiva للورش — مش أكتر من دقيقة.",
+    "owner": "الاسم",
+    "company": "الورشة / الشركة",
+    "rating": "التقييم",
+    "comment": "تعليق (اختياري)",
+    "commentPlaceholder": "إيه اللي عجبك أو محتاج يتحسّن؟",
+    "submit": "إرسال",
+    "later": "لاحقًا",
+    "ratingRequired": "اختَر تقييمًا من 1 إلى 5.",
+    "submitError": "تعذّر إرسال التقييم. حاول مرة أخرى.",
+    "thanksTitle": "شكرًا لك",
+    "thanksBody": "وصلنا رأيك وهنشتغل على تحسين التجربة."
+  },
   "theme": {
     "label": "المظهر",
     "light": "فاتح",
@@ -38,12 +53,23 @@
     "nav": {
       "overview": "نظرة عامة",
       "clients": "العملاء",
-      "plans": "الشرائح"
+      "plans": "الشرائح",
+      "feedback": "التقييمات"
     },
     "overviewTitle": "نظرة عامة على المنصة",
     "manageClients": "إدارة العملاء",
     "clientsTitle": "العملاء والاشتراكات",
     "plansTitle": "شرائح الاشتراك",
+    "feedbackTitle": "تقييمات العملاء",
+    "feedbackHint": "آراء الورش لتطوير الجودة — الاسم والشركة والتقييم والتعليق.",
+    "feedbackRefresh": "تحديث",
+    "feedbackEmpty": "لا تقييمات بعد.",
+    "feedbackCount": "{{count}} تقييم",
+    "feedbackNoComment": "بدون تعليق",
+    "feedback": {
+      "triggerCalculate": "بعد الحساب",
+      "triggerLogin": "بعد الدخول"
+    },
     "plansHint": "عدّل اسم الشريحة والسعر والمقاعد والمدة والميزات المفعّلة لكل شريحة.",
     "planFeatures": "ميزات هذه الشريحة",
     "feature": {

@@ -34,6 +34,7 @@ import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { MARKET_MATERIALS_SECTOR_CODE } from '../../../core/constants/market';
 import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 import { AuthService } from '../../../core/services/auth.service';
+import { FeedbackPromptService } from '../../../core/services/feedback-prompt.service';
 import { PlanEntitlementsService } from '../../../core/services/plan-entitlements.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 import { cmToMm, formatCm, mmToCm } from '../../../core/units/length';
@@ -103,6 +104,7 @@ export class ProjectWorkspace {
   private readonly workshopContext = inject(WorkshopContextService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
+  private readonly feedbackPrompts = inject(FeedbackPromptService);
   readonly entitlements = inject(PlanEntitlementsService);
   readonly canManageCatalog = this.auth.canManageCatalog;
 
@@ -647,6 +649,7 @@ export class ProjectWorkspace {
           this.calculating.set(false);
           this.calculateResult.set(result);
           this.reloadProductItems(projectId);
+          this.feedbackPrompts.maybeShowAfterCalculate();
         },
         error: (err) => {
           this.calculating.set(false);

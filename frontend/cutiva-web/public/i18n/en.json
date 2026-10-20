@@ -18,6 +18,21 @@
     "no": "No",
     "cm": "cm"
   },
+  "feedback": {
+    "title": "We value your feedback",
+    "subtitle": "A quick rating helps us improve Cutiva for workshops — under a minute.",
+    "owner": "Name",
+    "company": "Workshop / company",
+    "rating": "Rating",
+    "comment": "Comment (optional)",
+    "commentPlaceholder": "What worked well, or what should improve?",
+    "submit": "Send",
+    "later": "Later",
+    "ratingRequired": "Choose a rating from 1 to 5.",
+    "submitError": "Could not send feedback. Please try again.",
+    "thanksTitle": "Thank you",
+    "thanksBody": "We received your feedback and will use it to improve the product."
+  },
   "theme": {
     "label": "Theme",
     "light": "Light",
@@ -38,12 +53,23 @@
     "nav": {
       "overview": "Overview",
       "clients": "Clients",
-      "plans": "Plans"
+      "plans": "Plans",
+      "feedback": "Feedback"
     },
     "overviewTitle": "Platform overview",
     "manageClients": "Manage clients",
     "clientsTitle": "Clients & subscriptions",
     "plansTitle": "Subscription plans",
+    "feedbackTitle": "Customer feedback",
+    "feedbackHint": "Workshop ratings for quality — owner, company, stars, and comments.",
+    "feedbackRefresh": "Refresh",
+    "feedbackEmpty": "No feedback yet.",
+    "feedbackCount": "{{count}} reviews",
+    "feedbackNoComment": "No comment",
+    "feedback": {
+      "triggerCalculate": "After calculate",
+      "triggerLogin": "After login"
+    },
     "plansHint": "Edit catalog name, price, seats, duration, and which features each plan unlocks.",
     "planFeatures": "Features on this plan",
     "feature": {

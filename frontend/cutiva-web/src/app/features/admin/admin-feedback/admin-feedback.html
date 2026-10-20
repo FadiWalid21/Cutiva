@@ -1,0 +1,51 @@
+<section class="admin-page">
+  <header class="fb-admin__head">
+    <div>
+      <h1>{{ 'admin.feedbackTitle' | translate }}</h1>
+      <p class="hint">{{ 'admin.feedbackHint' | translate }}</p>
+    </div>
+    <button type="button" class="btn btn--ghost" (click)="reload()" [disabled]="loading()">
+      {{ 'admin.feedbackRefresh' | translate }}
+    </button>
+  </header>
+
+  @if (error(); as err) {
+    <p class="page__error">{{ err | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p class="hint">{{ 'common.loading' | translate }}</p>
+  } @else if (items().length === 0) {
+    <p class="hint">{{ 'admin.feedbackEmpty' | translate }}</p>
+  } @else {
+    <div class="fb-admin__stats hint">
+      {{ 'admin.feedbackCount' | translate: { count: items().length } }}
+    </div>
+    <div class="fb-admin__list">
+      @for (item of items(); track item.id) {
+        <article class="card fb-card">
+          <header>
+            <div>
+              <strong>{{ item.ownerDisplayName }}</strong>
+              <span class="muted"> · {{ item.companyName }}</span>
+            </div>
+            <span class="fb-card__stars" [attr.aria-label]="item.rating">{{
+              stars(item.rating)
+            }}</span>
+          </header>
+          @if (item.comment) {
+            <p class="fb-card__comment">{{ item.comment }}</p>
+          } @else {
+            <p class="muted">{{ 'admin.feedbackNoComment' | translate }}</p>
+          }
+          <footer>
+            <span>{{ triggerKey(item.trigger) | translate }}</span>
+            <time [attr.datetime]="item.createdAtUtc">{{
+              item.createdAtUtc | date: 'medium'
+            }}</time>
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>

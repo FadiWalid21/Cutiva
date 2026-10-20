@@ -1,7 +1,23 @@
 .app-shell {
+  --shell-sat: env(safe-area-inset-top, 0px);
+  --shell-sab: env(safe-area-inset-bottom, 0px);
   display: flex;
   min-height: 100vh;
   background: transparent;
+}
+
+@supports (top: constant(safe-area-inset-top)) {
+  .app-shell {
+    --shell-sat: constant(safe-area-inset-top);
+    --shell-sab: constant(safe-area-inset-bottom);
+  }
+}
+
+@supports (top: env(safe-area-inset-top)) {
+  .app-shell {
+    --shell-sat: env(safe-area-inset-top, 0px);
+    --shell-sab: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 .sidebar {
@@ -280,10 +296,20 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
 }
 
 .sidebar__icon {
-  width: 1.1rem;
-  text-align: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  opacity: 0.9;
+  opacity: 0.92;
+  color: inherit;
+
+  svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: block;
+  }
 }
 
 .sidebar__cta {
@@ -443,6 +469,8 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
   flex-direction: column;
   gap: 0.15rem;
   padding: 0 0.15rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .sidebar__user-name {
@@ -451,14 +479,16 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .sidebar__user-email {
   font-size: 0.72rem;
   color: var(--color-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  min-width: 0;
 }
 
 .sidebar__logout {
@@ -539,7 +569,36 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
 @media (max-width: 900px) {
   .app-shell {
     min-height: 100dvh;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: var(--shell-sab);
+  }
+
+  /* Never use desktop icon-rail width on mobile, even if is-collapsed leaks. */
+  .app-shell.is-collapsed .sidebar,
+  .sidebar {
+    width: min(18.5rem, 86vw) !important;
+    padding-inline: 1rem !important;
+  }
+
+  .app-shell.is-collapsed .sidebar__nav a {
+    justify-content: flex-start;
+    padding-inline: 0.75rem;
+  }
+
+  .app-shell.is-collapsed .sidebar__logo-full,
+  .app-shell.is-collapsed .sidebar__tagline {
+    max-width: 11rem;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .app-shell.is-collapsed .sidebar__logo-mono {
+    opacity: 0;
+  }
+
+  .app-shell.is-collapsed .sidebar__chevron {
+    opacity: 1;
+    transform: scaleX(-1);
   }
 
   .app-shell__menu {
@@ -548,11 +607,10 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     place-content: center;
     position: fixed;
     z-index: 40;
-    /* Logical start inset + gap (LTR left / RTL right). */
     inset-inline-start: calc(
       env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.85rem
     );
-    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    top: calc(var(--shell-sat) + 0.85rem);
     width: 2.85rem;
     height: 2.85rem;
     min-width: 44px;
@@ -576,7 +634,6 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     }
   }
 
-  /* Older WebKit: inline-start safe-area may be missing — use physical right in RTL. */
   html[dir='rtl'] .app-shell__menu {
     inset-inline-start: calc(env(safe-area-inset-right, 0px) + 0.85rem);
   }
@@ -603,10 +660,9 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     z-index: 50;
     inset-block: 0;
     inset-inline-start: 0;
-    width: min(18.5rem, 86vw) !important;
     height: 100dvh;
-    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(1rem + var(--shell-sat));
+    padding-bottom: calc(1rem + var(--shell-sab));
     padding-inline-start: calc(
       env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.35rem
     );
@@ -618,18 +674,26 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     transform: translateX(-105%);
     transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     background: var(--color-surface-solid);
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  html[dir='rtl'] .sidebar,
+  html[dir='rtl'] .app-shell.is-collapsed .sidebar,
+  html[dir='rtl'] .app-shell.is-mobile-nav-open .sidebar {
+    padding-inline-start: calc(env(safe-area-inset-right, 0px) + 0.5rem);
+    padding-inline-end: calc(env(safe-area-inset-left, 0px) + 0.5rem);
   }
 
   html[dir='rtl'] .sidebar,
   html[dir='rtl'] .app-shell.is-collapsed .sidebar {
-    /* Drawer off the start edge (physical right in RTL). */
     transform: translateX(105%);
-    padding-inline-start: calc(env(safe-area-inset-right, 0px) + 0.35rem);
-    padding-inline-end: calc(env(safe-area-inset-left, 0px) + 0.35rem);
   }
 
   .app-shell.is-mobile-nav-open .sidebar,
-  .app-shell.is-mobile-nav-open.is-collapsed .sidebar {
+  .app-shell.is-mobile-nav-open.is-collapsed .sidebar,
+  html[dir='rtl'] .app-shell.is-mobile-nav-open .sidebar,
+  html[dir='rtl'] .app-shell.is-mobile-nav-open.is-collapsed .sidebar {
     transform: translateX(0);
   }
 
@@ -638,9 +702,7 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
   }
 
   .app-shell__content {
-    /* Clears floating menu (44px+) + gap under status bar. */
-    padding: calc(4.75rem + env(safe-area-inset-top, 0px)) 1rem
-      calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    padding: calc(4.75rem + var(--shell-sat)) 1rem calc(1.25rem + var(--shell-sab));
   }
 
   .sidebar__nav a {
@@ -657,6 +719,11 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     object-position: right center;
   }
 
+  .sidebar__workshop,
+  .sidebar__footer {
+    min-width: 0;
+  }
+
   .sidebar__logout,
   .sidebar__install,
   .sidebar__icon-btn {
@@ -666,6 +733,9 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
 
 @media (display-mode: standalone) {
   .app-shell {
+    /* When env is 0 on iOS PWA, still clear a typical status bar. */
+    --shell-sat: max(env(safe-area-inset-top, 0px), 47px);
+    --shell-sab: max(env(safe-area-inset-bottom, 0px), 0px);
     min-height: 100dvh;
   }
 
@@ -673,7 +743,7 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
     inset-inline-start: calc(
       env(safe-area-inset-inline-start, env(safe-area-inset-left, 0px)) + 0.85rem
     );
-    top: calc(env(safe-area-inset-top, 0px) + 0.85rem);
+    top: calc(var(--shell-sat) + 0.55rem);
     min-width: 44px;
     min-height: 44px;
   }
@@ -683,17 +753,13 @@ html[dir='rtl'] .app-shell.is-collapsed .sidebar__brand-btn:focus-visible .sideb
   }
 
   .app-shell__content {
-    padding-top: calc(4.75rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(1.35rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(var(--shell-sat) + 4.25rem);
+    padding-bottom: calc(var(--shell-sab) + 1.35rem);
   }
 
-  .sidebar {
-    padding-top: calc(1.15rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(1.15rem + env(safe-area-inset-bottom, 0px));
-  }
-
-  html[dir='rtl'] .sidebar {
-    padding-inline-start: calc(env(safe-area-inset-right, 0px) + 0.35rem);
-    padding-inline-end: calc(env(safe-area-inset-left, 0px) + 0.35rem);
+  .sidebar,
+  .app-shell.is-collapsed .sidebar {
+    padding-top: calc(var(--shell-sat) + 1rem);
+    padding-bottom: calc(var(--shell-sab) + 1rem);
   }
 }

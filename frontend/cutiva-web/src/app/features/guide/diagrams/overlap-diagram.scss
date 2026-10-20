@@ -5,6 +5,29 @@
   border-radius: var(--radius-md, 12px);
   background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface-solid, #fff));
   text-align: center;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.diag__controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.diag__btn {
+  border: 1px solid var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-elevated, transparent);
+  color: var(--color-text);
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: default;
+  }
 }
 
 .diag svg {
@@ -35,7 +58,7 @@
   stroke-width: 1.5;
 }
 
-.diag__labels text {
+.diag-annotate text {
   fill: var(--color-muted);
   font-size: 11px;
 }
@@ -51,12 +74,22 @@
   font-size: 10.5px !important;
 }
 
+.diag__step {
+  margin: 0;
+  min-height: 2.6em;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
 .diag figcaption {
-  margin-top: 0.55rem;
-  font-size: 0.88rem;
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--color-muted);
 }
 
-.diag--labels-off .diag__labels {
-  opacity: 0;
+.diag--labels-off .diag-annotate {
+  opacity: 0 !important;
+  visibility: hidden;
 }

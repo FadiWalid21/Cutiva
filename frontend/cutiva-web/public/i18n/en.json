@@ -242,6 +242,8 @@
     "overview": {
       "heading": "Workshop workflow",
       "intro": "Each area has one job. The natural order is:",
+      "replay": "Replay workflow",
+      "flowProgress": "Step {{step}} of {{total}}",
       "stepResources": "Resources",
       "stepRecipes": "Recipes",
       "stepProject": "Project",
@@ -361,7 +363,22 @@
       "totalWidth": "Total width",
       "effectiveWidth": "Effective W = (W ÷ sash count) + O",
       "sashShorter": "Sash shorter than frame by clearance",
-      "clearanceExample": "Common example: minus 4 cm clearance"
+      "clearanceExample": "Common example: minus 4 cm clearance",
+      "playTeach": "Play teaching",
+      "playing": "Explaining…",
+      "stepClearanceIdle": "Press “Play teaching” to see clearance form.",
+      "stepClearance1": "1) Sash matches the frame opening — no clearance yet.",
+      "stepClearance2": "2) Sash shrinks inward — that gap is clearance.",
+      "stepClearance3": "3) In the recipe: usually “height − clearance” or “width − clearance”.",
+      "stepOverlapIdle": "Press “Play teaching” to see sash overlap.",
+      "stepOverlap1": "1) Two sashes side by side with no overlap.",
+      "stepOverlap2": "2) A sash slides — the gold strip (overlap O) appears.",
+      "stepOverlap3": "3) Effective width = (width ÷ sash count) + overlap.",
+      "stepFrameIdle": "Press “Play teaching” to build frame and sash step by step.",
+      "stepFrame1": "1) Outer frame (frame) — top, bottom, and jamb.",
+      "stepFrame2": "2) Sash and glass inside the frame.",
+      "stepFrame3": "3) Dimension arrows: width W, height H, and clearance.",
+      "stepFrame4": "4) Part labels — these are what you tune in the recipe."
     }
   },
   "reports": {

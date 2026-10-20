@@ -1,4 +1,4 @@
-<section class="guide" #pageRoot>
+<section class="guide" #pageRoot [class.is-rtl]="isRtl() === 'ar'">
   <header class="guide__header">
     <h1>{{ 'guide.title' | translate }}</h1>
     <p>{{ 'guide.subtitle' | translate }}</p>
@@ -22,19 +22,27 @@
   <div class="guide__panel" #sectionPanel role="tabpanel">
     @if (section() === 'overview') {
       <article class="guide-block">
-        <h2>{{ 'guide.overview.heading' | translate }}</h2>
-        <p>{{ 'guide.overview.intro' | translate }}</p>
-        <div class="guide-flow" aria-hidden="true">
-          <span class="guide-flow__step">{{ 'guide.overview.stepResources' | translate }}</span>
-          <span class="guide-flow__arrow">→</span>
-          <span class="guide-flow__step">{{ 'guide.overview.stepRecipes' | translate }}</span>
-          <span class="guide-flow__arrow">→</span>
-          <span class="guide-flow__step">{{ 'guide.overview.stepProject' | translate }}</span>
-          <span class="guide-flow__arrow">→</span>
-          <span class="guide-flow__step">{{ 'guide.overview.stepCalc' | translate }}</span>
-          <span class="guide-flow__arrow">→</span>
-          <span class="guide-flow__step">{{ 'guide.overview.stepCut' | translate }}</span>
+        <div class="guide-toolbar">
+          <h2 style="flex: 1; margin: 0">{{ 'guide.overview.heading' | translate }}</h2>
+          <button type="button" class="guide-toolbar__btn" (click)="playFlowTeach()">
+            {{ 'guide.overview.replay' | translate }}
+          </button>
         </div>
+        <p>{{ 'guide.overview.intro' | translate }}</p>
+        <div class="guide-flow" #flowRoot aria-hidden="true">
+          @for (key of flowSteps; track key; let i = $index; let last = $last) {
+            <span
+              class="guide-flow__step"
+              [class.is-lit]="flowStep() > i"
+            >{{ key | translate }}</span>
+            @if (!last) {
+              <span class="guide-flow__arrow" aria-hidden="true"></span>
+            }
+          }
+        </div>
+        <p class="guide-step-hint" [class.is-visible]="flowStep() > 0">
+          {{ 'guide.overview.flowProgress' | translate: { step: flowStep(), total: flowSteps.length } }}
+        </p>
         <ol>
           <li>{{ 'guide.overview.li1' | translate }}</li>
           <li>{{ 'guide.overview.li2' | translate }}</li>

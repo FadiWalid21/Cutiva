@@ -1,25 +1,32 @@
 <figure class="diag" #diagram [class.diag--labels-off]="!showLabels()">
-  <svg viewBox="0 0 480 160" role="img" [attr.aria-label]="'guide.diagrams.overlapAria' | translate">
+  <div class="diag__controls">
+    <button type="button" class="diag__btn" (click)="play()" [disabled]="playing()">
+      {{
+        (playing() ? 'guide.diagrams.playing' : 'guide.diagrams.playTeach') | translate
+      }}
+    </button>
+  </div>
+  <svg viewBox="0 0 480 170" role="img" [attr.aria-label]="'guide.diagrams.overlapAria' | translate">
     <rect class="diag__outer" x="24" y="36" width="432" height="72" rx="2" />
-    <rect class="diag__leaf" x="36" y="46" width="210" height="52" rx="1" />
-    <rect class="diag__leaf" x="226" y="46" width="218" height="52" rx="1" />
-    <rect class="diag__overlap-zone" x="226" y="46" width="28" height="52" rx="1" />
+    <rect class="diag__leaf diag__leaf1" x="36" y="46" width="210" height="52" rx="1" />
+    <rect class="diag__leaf diag__leaf2" x="246" y="46" width="218" height="52" rx="1" />
+    <rect class="diag__overlap-zone" x="226" y="46" width="0" height="52" rx="1" />
 
-    <g class="diag__labels">
+    <g class="diag-annotate">
       <text x="140" y="76" text-anchor="middle">{{ 'guide.diagrams.sash1' | translate }}</text>
       <text x="340" y="76" text-anchor="middle">{{ 'guide.diagrams.sash2' | translate }}</text>
       <text x="240" y="28" text-anchor="middle" class="diag__o-label">
         O — {{ 'guide.diagrams.overlap' | translate }}
       </text>
-      <text x="240" y="132" text-anchor="middle">
+      <line class="diag__dim" x1="24" y1="122" x2="456" y2="122" />
+      <text x="240" y="140" text-anchor="middle">
         W — {{ 'guide.diagrams.totalWidth' | translate }}
       </text>
-      <text x="240" y="150" text-anchor="middle" class="diag__formula">
+      <text x="240" y="158" text-anchor="middle" class="diag__formula">
         {{ 'guide.diagrams.effectiveWidth' | translate }}
       </text>
     </g>
-
-    <line class="diag__dim" x1="24" y1="118" x2="456" y2="118" />
   </svg>
+  <p class="diag__step">{{ stepKey() | translate }}</p>
   <figcaption>{{ 'guide.diagrams.overlapCaption' | translate }}</figcaption>
 </figure>

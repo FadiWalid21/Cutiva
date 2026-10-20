@@ -1,0 +1,33 @@
+<figure class="diag" #diagram [class.diag--labels-off]="!showLabels()">
+  <svg viewBox="0 0 420 220" role="img" [attr.aria-label]="'guide.diagrams.clearanceAria' | translate">
+    <!-- Frame outline -->
+    <rect class="diag__frame" x="40" y="30" width="280" height="160" />
+    <!-- Sash inset by clearance -->
+    <rect class="diag__sash" x="60" y="50" width="240" height="120" />
+
+    <!-- Top clearance arrow -->
+    <g class="diag__gap">
+      <line x1="180" y1="30" x2="180" y2="50" />
+      <polygon points="180,30 176,38 184,38" />
+      <polygon points="180,50 176,42 184,42" />
+      <text x="198" y="44">{{ 'guide.diagrams.clearance' | translate }}</text>
+    </g>
+    <!-- Side clearance -->
+    <g class="diag__gap">
+      <line x1="40" y1="110" x2="60" y2="110" />
+      <polygon points="40,110 48,106 48,114" />
+      <polygon points="60,110 52,106 52,114" />
+      <text x="28" y="100" text-anchor="end">{{ 'guide.diagrams.clearance' | translate }}</text>
+    </g>
+
+    <g class="diag__labels">
+      <text x="180" y="118" text-anchor="middle">
+        {{ 'guide.diagrams.sashShorter' | translate }}
+      </text>
+      <text x="180" y="210" text-anchor="middle">
+        {{ 'guide.diagrams.clearanceExample' | translate }}
+      </text>
+    </g>
+  </svg>
+  <figcaption>{{ 'guide.diagrams.clearanceCaption' | translate }}</figcaption>
+</figure>

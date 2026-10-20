@@ -1,0 +1,59 @@
+<figure class="diag" #diagram [class.diag--labels-off]="!showLabels()">
+  <svg viewBox="0 0 440 300" role="img" [attr.aria-label]="'guide.diagrams.frameSashAria' | translate">
+    <!-- Outer frame -->
+    <rect class="diag__frame" x="48" y="36" width="300" height="200" rx="2" />
+    <!-- Inner sash -->
+    <rect class="diag__sash" x="72" y="56" width="252" height="160" rx="1" />
+    <rect class="diag__glass" x="92" y="72" width="212" height="128" rx="1" />
+
+    <!-- Clearance markers (gap between frame and sash) -->
+    <g class="diag-anim diag__clearance">
+      <line x1="48" y1="28" x2="72" y2="28" />
+      <line x1="48" y1="24" x2="48" y2="32" />
+      <line x1="72" y1="24" x2="72" y2="32" />
+      <text x="60" y="22" text-anchor="middle">{{ 'guide.diagrams.clearance' | translate }}</text>
+    </g>
+
+    <!-- Width dimension -->
+    <g class="diag-anim diag__dim">
+      <line x1="48" y1="260" x2="348" y2="260" marker-end="url(#arrowR)" marker-start="url(#arrowL)" />
+      <text x="198" y="280" text-anchor="middle">W — {{ 'glossary.width' | translate }}</text>
+    </g>
+
+    <!-- Height dimension -->
+    <g class="diag-anim diag__dim">
+      <line x1="28" y1="36" x2="28" y2="236" marker-end="url(#arrowD)" marker-start="url(#arrowU)" />
+      <text x="14" y="140" text-anchor="middle" transform="rotate(-90 14 140)">
+        H — {{ 'glossary.height' | translate }}
+      </text>
+    </g>
+
+    <!-- Part labels -->
+    <g class="diag-anim diag__labels">
+      <text x="198" y="52" text-anchor="middle">{{ 'guide.diagrams.frameTop' | translate }}</text>
+      <text x="198" y="228" text-anchor="middle">{{ 'guide.diagrams.frameBottom' | translate }}</text>
+      <text x="60" y="140" text-anchor="middle" transform="rotate(-90 60 140)">
+        {{ 'guide.diagrams.jamb' | translate }}
+      </text>
+      <text x="198" y="148" text-anchor="middle" class="diag__sash-label">
+        {{ 'glossary.sash' | translate }}
+      </text>
+    </g>
+
+    <defs>
+      <marker id="arrowR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" class="diag__arrow-fill" />
+      </marker>
+      <marker id="arrowL" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
+        <path d="M6,0 L0,3 L6,6 Z" class="diag__arrow-fill" />
+      </marker>
+      <marker id="arrowD" markerWidth="8" markerHeight="8" refX="3" refY="6" orient="auto">
+        <path d="M0,0 L3,6 L6,0 Z" class="diag__arrow-fill" />
+      </marker>
+      <marker id="arrowU" markerWidth="8" markerHeight="8" refX="3" refY="2" orient="auto">
+        <path d="M0,6 L3,0 L6,6 Z" class="diag__arrow-fill" />
+      </marker>
+    </defs>
+  </svg>
+  <figcaption>{{ 'guide.diagrams.frameSashCaption' | translate }}</figcaption>
+</figure>

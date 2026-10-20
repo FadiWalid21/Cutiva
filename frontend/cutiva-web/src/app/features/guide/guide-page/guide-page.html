@@ -1,0 +1,244 @@
+<section class="guide" #pageRoot>
+  <header class="guide__header">
+    <h1>{{ 'guide.title' | translate }}</h1>
+    <p>{{ 'guide.subtitle' | translate }}</p>
+  </header>
+
+  <div class="guide-tabs" role="tablist">
+    @for (tab of sections; track tab.id) {
+      <button
+        type="button"
+        class="guide-tabs__btn"
+        role="tab"
+        [class.is-active]="section() === tab.id"
+        [attr.aria-selected]="section() === tab.id"
+        (click)="setSection(tab.id)"
+      >
+        {{ tab.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="guide__panel" #sectionPanel role="tabpanel">
+    @if (section() === 'overview') {
+      <article class="guide-block">
+        <h2>{{ 'guide.overview.heading' | translate }}</h2>
+        <p>{{ 'guide.overview.intro' | translate }}</p>
+        <div class="guide-flow" aria-hidden="true">
+          <span class="guide-flow__step">{{ 'guide.overview.stepResources' | translate }}</span>
+          <span class="guide-flow__arrow">→</span>
+          <span class="guide-flow__step">{{ 'guide.overview.stepRecipes' | translate }}</span>
+          <span class="guide-flow__arrow">→</span>
+          <span class="guide-flow__step">{{ 'guide.overview.stepProject' | translate }}</span>
+          <span class="guide-flow__arrow">→</span>
+          <span class="guide-flow__step">{{ 'guide.overview.stepCalc' | translate }}</span>
+          <span class="guide-flow__arrow">→</span>
+          <span class="guide-flow__step">{{ 'guide.overview.stepCut' | translate }}</span>
+        </div>
+        <ol>
+          <li>{{ 'guide.overview.li1' | translate }}</li>
+          <li>{{ 'guide.overview.li2' | translate }}</li>
+          <li>{{ 'guide.overview.li3' | translate }}</li>
+          <li>{{ 'guide.overview.li4' | translate }}</li>
+        </ol>
+      </article>
+    }
+
+    @if (section() === 'recipes') {
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.whatHeading' | translate }}</h2>
+        <p>{{ 'guide.recipes.whatBody' | translate }}</p>
+        <pre class="guide-formula">{{ 'guide.recipes.formulaLine' | translate }}</pre>
+        <div class="guide-callout">{{ 'guide.recipes.seedHint' | translate }}</div>
+        <p>
+          <a class="guide-link" routerLink="/product-templates">{{
+            'guide.recipes.openPage' | translate
+          }}</a>
+        </p>
+      </article>
+
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.mapHeading' | translate }}</h2>
+        <ol>
+          <li>{{ 'guide.recipes.map1' | translate }}</li>
+          <li>{{ 'guide.recipes.map2' | translate }}</li>
+          <li>{{ 'guide.recipes.map3' | translate }}</li>
+          <li>{{ 'guide.recipes.map4' | translate }}</li>
+          <li>{{ 'guide.recipes.map5' | translate }}</li>
+          <li>{{ 'guide.recipes.map6' | translate }}</li>
+        </ol>
+      </article>
+
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.modelHeading' | translate }}</h2>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>{{ 'guide.recipes.colField' | translate }}</th>
+              <th>{{ 'guide.recipes.colMeaning' | translate }}</th>
+              <th>{{ 'guide.recipes.colEffect' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ 'guide.recipes.fieldName' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldNameM' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldNameE' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.fieldSash' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldSashM' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldSashE' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.fieldOverlap' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldOverlapM' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldOverlapE' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.fieldActive' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldActiveM' | translate }}</td>
+              <td>{{ 'guide.recipes.fieldActiveE' | translate }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="guide-block">
+        <div class="guide-toolbar">
+          <h2 style="flex: 1; margin: 0">{{ 'guide.recipes.diagramsHeading' | translate }}</h2>
+          <button type="button" class="guide-toolbar__btn" (click)="toggleLabels()">
+            {{
+              (showDiagramLabels()
+                ? 'guide.recipes.hideLabels'
+                : 'guide.recipes.showLabels'
+              ) | translate
+            }}
+          </button>
+        </div>
+        <p>{{ 'guide.recipes.diagramsIntro' | translate }}</p>
+        <div class="guide-diagrams guide-diagrams--full">
+          <app-frame-sash-diagram [showLabels]="showDiagramLabels()" />
+        </div>
+        <div class="guide-diagrams">
+          <app-clearance-diagram [showLabels]="showDiagramLabels()" />
+          <app-overlap-diagram [showLabels]="showDiagramLabels()" />
+        </div>
+      </article>
+
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.lengthHeading' | translate }}</h2>
+        <pre class="guide-formula">{{ 'guide.recipes.lengthFormula' | translate }}</pre>
+        <p>{{ 'guide.recipes.effectiveW' | translate }}</p>
+        <p>{{ 'guide.recipes.simpleSentence' | translate }}</p>
+        <h3>{{ 'guide.recipes.examplesHeading' | translate }}</h3>
+        <ul>
+          <li>{{ 'guide.recipes.ex1' | translate }}</li>
+          <li>{{ 'guide.recipes.ex2' | translate }}</li>
+          <li>{{ 'guide.recipes.ex3' | translate }}</li>
+          <li>{{ 'guide.recipes.ex4' | translate }}</li>
+        </ul>
+      </article>
+
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.glassHeading' | translate }}</h2>
+        <p>{{ 'guide.recipes.glassBody' | translate }}</p>
+        <h3>{{ 'guide.recipes.accHeading' | translate }}</h3>
+        <p>{{ 'guide.recipes.accBody' | translate }}</p>
+      </article>
+
+      <article class="guide-block">
+        <h2>{{ 'guide.recipes.emptyHeading' | translate }}</h2>
+        <p>{{ 'guide.recipes.emptyIntro' | translate }}</p>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>{{ 'guide.recipes.emptyColField' | translate }}</th>
+              <th>{{ 'guide.recipes.emptyColResult' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ 'guide.recipes.emptyName' | translate }}</td>
+              <td>{{ 'guide.recipes.emptyNameR' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.emptySash' | translate }}</td>
+              <td>{{ 'guide.recipes.emptySashR' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.emptyOverlap' | translate }}</td>
+              <td>{{ 'guide.recipes.emptyOverlapR' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.emptyClearance' | translate }}</td>
+              <td>{{ 'guide.recipes.emptyClearanceR' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.emptyMaterial' | translate }}</td>
+              <td>{{ 'guide.recipes.emptyMaterialR' | translate }}</td>
+            </tr>
+            <tr>
+              <td>{{ 'guide.recipes.emptyGlassReq' | translate }}</td>
+              <td>{{ 'guide.recipes.emptyGlassReqR' | translate }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    }
+
+    @if (section() === 'project') {
+      <article class="guide-block">
+        <h2>{{ 'guide.project.heading' | translate }}</h2>
+        <p>{{ 'guide.project.intro' | translate }}</p>
+        <ol>
+          <li>{{ 'guide.project.step1' | translate }}</li>
+          <li>{{ 'guide.project.step2' | translate }}</li>
+          <li>{{ 'guide.project.step3' | translate }}</li>
+          <li>{{ 'guide.project.step4' | translate }}</li>
+          <li>{{ 'guide.project.step5' | translate }}</li>
+        </ol>
+        <div class="guide-callout">{{ 'guide.project.missingHint' | translate }}</div>
+        <p>
+          <a class="guide-link" routerLink="/projects">{{ 'guide.project.openPage' | translate }}</a>
+        </p>
+      </article>
+    }
+
+    @if (section() === 'resources') {
+      <article class="guide-block">
+        <h2>{{ 'guide.resources.heading' | translate }}</h2>
+        <p>{{ 'guide.resources.intro' | translate }}</p>
+        <ul>
+          <li>{{ 'guide.resources.aluminum' | translate }}</li>
+          <li>{{ 'guide.resources.glass' | translate }}</li>
+          <li>{{ 'guide.resources.accessories' | translate }}</li>
+        </ul>
+        <div class="guide-callout">{{ 'guide.resources.linkHint' | translate }}</div>
+        <p>
+          <a class="guide-link" routerLink="/resources">{{
+            'guide.resources.openPage' | translate
+          }}</a>
+        </p>
+      </article>
+    }
+
+    @if (section() === 'cutting') {
+      <article class="guide-block">
+        <h2>{{ 'guide.cutting.heading' | translate }}</h2>
+        <p>{{ 'guide.cutting.intro' | translate }}</p>
+        <ol>
+          <li>{{ 'guide.cutting.step1' | translate }}</li>
+          <li>{{ 'guide.cutting.step2' | translate }}</li>
+          <li>{{ 'guide.cutting.step3' | translate }}</li>
+        </ol>
+        <div class="guide-callout">{{ 'guide.cutting.remnantsHint' | translate }}</div>
+        <p>
+          <a class="guide-link" routerLink="/cutting-plans/new">{{
+            'guide.cutting.openPage' | translate
+          }}</a>
+        </p>
+      </article>
+    }
+  </div>
+</section>

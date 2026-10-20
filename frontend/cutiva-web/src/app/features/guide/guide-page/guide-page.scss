@@ -1,0 +1,181 @@
+.guide {
+  display: grid;
+  gap: 1.15rem;
+  max-width: 920px;
+}
+
+.guide__header h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.55rem;
+  font-weight: 600;
+}
+
+.guide__header p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.guide-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.guide-tabs__btn {
+  border: 1px solid var(--color-border, #d8d8d4);
+  background: transparent;
+  color: var(--color-muted);
+  padding: 0.45rem 0.95rem;
+  border-radius: 0.45rem;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+  &.is-active {
+    background: #b8924f;
+    color: #1a1410;
+    border-color: #8a6a3d;
+    font-weight: 600;
+  }
+}
+
+.guide__panel {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.guide-block {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: var(--color-surface-solid, #fff);
+}
+
+.guide-block h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--color-accent);
+}
+
+.guide-block h3 {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+}
+
+.guide-block p,
+.guide-block li {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.guide-block ul,
+.guide-block ol {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.guide-formula {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #132028;
+  color: #e8f0f2;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.6rem;
+    text-align: start;
+    vertical-align: top;
+  }
+
+  th {
+    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  }
+}
+
+.guide-callout {
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #b8924f 45%, #ccc);
+  background: color-mix(in srgb, #b8924f 14%, transparent);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.guide-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.guide-flow__step {
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.guide-flow__arrow {
+  color: #b8924f;
+  font-weight: 700;
+}
+
+.guide-diagrams {
+  display: grid;
+  gap: 1rem;
+}
+
+.guide-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.guide-toolbar__btn {
+  border: 1px solid var(--color-border-strong, var(--color-border));
+  background: var(--color-surface-elevated, transparent);
+  color: var(--color-text);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.4rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.guide-link {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+@media (min-width: 720px) {
+  .guide-diagrams {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .guide-diagrams--full {
+    grid-template-columns: 1fr;
+  }
+}

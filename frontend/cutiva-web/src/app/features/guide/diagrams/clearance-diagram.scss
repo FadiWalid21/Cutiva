@@ -1,0 +1,53 @@
+.diag {
+  margin: 0;
+  padding: 0.85rem 1rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 12px);
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface-solid, #fff));
+  text-align: center;
+}
+
+.diag svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diag__frame {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 5;
+}
+
+.diag__sash {
+  fill: color-mix(in srgb, #b8924f 12%, transparent);
+  stroke: #8a6a3d;
+  stroke-width: 2.5;
+}
+
+.diag__gap line {
+  stroke: #b8924f;
+  stroke-width: 1.5;
+}
+
+.diag__gap polygon {
+  fill: #b8924f;
+}
+
+.diag__gap text,
+.diag__labels text {
+  fill: var(--color-muted);
+  font-size: 11px;
+}
+
+.diag figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+
+.diag--labels-off {
+  .diag__labels,
+  .diag__gap text {
+    opacity: 0;
+  }
+}

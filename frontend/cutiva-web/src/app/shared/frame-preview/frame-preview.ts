@@ -143,6 +143,160 @@ export class FramePreview {
     const h = this.heightMm() ?? 1000;
     const w = this.widthMm() ?? 1000;
     const max = this.compact() ? 96 : 140;
+    const isHopper = this.kind() === 'hopper';
+
+    // --- Hopper: height-scaled side elevation (horizontal = depth, not opening width) ---
+    if (isHopper) {
+      const drawScale = max / Math.max(h, 1);
+      const ih = Math.max(52, Math.min(max + 8, h * drawScale));
+      const frame = Math.max(8, Math.min(13, ih * 0.09));
+      const frameDepth = 15;
+      const topPad = 16;
+      const bottomPad = 34;
+      const y = topPad;
+      const hingeY = y + frame * 0.65;
+      const clearH = Math.max(28, ih - frame * 1.15);
+      let sashLen = clearH;
+      let openDeg = 30;
+      // Keep tip inside padded canvas: reduce length then angle if needed.
+      for (let i = 0; i < 8; i++) {
+        const rad = (openDeg * Math.PI) / 180;
+        const tipY = hingeY + Math.cos(rad) * sashLen;
+        const tipXOverhang = Math.sin(rad) * sashLen;
+        const maxTipY = y + ih + bottomPad - 20;
+        if (tipY <= maxTipY && tipXOverhang <= ih * 0.55) break;
+        if (tipY > maxTipY) sashLen *= 0.92;
+        else openDeg = Math.max(18, openDeg - 2);
+      }
+      const openRad = (openDeg * Math.PI) / 180;
+      const overhang = Math.sin(openRad) * sashLen;
+      // Place frame so open tip + handle stay inside the view (horizontal = depth).
+      const leftSafe = 10;
+      const frameFrontX = leftSafe + overhang + 22;
+      const wallX = frameFrontX - 12;
+      const hingeX = frameFrontX + 2.5;
+      const sashTipX = hingeX - Math.sin(openRad) * sashLen;
+      const sashTipY = hingeY + Math.cos(openRad) * sashLen;
+      const sashThick = Math.max(3.4, frame * 0.42);
+      const nx = -Math.cos(openRad);
+      const ny = -Math.sin(openRad);
+      const hopperPoints = [
+        `${hingeX + nx * sashThick * 0.12},${hingeY + ny * sashThick * 0.12}`,
+        `${hingeX - nx * sashThick},${hingeY - ny * sashThick}`,
+        `${sashTipX - nx * sashThick},${sashTipY - ny * sashThick}`,
+        `${sashTipX + nx * sashThick * 0.12},${sashTipY + ny * sashThick * 0.12}`,
+      ].join(' ');
+      // Aluminum rail strips along sash long edges (for richer SVG).
+      const railT = Math.max(1.6, sashThick * 0.28);
+      const hopperRailOuter = [
+        `${hingeX - nx * sashThick},${hingeY - ny * sashThick}`,
+        `${hingeX - nx * (sashThick - railT)},${hingeY - ny * (sashThick - railT)}`,
+        `${sashTipX - nx * (sashThick - railT)},${sashTipY - ny * (sashThick - railT)}`,
+        `${sashTipX - nx * sashThick},${sashTipY - ny * sashThick}`,
+      ].join(' ');
+      const hopperRailInner = [
+        `${hingeX + nx * sashThick * 0.12},${hingeY + ny * sashThick * 0.12}`,
+        `${hingeX + nx * (sashThick * 0.12 - railT)},${hingeY + ny * (sashThick * 0.12 - railT)}`,
+        `${sashTipX + nx * (sashThick * 0.12 - railT)},${sashTipY + ny * (sashThick * 0.12 - railT)}`,
+        `${sashTipX + nx * sashThick * 0.12},${sashTipY + ny * sashThick * 0.12}`,
+      ].join(' ');
+      const closedSashX = hingeX;
+      const closedTipY = hingeY + sashLen;
+      const arcR = sashLen;
+      const hopHandleX = sashTipX - nx * sashThick * 0.45;
+      const hopHandleY = sashTipY - ny * sashThick * 0.45;
+      const hopS = Math.min(1.4, Math.max(0.85, sashThick / 4));
+      const viewW = frameFrontX + frameDepth + 36;
+      const viewH = y + ih + bottomPad;
+      const iguGap = Math.max(1.2, Math.min(2.2, frame * 0.16));
+      const glassMidX1 = hingeX - nx * sashThick * 0.45;
+      const glassMidY1 = hingeY - ny * sashThick * 0.45;
+      const glassMidX2 = sashTipX - nx * sashThick * 0.45;
+      const glassMidY2 = sashTipY - ny * sashThick * 0.45;
+      const headLipH = frame * 0.55;
+      const sillLipH = frame * 0.5;
+      const pocketX = frameFrontX + 2.2;
+      const pocketY = y + headLipH;
+      const pocketW = Math.max(4, frameDepth - 4.4);
+      const pocketH = Math.max(12, ih - headLipH - sillLipH);
+      const lipX = frameFrontX - 1.5;
+      const lipW = frameDepth + 3;
+      const sillLipY = y + ih - sillLipH;
+
+      return {
+        viewW,
+        viewH,
+        x: frameFrontX,
+        y,
+        w: frameDepth,
+        h: ih,
+        frame,
+        innerX: frameFrontX + 2,
+        innerY: hingeY,
+        innerW: frameDepth - 4,
+        innerH: clearH,
+        midX: frameFrontX + frameDepth / 2,
+        midY: y + ih / 2,
+        widthLabelX: frameFrontX + frameDepth / 2,
+        widthLabelY: y + ih + 18,
+        heightLabelX: 10,
+        heightLabelY: y + ih / 2,
+        pocketX,
+        pocketY,
+        pocketW,
+        pocketH,
+        lipX,
+        lipW,
+        headLipH,
+        sillLipH,
+        sillLipY,
+        winBaseW: 0,
+        winBaseH: 0,
+        winLeverW: 0,
+        winLeverH: 0,
+        winLeverX: 0,
+        doorKnobR: 0,
+        doorLeverW: 0,
+        doorLeverH: 0,
+        doorLeverX: 0,
+        handleX: 0,
+        handleY: 0,
+        mullionW: 0,
+        iguGap,
+        hopperPoints,
+        hopperRailOuter,
+        hopperRailInner,
+        hingeY,
+        hingeX,
+        wallX,
+        frameFrontX,
+        frameDepth,
+        frameBackX: frameFrontX + frameDepth,
+        sillY: y + ih,
+        closedSashX,
+        closedTipY,
+        sashTipX,
+        sashTipY,
+        arcR,
+        hopHandleX,
+        hopHandleY,
+        hopHandleR: Math.max(2.2, 2.5 * hopS),
+        hopLeverW: Math.max(6.5, 7.5 * hopS),
+        hopLeverH: Math.max(1.8, 2.1 * hopS),
+        hopHingeR: Math.max(2.2, 2.4 * hopS),
+        glassMidX1,
+        glassMidY1,
+        glassMidX2,
+        glassMidY2,
+        sashX: 0,
+        sashY: 0,
+        sashW: 0,
+        sashH: 0,
+        sashStroke: 0,
+      };
+    }
+
+    // --- Front elevation (sliding / casement / door) ---
     const drawScale = max / Math.max(h, w);
     const ih = Math.max(40, h * drawScale);
     const iw = Math.max(40, w * drawScale);
@@ -163,34 +317,9 @@ export class FramePreview {
 
     const handleScale = Math.min(1.6, Math.max(0.75, Math.min(innerW, innerH) / 80));
     const inset = Math.min(innerW * 0.22, Math.max(frame * 0.85, 5 * handleScale));
-    // Sliding/casement: handle on movable sash outer stile (right edge, LTR).
     const handleX = innerX + innerW - inset;
     const handleY = midY;
     const s = handleScale;
-
-    // Side elevation for tilt/hopper: wall | frame | sash hinged at top swinging open.
-    const wallX = Math.max(6, x - 10);
-    const frameDepth = Math.max(10, Math.min(18, frame * 1.35));
-    const frameFrontX = x + iw * 0.42;
-    const hingeX = frameFrontX + frameDepth * 0.35;
-    const hingeY = innerY + 2;
-    const sashLen = Math.max(24, innerH - 4);
-    const openRad = (32 * Math.PI) / 180;
-    const sashTipX = hingeX - Math.sin(openRad) * sashLen;
-    const sashTipY = hingeY + Math.cos(openRad) * sashLen;
-    const sashThick = Math.max(3.2, frame * 0.38);
-    const nx = -Math.cos(openRad);
-    const ny = -Math.sin(openRad);
-    const hopperPoints = [
-      `${hingeX + nx * sashThick * 0.15},${hingeY + ny * sashThick * 0.15}`,
-      `${hingeX - nx * sashThick},${hingeY - ny * sashThick}`,
-      `${sashTipX - nx * sashThick},${sashTipY - ny * sashThick}`,
-      `${sashTipX + nx * sashThick * 0.15},${sashTipY + ny * sashThick * 0.15}`,
-    ].join(' ');
-    const closedSashX = hingeX;
-    const arcR = sashLen * 0.92;
-    const hopHandleX = sashTipX - nx * sashThick * 0.4;
-    const hopHandleY = sashTipY - ny * sashThick * 0.4;
 
     const sashInset = Math.max(2.5, frame * 0.35);
     const sashX = twoPane ? midX + sashInset * 0.35 : innerX + sashInset;
@@ -232,21 +361,40 @@ export class FramePreview {
       handleY,
       mullionW: Math.max(2.4, Math.min(4.2, frame * 0.45)),
       iguGap: Math.max(1.2, Math.min(2.4, frame * 0.18)),
-      hopperPoints,
-      hingeY,
-      hingeX,
-      wallX,
-      frameFrontX,
-      frameDepth,
-      closedSashX,
-      sashTipX,
-      sashTipY,
-      arcR,
-      hopHandleX,
-      hopHandleY,
-      hopHandleR: Math.max(2.4, 2.6 * s),
-      hopLeverW: Math.max(7, 8 * s),
-      hopLeverH: Math.max(2, 2.2 * s),
+      hopperPoints: '',
+      hopperRailOuter: '',
+      hopperRailInner: '',
+      hingeY: 0,
+      hingeX: 0,
+      wallX: 0,
+      frameFrontX: 0,
+      frameDepth: 0,
+      frameBackX: 0,
+      sillY: 0,
+      closedSashX: 0,
+      closedTipY: 0,
+      sashTipX: 0,
+      sashTipY: 0,
+      arcR: 0,
+      hopHandleX: 0,
+      hopHandleY: 0,
+      hopHandleR: 0,
+      hopLeverW: 0,
+      hopLeverH: 0,
+      hopHingeR: 0,
+      glassMidX1: 0,
+      glassMidY1: 0,
+      glassMidX2: 0,
+      glassMidY2: 0,
+      pocketX: 0,
+      pocketY: 0,
+      pocketW: 0,
+      pocketH: 0,
+      lipX: 0,
+      lipW: 0,
+      headLipH: 0,
+      sillLipH: 0,
+      sillLipY: 0,
       sashX,
       sashY,
       sashW,

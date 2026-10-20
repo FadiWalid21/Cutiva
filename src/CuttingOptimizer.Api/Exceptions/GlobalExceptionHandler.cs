@@ -22,13 +22,44 @@ public sealed class GlobalExceptionHandler(
             _ => StatusCodes.Status500InternalServerError
         };
 
+        var baseError = exception.GetBaseException().Message;
+
         if (statusCode == StatusCodes.Status500InternalServerError)
         {
             logger.LogError(
                 exception,
                 "An unexpected error occurred at {Path}: {Error}",
                 httpContext.Request.Path.Value,
-                exception.GetBaseException().Message);
+                baseError);
+
+            // #region agent log
+            try
+            {
+                var logLine = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    sessionId = "50384f",
+                    hypothesisId = "A-E",
+                    location = "GlobalExceptionHandler.cs",
+                    message = "unhandled 500",
+                    data = new
+                    {
+                        path = httpContext.Request.Path.Value,
+                        type = exception.GetType().FullName,
+                        baseType = exception.GetBaseException().GetType().FullName,
+                        baseError
+                    },
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    runId = "prod-500"
+                });
+                System.IO.File.AppendAllText(
+                    "/Users/macbookpro/dev/full-projects/ServerSide/CuttingOptimizer/.cursor/debug-50384f.log",
+                    logLine + "\n");
+            }
+            catch
+            {
+                // Prod host has no local debug path — ignore.
+            }
+            // #endregion
         }
 
         var problem = new ProblemDetails
@@ -58,6 +89,15 @@ public sealed class GlobalExceptionHandler(
             problem.Extensions["errors"] = errors;
             problem.Extensions["message"] = localizer["ValidationFailedDetail"].Value;
         }
+
+        // #region agent log
+        // Temporary: expose root cause so we can confirm Kind vs other DB errors on prod.
+        if (statusCode == StatusCodes.Status500InternalServerError)
+        {
+            problem.Extensions["debugDetail"] = baseError;
+            problem.Extensions["debugType"] = exception.GetBaseException().GetType().FullName;
+        }
+        // #endregion
 
 
         httpContext.Response.StatusCode = statusCode;

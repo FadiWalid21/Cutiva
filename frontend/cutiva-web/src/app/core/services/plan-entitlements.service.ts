@@ -4,10 +4,9 @@ import {
   PlanFeatureCode,
   PlanFeatureCodes,
 } from '../constants/plan-features';
-import { environment } from '../../../environments/environment';
 
 /**
- * Plan entitlements from auth/me. Env flags remain hard kill-switches when false.
+ * Plan entitlements from auth/me — source of truth for product capabilities.
  */
 @Injectable({ providedIn: 'root' })
 export class PlanEntitlementsService {
@@ -19,15 +18,6 @@ export class PlanEntitlementsService {
   });
 
   has(code: PlanFeatureCode): boolean {
-    if (code === PlanFeatureCodes.resources && environment.features?.resourcesV2 === false) {
-      return false;
-    }
-    if (
-      code === PlanFeatureCodes.productTemplates &&
-      environment.features?.productTemplates === false
-    ) {
-      return false;
-    }
     return this.features().has(code);
   }
 

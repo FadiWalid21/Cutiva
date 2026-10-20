@@ -35,6 +35,8 @@ export class PwaInstallService {
   readonly showIosHelp = computed(() => this.helpKindSignal() === 'ios');
 
   init(): void {
+    this.syncStandaloneClass();
+
     window.addEventListener('beforeinstallprompt', (event) => {
       event.preventDefault();
       this.deferred = event as BeforeInstallPromptEvent;
@@ -46,13 +48,22 @@ export class PwaInstallService {
       this.canInstallSignal.set(false);
       this.dismissBanner();
       this.closeHelp();
+      this.syncStandaloneClass();
     });
 
     window
       .matchMedia('(display-mode: standalone)')
       .addEventListener('change', () => {
         this.isStandaloneSignal.set(this.detectStandalone());
+        this.syncStandaloneClass();
       });
+  }
+
+  /** Lets CSS target iOS PWAs even when display-mode media is flaky. */
+  private syncStandaloneClass(): void {
+    const standalone = this.detectStandalone();
+    this.isStandaloneSignal.set(standalone);
+    document.documentElement.classList.toggle('is-pwa-standalone', standalone);
   }
 
   async promptInstall(): Promise<boolean> {

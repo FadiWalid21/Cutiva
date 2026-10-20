@@ -26,6 +26,7 @@ public sealed class LoginHandler(IAuthService authService)
             result.DisplayName,
             result.Roles,
             result.WorkshopId,
-            result.Subscription));
+            result.Subscription,
+            result.Features));
     }
 }

@@ -34,7 +34,7 @@ import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { MARKET_MATERIALS_SECTOR_CODE } from '../../../core/constants/market';
 import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
 import { AuthService } from '../../../core/services/auth.service';
-import { FeatureFlagsService } from '../../../core/services/feature-flags.service';
+import { PlanEntitlementsService } from '../../../core/services/plan-entitlements.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 import { cmToMm, formatCm, mmToCm } from '../../../core/units/length';
 import { FramePreview } from '../../../shared/frame-preview/frame-preview';
@@ -103,7 +103,7 @@ export class ProjectWorkspace {
   private readonly workshopContext = inject(WorkshopContextService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
-  readonly features = inject(FeatureFlagsService);
+  readonly entitlements = inject(PlanEntitlementsService);
   readonly canManageCatalog = this.auth.canManageCatalog;
 
   readonly projectId = signal<string>('');
@@ -183,7 +183,7 @@ export class ProjectWorkspace {
         next: (items) => this.catalog.set(items),
         error: () => this.catalog.set([]),
       });
-      if (this.features.productTemplates) {
+      if (this.entitlements.productTemplates()) {
         this.glassApi.listTypes(workshopId, true).subscribe({
           next: (types) => this.glassTypes.set(types),
           error: () => this.glassTypes.set([]),
@@ -327,7 +327,7 @@ export class ProjectWorkspace {
 
     this.reloadRows(projectId);
 
-    if (this.features.productTemplates) {
+    if (this.entitlements.productTemplates()) {
       this.reloadProductItems(projectId);
       this.templatesApi.listTypes(true).subscribe({
         next: (types) => {
@@ -348,7 +348,7 @@ export class ProjectWorkspace {
   }
 
   reloadProductItems(projectId = this.projectId()): void {
-    if (!projectId || !this.features.productTemplates) return;
+    if (!projectId || !this.entitlements.productTemplates()) return;
     this.projectItemsApi.list(projectId).subscribe({
       next: (items) => this.productItems.set(items),
       error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),

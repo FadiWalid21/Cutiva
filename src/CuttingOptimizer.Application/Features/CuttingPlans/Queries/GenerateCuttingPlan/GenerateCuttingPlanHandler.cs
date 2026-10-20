@@ -1,7 +1,9 @@
 using CuttingOptimizer.Application.Abstractions;
+using CuttingOptimizer.Application.Abstractions.Entitlements;
 using CuttingOptimizer.Application.Abstractions.Optimization;
 using CuttingOptimizer.Application.Features.CuttingPlans;
 using CuttingOptimizer.Application.Services.Optimization;
+using CuttingOptimizer.Domain.Constants;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +11,8 @@ namespace CuttingOptimizer.Application.Features.CuttingPlans.Queries.GenerateCut
 
 public sealed class GenerateCuttingPlanHandler(
     IApplicationDbContext context,
-    ICuttingPlanAlternativesGenerator alternativesGenerator)
+    ICuttingPlanAlternativesGenerator alternativesGenerator,
+    IPlanEntitlementService entitlements)
     : IRequestHandler<GenerateCuttingPlanQuery, CuttingPlanComparisonDto?>
 {
     public async Task<CuttingPlanComparisonDto?> Handle(
@@ -58,6 +61,17 @@ public sealed class GenerateCuttingPlanHandler(
 
         var workshopId = workshopIds[0];
 
+        var canUseRemnants = await entitlements.HasAsync(
+            workshopId,
+            PlanFeatureCodes.Remnants,
+            cancellationToken);
+        var canCompare = await entitlements.HasAsync(
+            workshopId,
+            PlanFeatureCodes.PlanComparisons,
+            cancellationToken);
+
+        var useRemnants = request.UseRemnants && canUseRemnants;
+
         var projectIds = cutContexts
             .Select(cut => cut.ProjectId)
             .Distinct()
@@ -100,7 +114,7 @@ public sealed class GenerateCuttingPlanHandler(
                     !stockBar.IsRemnant
                     || stockBar.AvailableQuantity > 0));
 
-        if (!request.UseRemnants)
+        if (!useRemnants)
             stockQuery = stockQuery.Where(stockBar => !stockBar.IsRemnant);
 
         // Catalog bars must be priced; free catalog SKUs look like remnants in the buy list.
@@ -122,7 +136,16 @@ public sealed class GenerateCuttingPlanHandler(
             request.KerfMm,
             requiredCuts,
             stockOptions,
-            request.UseRemnants);
+            useRemnants);
+
+        if (!canCompare && candidates.Count > 1)
+        {
+            candidates = candidates
+                .OrderBy(c => c.Result.TotalMaterialCost)
+                .ThenBy(c => c.Result.TotalLeftoverMm + c.Result.TotalKerfMm)
+                .Take(1)
+                .ToList();
+        }
 
         var comparisonGroupId = Guid.NewGuid();
         var createdAtUtc = DateTime.UtcNow;
@@ -139,7 +162,7 @@ public sealed class GenerateCuttingPlanHandler(
                 comparisonGroupId,
                 candidate.StrategyCode,
                 createdAtUtc,
-                request.UseRemnants);
+                useRemnants);
 
             context.CuttingPlans.Add(plan);
             summaries.Add(CuttingPlanMapper.ToSummary(plan, candidate.BarsSummary));

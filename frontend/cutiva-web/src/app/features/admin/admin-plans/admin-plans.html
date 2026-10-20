@@ -53,6 +53,20 @@
           </label>
         }
 
+        <fieldset class="features">
+          <legend>{{ 'admin.planFeatures' | translate }}</legend>
+          @for (f of p.features; track f.code) {
+            <label class="feature-row">
+              <input
+                type="checkbox"
+                [(ngModel)]="f.isEnabled"
+                [name]="'feat-' + p.id + '-' + f.code"
+              />
+              <span>{{ featureLabelKey(f.code) | translate }}</span>
+            </label>
+          }
+        </fieldset>
+
         <button
           type="button"
           class="btn btn--primary"

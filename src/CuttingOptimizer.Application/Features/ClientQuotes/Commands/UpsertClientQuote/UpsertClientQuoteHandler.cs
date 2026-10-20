@@ -1,5 +1,7 @@
 using CuttingOptimizer.Application.Abstractions;
+using CuttingOptimizer.Application.Abstractions.Entitlements;
 using CuttingOptimizer.Application.Features.ClientQuotes;
+using CuttingOptimizer.Domain.Constants;
 using CuttingOptimizer.Domain.Entities;
 using CuttingOptimizer.Domain.Enums;
 using MediatR;
@@ -8,7 +10,8 @@ using Microsoft.EntityFrameworkCore;
 namespace CuttingOptimizer.Application.Features.ClientQuotes.Commands.UpsertClientQuote;
 
 public sealed class UpsertClientQuoteHandler(
-    IApplicationDbContext context)
+    IApplicationDbContext context,
+    IPlanEntitlementService entitlements)
     : IRequestHandler<UpsertClientQuoteCommand, UpsertClientQuoteResult>
 {
     public async Task<UpsertClientQuoteResult> Handle(
@@ -22,6 +25,12 @@ public sealed class UpsertClientQuoteHandler(
 
         if (project is null)
             return new UpsertClientQuoteNotFound();
+
+        if (!await entitlements.HasAsync(
+                project.WorkshopId,
+                PlanFeatureCodes.ClientQuotes,
+                cancellationToken))
+            return new UpsertClientQuoteFeatureDisabled();
 
         if (request.CuttingPlanId.HasValue)
         {

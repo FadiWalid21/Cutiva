@@ -9,7 +9,8 @@ public sealed record AuthTokenResponse(
     string? DisplayName,
     IReadOnlyList<string> Roles,
     Guid? WorkshopId,
-    SubscriptionSummaryDto? Subscription);
+    SubscriptionSummaryDto? Subscription,
+    IReadOnlyList<string> Features);
 
 public sealed record AuthMeResponse(
     string UserId,
@@ -17,4 +18,5 @@ public sealed record AuthMeResponse(
     string? DisplayName,
     IReadOnlyList<string> Roles,
     Guid? WorkshopId,
-    SubscriptionSummaryDto? Subscription);
+    SubscriptionSummaryDto? Subscription,
+    IReadOnlyList<string> Features);

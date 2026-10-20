@@ -45,6 +45,9 @@ public sealed class ClientQuotesController(
             {
                 message = localizer["QuoteNoBillableLines"].Value
             }),
+            UpsertClientQuoteFeatureDisabled => StatusCode(
+                StatusCodes.Status403Forbidden,
+                new { message = "Client quotes are not enabled for this plan." }),
             _ => NotFound(new
             {
                 message = localizer["QuoteNotFound"].Value

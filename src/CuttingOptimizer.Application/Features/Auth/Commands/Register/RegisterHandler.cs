@@ -28,7 +28,8 @@ public sealed class RegisterHandler(IAuthService authService)
                 result.DisplayName,
                 result.Roles,
                 result.WorkshopId,
-                result.Subscription));
+                result.Subscription,
+                result.Features));
         }
         catch (AuthDuplicateEmailException)
         {

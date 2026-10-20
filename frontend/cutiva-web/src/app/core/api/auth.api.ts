@@ -22,6 +22,7 @@ export interface AuthTokenResponse {
   roles: string[];
   workshopId: string | null;
   subscription: SubscriptionSummary | null;
+  features: string[];
 }
 
 export interface AuthMeResponse {
@@ -31,6 +32,7 @@ export interface AuthMeResponse {
   roles: string[];
   workshopId: string | null;
   subscription: SubscriptionSummary | null;
+  features: string[];
 }
 
 export interface LoginBody {

@@ -12,7 +12,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MotionService } from '../../core/motion/motion.service';
 import { AuthService } from '../../core/services/auth.service';
-import { FeatureFlagsService } from '../../core/services/feature-flags.service';
+import { PlanEntitlementsService } from '../../core/services/plan-entitlements.service';
 import { AppLanguage, LanguageService } from '../../core/services/language.service';
 import { PwaInstallService } from '../../core/services/pwa-install.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -34,7 +34,7 @@ export class Shell implements AfterViewInit, OnDestroy {
   private readonly motion = inject(MotionService);
   readonly pwa = inject(PwaInstallService);
   readonly workshopContext = inject(WorkshopContextService);
-  readonly features = inject(FeatureFlagsService);
+  readonly entitlements = inject(PlanEntitlementsService);
   readonly canManageCatalog = this.auth.canManageCatalog;
 
   private readonly shellRoot = viewChild<ElementRef<HTMLElement>>('shellRoot');

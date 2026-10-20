@@ -43,3 +43,42 @@ export interface RemnantInventoryItemDto {
   lengthMm: number;
   availableQuantity: number;
 }
+
+/** Matches GET /api/workshops/{id}/reports/summary */
+export interface WorkshopReportResponse {
+  fromUtc: string;
+  toUtc: string;
+  kpis: WorkshopReportKpisDto;
+  topMaterialsByCost: WorkshopReportMaterialRowDto[];
+  projects: WorkshopReportProjectRowDto[];
+}
+
+export interface WorkshopReportKpisDto {
+  projectsActive: number;
+  plansGenerated: number;
+  plansApproved: number;
+  stockBarsUsed: number;
+  remnantBarsInStock: number;
+  remnantBarsConsumed: number;
+  materialEfficiencyPercent: number;
+  wastePercent: number;
+  totalMaterialCost: number;
+}
+
+export interface WorkshopReportMaterialRowDto {
+  materialId: string;
+  materialName: string;
+  plansApproved: number;
+  stockBarsUsed: number;
+  totalMaterialCost: number;
+  wastePercent: number;
+}
+
+export interface WorkshopReportProjectRowDto {
+  projectId: string;
+  projectName: string;
+  plansGenerated: number;
+  plansApproved: number;
+  totalMaterialCost: number;
+  lastActivityUtc: string;
+}

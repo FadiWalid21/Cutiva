@@ -298,6 +298,25 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.ToTable("CuttingPlanUnallocatedPieces", (string)null);
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.FeatureDefinition", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("FeatureDefinitions", (string)null);
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.FxRateSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -977,6 +996,25 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("SubscriptionPlans", (string)null);
+                });
+
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.SubscriptionPlanFeature", b =>
+                {
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FeatureCode")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("PlanId", "FeatureCode");
+
+                    b.HasIndex("FeatureCode");
+
+                    b.ToTable("SubscriptionPlanFeatures", (string)null);
                 });
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateAccessorySlot", b =>
@@ -1795,6 +1833,25 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Material");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.SubscriptionPlanFeature", b =>
+                {
+                    b.HasOne("CuttingOptimizer.Domain.Entities.FeatureDefinition", "Feature")
+                        .WithMany("PlanFeatures")
+                        .HasForeignKey("FeatureCode")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CuttingOptimizer.Domain.Entities.SubscriptionPlan", "Plan")
+                        .WithMany("Features")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Feature");
+
+                    b.Navigation("Plan");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.TemplateAccessorySlot", b =>
                 {
                     b.HasOne("CuttingOptimizer.Domain.Entities.Accessory", "DefaultAccessory")
@@ -1953,6 +2010,11 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                     b.Navigation("Pieces");
                 });
 
+            modelBuilder.Entity("CuttingOptimizer.Domain.Entities.FeatureDefinition", b =>
+                {
+                    b.Navigation("PlanFeatures");
+                });
+
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.GlassType", b =>
                 {
                     b.Navigation("Specs");
@@ -2011,6 +2073,8 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("CuttingOptimizer.Domain.Entities.SubscriptionPlan", b =>
                 {
+                    b.Navigation("Features");
+
                     b.Navigation("Subscriptions");
                 });
 

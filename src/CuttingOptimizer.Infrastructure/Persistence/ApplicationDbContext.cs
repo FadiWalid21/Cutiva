@@ -46,6 +46,11 @@ public class ApplicationDbContext(
 
     public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
 
+    public DbSet<FeatureDefinition> FeatureDefinitions => Set<FeatureDefinition>();
+
+    public DbSet<SubscriptionPlanFeature> SubscriptionPlanFeatures =>
+        Set<SubscriptionPlanFeature>();
+
     public DbSet<FxRateSnapshot> FxRateSnapshots => Set<FxRateSnapshot>();
 
     public DbSet<WorkshopSubscription> WorkshopSubscriptions =>
@@ -106,6 +111,7 @@ public class ApplicationDbContext(
         ConfigureAccessory(modelBuilder);
         ConfigureProjectSectionAccessory(modelBuilder);
         ConfigureSubscriptionPlan(modelBuilder);
+        ConfigurePlanFeatures(modelBuilder);
         ConfigureFxRateSnapshot(modelBuilder);
         ConfigureWorkshopSubscription(modelBuilder);
         ConfigurePasswordResetOtp(modelBuilder);
@@ -640,6 +646,45 @@ public class ApplicationDbContext(
 
             entity.Property(x => x.DurationDays)
                 .HasDefaultValue(30);
+        });
+    }
+
+    private static void ConfigurePlanFeatures(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<FeatureDefinition>(entity =>
+        {
+            entity.ToTable("FeatureDefinitions");
+
+            entity.HasKey(x => x.Code);
+
+            entity.Property(x => x.Code)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            entity.Property(x => x.Name)
+                .HasMaxLength(120)
+                .IsRequired();
+        });
+
+        modelBuilder.Entity<SubscriptionPlanFeature>(entity =>
+        {
+            entity.ToTable("SubscriptionPlanFeatures");
+
+            entity.HasKey(x => new { x.PlanId, x.FeatureCode });
+
+            entity.Property(x => x.FeatureCode)
+                .HasMaxLength(64)
+                .IsRequired();
+
+            entity.HasOne(x => x.Plan)
+                .WithMany(p => p.Features)
+                .HasForeignKey(x => x.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Feature)
+                .WithMany(f => f.PlanFeatures)
+                .HasForeignKey(x => x.FeatureCode)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

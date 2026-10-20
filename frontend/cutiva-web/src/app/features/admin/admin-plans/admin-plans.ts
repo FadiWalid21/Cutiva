@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { AdminApi, AdminPlan } from '../../../core/api/admin.api';
+import { AdminApi, AdminPlan, AdminPlanFeature } from '../../../core/api/admin.api';
 
 interface PlanDraft {
   id: string;
@@ -12,6 +12,7 @@ interface PlanDraft {
   maxUsers: number | null;
   unlimited: boolean;
   isActive: boolean;
+  features: AdminPlanFeature[];
 }
 
 @Component({
@@ -49,6 +50,10 @@ export class AdminPlans implements OnInit {
         maxUsers: draft.unlimited ? null : Number(draft.maxUsers) || 1,
         durationDays: Number(draft.durationDays) || 30,
         isActive: draft.isActive,
+        features: draft.features.map((f) => ({
+          code: f.code,
+          isEnabled: f.isEnabled,
+        })),
       })
       .subscribe({
         next: (plan) => {
@@ -65,6 +70,10 @@ export class AdminPlans implements OnInit {
       });
   }
 
+  featureLabelKey(code: string): string {
+    return `admin.feature.${code}`;
+  }
+
   private toDraft(p: AdminPlan): PlanDraft {
     return {
       id: p.id,
@@ -75,6 +84,7 @@ export class AdminPlans implements OnInit {
       maxUsers: p.maxUsers,
       unlimited: p.maxUsers == null,
       isActive: p.isActive,
+      features: [...(p.features ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
     };
   }
 }

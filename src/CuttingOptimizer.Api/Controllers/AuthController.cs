@@ -113,7 +113,8 @@ public sealed class AuthController(
             me.DisplayName,
             me.Roles,
             me.WorkshopId,
-            me.Subscription));
+            me.Subscription,
+            me.Features));
     }
 
     private bool IsArabicRequest()

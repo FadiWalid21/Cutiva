@@ -148,6 +148,9 @@ builder.Services.AddSingleton<JwtTokenService>();
 builder.Services.AddScoped<IAuthService, IdentityAuthService>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddScoped<
+    CuttingOptimizer.Application.Abstractions.Entitlements.IPlanEntitlementService,
+    CuttingOptimizer.Infrastructure.Entitlements.PlanEntitlementService>();
+builder.Services.AddScoped<
     CuttingOptimizer.Application.Abstractions.Admin.IAdminClientService,
     CuttingOptimizer.Infrastructure.Admin.AdminClientService>();
 

@@ -20,4 +20,7 @@ public class SubscriptionPlan
 
     public ICollection<WorkshopSubscription> Subscriptions { get; set; }
         = new List<WorkshopSubscription>();
+
+    public ICollection<SubscriptionPlanFeature> Features { get; set; }
+        = new List<SubscriptionPlanFeature>();
 }

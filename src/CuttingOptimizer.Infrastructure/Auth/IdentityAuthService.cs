@@ -1,5 +1,6 @@
 using CuttingOptimizer.Application.Abstractions;
 using CuttingOptimizer.Application.Abstractions.Auth;
+using CuttingOptimizer.Application.Abstractions.Entitlements;
 using CuttingOptimizer.Domain.Constants;
 using CuttingOptimizer.Domain.Entities;
 using CuttingOptimizer.Domain.Enums;
@@ -12,7 +13,8 @@ namespace CuttingOptimizer.Infrastructure.Auth;
 public sealed class IdentityAuthService(
     UserManager<ApplicationUser> userManager,
     JwtTokenService jwtTokenService,
-    IApplicationDbContext dbContext)
+    IApplicationDbContext dbContext,
+    IPlanEntitlementService entitlements)
     : IAuthService
 {
     public async Task<AuthResult> RegisterAsync(
@@ -114,13 +116,18 @@ public sealed class IdentityAuthService(
             subscription = subscription with { SeatUsed = seats };
         }
 
+        var features = await entitlements.GetEnabledFeaturesAsync(
+            user.WorkshopId,
+            cancellationToken);
+
         return new AuthUserDto(
             user.Id,
             user.Email!,
             user.DisplayName,
             roles.ToList(),
             user.WorkshopId,
-            subscription);
+            subscription,
+            features);
     }
 
     private async Task<AuthResult> BuildAuthResultAsync(
@@ -137,6 +144,10 @@ public sealed class IdentityAuthService(
             subscription = subscription with { SeatUsed = seats };
         }
 
+        var features = await entitlements.GetEnabledFeaturesAsync(
+            user.WorkshopId,
+            cancellationToken);
+
         return new AuthResult(
             token,
             expires,
@@ -145,7 +156,8 @@ public sealed class IdentityAuthService(
             user.Id,
             roles.ToList(),
             user.WorkshopId,
-            subscription);
+            subscription,
+            features);
     }
 
     private async Task<SubscriptionSummaryDto?> LoadSubscriptionAsync(

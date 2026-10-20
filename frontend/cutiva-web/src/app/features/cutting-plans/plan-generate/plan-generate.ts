@@ -18,6 +18,7 @@ import {
 import { RequiredCut, RequiredCutsApi } from '../../../core/api/required-cuts.api';
 import { StockBar, StockBarsApi } from '../../../core/api/stock-bars.api';
 import { apiErrorMessage, isI18nKey } from '../../../core/http/api-error';
+import { PlanEntitlementsService } from '../../../core/services/plan-entitlements.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 import { cmToMm, formatCm } from '../../../core/units/length';
 import { AluminumFinishBar } from '../../../shared/aluminum-finish-bar/aluminum-finish-bar';
@@ -46,6 +47,7 @@ export class PlanGenerate {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly workshopContext = inject(WorkshopContextService);
+  readonly entitlements = inject(PlanEntitlementsService);
 
   readonly materials = signal<Material[]>([]);
   readonly projects = signal<ProjectListItem[]>([]);
@@ -273,7 +275,7 @@ export class PlanGenerate {
         materialId: this.materialId,
         kerfMm: cmToMm(Number(this.kerfCm)),
         requiredCutIds: ids,
-        useRemnants: !!this.useRemnants,
+        useRemnants: this.entitlements.remnants() && !!this.useRemnants,
       })
       .subscribe({
         next: (comparison) => {

@@ -19,6 +19,24 @@
   align-items: start;
 }
 
+.settings__side {
+  display: grid;
+  gap: 1rem;
+}
+
+.password-steps {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.password-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .workshop-rename {
   display: grid;
   gap: 0.65rem;

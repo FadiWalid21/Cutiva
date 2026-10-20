@@ -14,6 +14,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "add": "Add",
+    "back": "Back",
     "yes": "Yes",
     "no": "No",
     "cm": "cm"
@@ -150,6 +151,11 @@
     "errors": {
       "generic": "Something went wrong. Try again.",
       "unavailable": "Server unavailable. The API may still be deploying — try again shortly."
+    },
+    "change": {
+      "wrongCurrent": "Current password is incorrect.",
+      "sameAsCurrent": "New password must be different from the current one.",
+      "weak": "Password must be at least 8 characters and include a digit and a lowercase letter."
     },
     "forgot": {
       "headline": "Reset access",
@@ -730,7 +736,19 @@
     "sectorLinked": "Element type linked to market material.",
     "materialRequired": "Choose the aluminum profile this element is made from.",
     "noMarketMaterials": "Add a profile under Market resources before defining element types.",
-    "reservedSectorCode": "This code is reserved for market materials."
+    "reservedSectorCode": "This code is reserved for market materials.",
+    "passwordTitle": "Change password",
+    "passwordHint": "Enter your current password first, then choose a new one. We will email you a security alert — never the password itself.",
+    "passwordStep": "Step {{step}} of 2",
+    "passwordCurrent": "Current password",
+    "passwordCurrentRequired": "Enter your current password to continue.",
+    "passwordContinue": "Continue",
+    "passwordNew": "New password",
+    "passwordConfirm": "Confirm new password",
+    "passwordMismatch": "New passwords do not match.",
+    "passwordSubmit": "Update password",
+    "passwordChanged": "Password updated. Check your email for the security alert.",
+    "passwordChangeError": "Could not update password. Try again."
   },
   "landing": {
     "nav": {

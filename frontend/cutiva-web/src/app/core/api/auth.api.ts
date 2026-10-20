@@ -64,4 +64,11 @@ export class AuthApi {
   }): Observable<void> {
     return this.http.post<void>(`${this.base}/reset-password`, body);
   }
+
+  changePassword(body: {
+    currentPassword: string;
+    newPassword: string;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.base}/change-password`, body);
+  }
 }

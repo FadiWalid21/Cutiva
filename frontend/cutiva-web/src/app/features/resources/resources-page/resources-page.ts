@@ -10,9 +10,10 @@ import {
   viewChild,
 } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { Observable, map, of, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   AccessoriesApi,
   Accessory,
@@ -23,7 +24,6 @@ import { Material, MaterialsApi } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { StockBar, StockBarsApi } from '../../../core/api/stock-bars.api';
 import {
-  MARKET_MATERIALS_SECTOR_CODE,
   MARKET_MATERIALS_SECTOR_NAME_AR,
   MARKET_MATERIALS_SECTOR_NAME_EN,
 } from '../../../core/constants/market';
@@ -142,12 +142,10 @@ export class ResourcesPage implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.reloadMaterials();
     this.ensureMarketSector().subscribe({
-      next: (sector) => {
-        this.marketSectorId = sector.id;
-        this.reloadMaterials();
-      },
-      error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
+      next: (sector) => (this.marketSectorId = sector.id),
+      error: () => (this.marketSectorId = null),
     });
   }
 
@@ -165,45 +163,23 @@ export class ResourcesPage implements OnInit, AfterViewInit {
   }
 
   private ensureMarketSector(): Observable<Sector> {
-    return this.sectorsApi.list().pipe(
-      switchMap((sectors) => {
-        const existing = sectors.find(
-          (s) => s.code.toUpperCase() === MARKET_MATERIALS_SECTOR_CODE,
-        );
-        if (existing) return of(existing);
-
-        const name =
-          this.language.currentLanguage() === 'ar'
-            ? MARKET_MATERIALS_SECTOR_NAME_AR
-            : MARKET_MATERIALS_SECTOR_NAME_EN;
-
-        return this.sectorsApi
-          .create({
-            code: MARKET_MATERIALS_SECTOR_CODE,
-            name,
-            materialId: null,
-          })
-          .pipe(
-            map(
-              (created): Sector => ({
-                id: created.id,
-                code: created.code,
-                name: created.name,
-                materialId: created.materialId,
-                materialCode: null,
-                materialName: null,
-              }),
-            ),
-          );
-      }),
+    return this.sectorsApi.ensureMarketSector(
+      this.language.currentLanguage() === 'ar'
+        ? MARKET_MATERIALS_SECTOR_NAME_AR
+        : MARKET_MATERIALS_SECTOR_NAME_EN,
     );
   }
 
-  reloadMaterials(): void {
+  reloadMaterials(selectId?: string): void {
     this.materialsApi
       .list({ category: 'Aluminum', activeOnly: true })
       .subscribe({
-        next: (materials) => this.materials.set(materials),
+        next: (materials) => {
+          this.materials.set(materials);
+          if (selectId && materials.some((m) => m.id === selectId)) {
+            this.selectMaterial(selectId);
+          }
+        },
         error: (err) => this.error.set(apiErrorMessage(err, 'common.loadError')),
       });
   }
@@ -236,7 +212,7 @@ export class ResourcesPage implements OnInit, AfterViewInit {
       return;
     }
 
-    const createWithSector = (sectorId: string) => {
+    const createWithSector = (sectorId: string, retryOnMissingSector: boolean) => {
       const thickness =
         this.materialThicknessMm != null && this.materialThicknessMm > 0
           ? Number(this.materialThicknessMm)
@@ -252,36 +228,47 @@ export class ResourcesPage implements OnInit, AfterViewInit {
           thicknessMm: thickness,
         })
         .subscribe({
-          next: () => {
+          next: (created) => {
             this.materialCode = '';
             this.materialName = '';
             this.materialDescription = '';
             this.materialThicknessMm = null;
-            this.reloadMaterials();
+            this.reloadMaterials(created.id);
           },
           error: (err) => {
+            if (retryOnMissingSector && err instanceof HttpErrorResponse && err.status === 404) {
+              this.marketSectorId = null;
+              resolveSectorThenCreate(false);
+              return;
+            }
+            const message = apiErrorMessage(err, 'common.saveError');
             const fields = apiFieldErrors(err);
+            const isConflict = err instanceof HttpErrorResponse && err.status === 409;
             this.materialFieldErrors.set({
-              code: firstFieldError(fields, 'code'),
+              code: firstFieldError(fields, 'code') ?? (isConflict ? message : null),
               name: firstFieldError(fields, 'name'),
             });
-            this.error.set(apiErrorMessage(err, 'common.saveError'));
+            this.error.set(message);
           },
         });
     };
 
+    const resolveSectorThenCreate = (retryOnMissingSector: boolean) => {
+      this.ensureMarketSector().subscribe({
+        next: (sector) => {
+          this.marketSectorId = sector.id;
+          createWithSector(sector.id, retryOnMissingSector);
+        },
+        error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
+      });
+    };
+
     if (this.marketSectorId) {
-      createWithSector(this.marketSectorId);
+      createWithSector(this.marketSectorId, true);
       return;
     }
 
-    this.ensureMarketSector().subscribe({
-      next: (sector) => {
-        this.marketSectorId = sector.id;
-        createWithSector(sector.id);
-      },
-      error: (err) => this.error.set(apiErrorMessage(err, 'common.saveError')),
-    });
+    resolveSectorThenCreate(false);
   }
 
   createStock(): void {

@@ -17,6 +17,7 @@
   <data name="SectorInUse" xml:space="preserve"><value>لا يمكن حذف قطاع مستخدم في أقسام المشاريع.</value></data>
   <data name="MaterialNotFound" xml:space="preserve"><value>المادة غير موجودة.</value></data>
   <data name="SectorNotFoundOrMaterialCodeExists" xml:space="preserve"><value>القطاع غير موجود أو رمز المادة مستخدم بالفعل.</value></data>
+  <data name="MaterialCodeExists" xml:space="preserve"><value>الكود {0} موجود بالفعل في الكتالوج. استخدم كودًا مختلفًا أو عدّل العنصر الموجود.</value></data>
   <data name="MaterialNotFoundSimple" xml:space="preserve"><value>المادة المحددة غير موجودة.</value></data>
   <data name="StockBarOrMaterialNotFound" xml:space="preserve"><value>قضيب المخزون أو المادة غير موجود.</value></data>
   <data name="StockBarNotFound" xml:space="preserve"><value>قضيب المخزون غير موجود.</value></data>

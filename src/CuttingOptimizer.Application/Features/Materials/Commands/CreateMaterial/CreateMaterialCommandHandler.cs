@@ -9,9 +9,9 @@ namespace CuttingOptimizer.Application.Features.Materials.Commands.CreateMateria
 public sealed class CreateMaterialCommandHandler(
     IApplicationDbContext dbContext,
     ILogger<CreateMaterialCommandHandler> logger)
-    : IRequestHandler<CreateMaterialCommand, Guid?>
+    : IRequestHandler<CreateMaterialCommand, CreateMaterialResult>
 {
-    public async Task<Guid?> Handle(
+    public async Task<CreateMaterialResult> Handle(
         CreateMaterialCommand request,
         CancellationToken cancellationToken)
     {
@@ -21,34 +21,48 @@ public sealed class CreateMaterialCommandHandler(
                 cancellationToken);
 
         if (!sectorExists)
-            return null;
+            return new CreateMaterialSectorNotFound();
 
         var code = request.Code.Trim().ToUpperInvariant();
+        var name = request.Name.Trim();
+        var description = string.IsNullOrWhiteSpace(request.Description)
+            ? null
+            : request.Description.Trim();
 
-        var codeExists = await dbContext.Materials
-            .AnyAsync(
+        var existing = await dbContext.Materials
+            .FirstOrDefaultAsync(
                 material => material.SectorId == request.SectorId
                             && material.Code == code,
                 cancellationToken);
 
-        if (codeExists)
-            return null;
+        if (existing is not null)
+        {
+            if (existing.IsActive)
+                return new CreateMaterialCodeExists(code);
 
-        var material = new Material
+            existing.Name = name;
+            existing.Description = description;
+            existing.Category = request.Category;
+            existing.ThicknessMm = request.ThicknessMm;
+            existing.IsActive = true;
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return new CreateMaterialSucceeded(existing.Id, code, Reactivated: true);
+        }
+
+        var created = new Material
         {
             Id = Guid.NewGuid(),
             SectorId = request.SectorId,
             Code = code,
-            Name = request.Name.Trim(),
-            Description = string.IsNullOrWhiteSpace(request.Description)
-                ? null
-                : request.Description.Trim(),
+            Name = name,
+            Description = description,
             Category = request.Category,
             ThicknessMm = request.ThicknessMm,
             IsActive = true
         };
 
-        dbContext.Materials.Add(material);
+        dbContext.Materials.Add(created);
 
         try
         {
@@ -61,10 +75,10 @@ public sealed class CreateMaterialCommandHandler(
                 "Duplicate material code {Code} for sector {SectorId}",
                 code,
                 request.SectorId);
-            return null;
+            return new CreateMaterialCodeExists(code);
         }
 
-        return material.Id;
+        return new CreateMaterialSucceeded(created.Id, code, Reactivated: false);
     }
 
     private static bool IsUniqueViolation(DbUpdateException ex)

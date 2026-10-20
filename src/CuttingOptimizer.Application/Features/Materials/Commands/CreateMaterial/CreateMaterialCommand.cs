@@ -9,4 +9,12 @@ public sealed record CreateMaterialCommand(
     string Name,
     string? Description,
     MaterialCategory Category = MaterialCategory.Aluminum,
-    decimal? ThicknessMm = null) : IRequest<Guid?>;
+    decimal? ThicknessMm = null) : IRequest<CreateMaterialResult>;
+
+public abstract record CreateMaterialResult;
+
+public sealed record CreateMaterialSucceeded(Guid Id, string Code, bool Reactivated) : CreateMaterialResult;
+
+public sealed record CreateMaterialSectorNotFound : CreateMaterialResult;
+
+public sealed record CreateMaterialCodeExists(string Code) : CreateMaterialResult;

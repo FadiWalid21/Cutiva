@@ -49,55 +49,102 @@
           </linearGradient>
         </defs>
 
-        <!-- Outer aluminum frame -->
-        <rect
-          [attr.x]="geometry().x"
-          [attr.y]="geometry().y"
-          [attr.width]="geometry().w"
-          [attr.height]="geometry().h"
-          rx="2.5"
-          [attr.fill]="'url(#' + gradientId() + ')'"
-          stroke="rgba(0,0,0,0.22)"
-          stroke-width="0.8"
-        />
-
         @if (kind() === 'hopper') {
+          <!-- Side elevation: wall, vertical frame, top-hinged sash open downward -->
+          <line
+            [attr.x1]="geometry().wallX"
+            [attr.y1]="geometry().y - 2"
+            [attr.x2]="geometry().wallX"
+            [attr.y2]="geometry().y + geometry().h + 2"
+            stroke="rgba(0,0,0,0.28)"
+            stroke-width="2.2"
+            stroke-linecap="round"
+          />
           <rect
-            [attr.x]="geometry().innerX"
-            [attr.y]="geometry().innerY"
-            [attr.width]="geometry().innerW"
-            [attr.height]="geometry().innerH"
-            rx="1"
-            fill="rgba(20,30,40,0.12)"
+            [attr.x]="geometry().frameFrontX"
+            [attr.y]="geometry().y"
+            [attr.width]="geometry().frameDepth"
+            [attr.height]="geometry().h"
+            rx="1.5"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.22)"
+            stroke-width="0.8"
+          />
+          <!-- Closed-position cue (dashed vertical) -->
+          <line
+            [attr.x1]="geometry().closedSashX"
+            [attr.y1]="geometry().hingeY"
+            [attr.x2]="geometry().closedSashX"
+            [attr.y2]="geometry().hingeY + geometry().arcR"
+            stroke="rgba(0,0,0,0.22)"
+            stroke-width="1.1"
+            stroke-dasharray="2.5 2"
+          />
+          <!-- Swing arc -->
+          <path
+            [attr.d]="
+              'M ' +
+              geometry().closedSashX +
+              ' ' +
+              (geometry().hingeY + geometry().arcR) +
+              ' A ' +
+              geometry().arcR +
+              ' ' +
+              geometry().arcR +
+              ' 0 0 0 ' +
+              geometry().sashTipX +
+              ' ' +
+              geometry().sashTipY
+            "
+            fill="none"
+            stroke="rgba(13,148,136,0.45)"
+            stroke-width="1.2"
+            stroke-dasharray="3 2.5"
           />
           <polygon
             [attr.points]="geometry().hopperPoints"
             [attr.fill]="'url(#' + gradientId() + '-glass)'"
-            stroke="rgba(255,255,255,0.4)"
-            stroke-width="0.7"
+            stroke="rgba(0,0,0,0.35)"
+            stroke-width="0.9"
           />
           @if (isDouble()) {
             <line
-              [attr.x1]="geometry().innerX + 8"
-              [attr.y1]="geometry().hingeY + geometry().innerH * 0.35"
-              [attr.x2]="geometry().innerX + geometry().innerW - 8"
-              [attr.y2]="geometry().hingeY + geometry().innerH * 0.35 - 4"
+              [attr.x1]="geometry().hingeX - 1"
+              [attr.y1]="geometry().hingeY + geometry().arcR * 0.28"
+              [attr.x2]="geometry().sashTipX + 2"
+              [attr.y2]="geometry().sashTipY - geometry().arcR * 0.12"
               stroke="rgba(255,255,255,0.55)"
               [attr.stroke-width]="geometry().iguGap"
               opacity="0.75"
             />
           }
-          <line
-            [attr.x1]="geometry().hingeX1"
-            [attr.y1]="geometry().hingeY"
-            [attr.x2]="geometry().hingeX2"
-            [attr.y2]="geometry().hingeY"
-            [attr.stroke]="finish().dark"
-            stroke-width="2.2"
-            stroke-linecap="round"
-            opacity="0.85"
+          <!-- Hinge mark at top -->
+          <circle
+            [attr.cx]="geometry().hingeX"
+            [attr.cy]="geometry().hingeY"
+            r="2.4"
+            [attr.fill]="finish().dark"
+            stroke="rgba(0,0,0,0.25)"
+            stroke-width="0.4"
+          />
+          <circle
+            [attr.cx]="geometry().hingeX"
+            [attr.cy]="geometry().hingeY"
+            r="1"
+            [attr.fill]="finish().light"
           />
         } @else if (kind() === 'window') {
+          <!-- Outer aluminum frame -->
+          <rect
+            [attr.x]="geometry().x"
+            [attr.y]="geometry().y"
+            [attr.width]="geometry().w"
+            [attr.height]="geometry().h"
+            rx="2.5"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.22)"
+            stroke-width="0.8"
+          />
           <rect
             [attr.x]="geometry().innerX"
             [attr.y]="geometry().innerY"
@@ -148,32 +195,18 @@
               stroke-width="0.4"
             />
           }
-          <g
-            [attr.transform]="
-              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
-            "
-          >
-            <rect
-              [attr.x]="-geometry().winBaseW / 2"
-              [attr.y]="-geometry().winBaseH / 2"
-              [attr.width]="geometry().winBaseW"
-              [attr.height]="geometry().winBaseH"
-              [attr.rx]="geometry().winBaseW * 0.28"
-              [attr.fill]="finish().dark"
-              opacity="0.92"
-            />
-            <rect
-              [attr.x]="geometry().winLeverX"
-              [attr.y]="-geometry().winLeverH / 2"
-              [attr.width]="geometry().winLeverW"
-              [attr.height]="geometry().winLeverH"
-              [attr.rx]="geometry().winLeverH * 0.45"
-              [attr.fill]="finish().light"
-              stroke="rgba(0,0,0,0.28)"
-              stroke-width="0.35"
-            />
-          </g>
         } @else {
+          <!-- Outer aluminum frame (door) -->
+          <rect
+            [attr.x]="geometry().x"
+            [attr.y]="geometry().y"
+            [attr.width]="geometry().w"
+            [attr.height]="geometry().h"
+            rx="2.5"
+            [attr.fill]="'url(#' + gradientId() + ')'"
+            stroke="rgba(0,0,0,0.22)"
+            stroke-width="0.8"
+          />
           @if (isStructure()) {
             <rect
               [attr.x]="geometry().innerX"
@@ -217,32 +250,10 @@
               opacity="0.45"
             />
           }
-          <g
-            [attr.transform]="
-              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
-            "
-          >
-            <circle
-              [attr.r]="geometry().doorKnobR"
-              [attr.fill]="finish().dark"
-              stroke="rgba(0,0,0,0.2)"
-              stroke-width="0.35"
-            />
-            <rect
-              [attr.x]="geometry().doorLeverX"
-              [attr.y]="-geometry().doorLeverH / 2"
-              [attr.width]="geometry().doorLeverW"
-              [attr.height]="geometry().doorLeverH"
-              [attr.rx]="geometry().doorLeverH * 0.48"
-              [attr.fill]="finish().light"
-              stroke="rgba(0,0,0,0.3)"
-              stroke-width="0.35"
-            />
-          </g>
         }
 
-        @if (hasRoleColors()) {
-          <!-- Role-colored frame edges -->
+        @if (hasRoleColors() && kind() !== 'hopper') {
+          <!-- Role-colored frame edges (recipes try-size only) -->
           @if (roleColor('FrameTop'); as c) {
             <rect
               [attr.x]="geometry().x"
@@ -328,6 +339,81 @@
               opacity="0.9"
             />
           }
+        }
+
+        <!-- Handles drawn last so role-color overlays never hide them -->
+        @if (kind() === 'hopper') {
+          <g
+            [attr.transform]="
+              'translate(' + geometry().hopHandleX + ',' + geometry().hopHandleY + ')'
+            "
+          >
+            <circle
+              [attr.r]="geometry().hopHandleR"
+              [attr.fill]="finish().dark"
+              stroke="rgba(0,0,0,0.25)"
+              stroke-width="0.4"
+            />
+            <rect
+              [attr.x]="-geometry().hopLeverW"
+              [attr.y]="-geometry().hopLeverH / 2"
+              [attr.width]="geometry().hopLeverW"
+              [attr.height]="geometry().hopLeverH"
+              [attr.rx]="geometry().hopLeverH * 0.45"
+              [attr.fill]="finish().light"
+              stroke="rgba(0,0,0,0.3)"
+              stroke-width="0.35"
+            />
+          </g>
+        } @else if (kind() === 'window') {
+          <g
+            [attr.transform]="
+              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
+            "
+          >
+            <rect
+              [attr.x]="-geometry().winBaseW / 2"
+              [attr.y]="-geometry().winBaseH / 2"
+              [attr.width]="geometry().winBaseW"
+              [attr.height]="geometry().winBaseH"
+              [attr.rx]="geometry().winBaseW * 0.28"
+              [attr.fill]="finish().dark"
+              opacity="0.92"
+            />
+            <rect
+              [attr.x]="geometry().winLeverX"
+              [attr.y]="-geometry().winLeverH / 2"
+              [attr.width]="geometry().winLeverW"
+              [attr.height]="geometry().winLeverH"
+              [attr.rx]="geometry().winLeverH * 0.45"
+              [attr.fill]="finish().light"
+              stroke="rgba(0,0,0,0.28)"
+              stroke-width="0.35"
+            />
+          </g>
+        } @else {
+          <g
+            [attr.transform]="
+              'translate(' + geometry().handleX + ',' + geometry().handleY + ')'
+            "
+          >
+            <circle
+              [attr.r]="geometry().doorKnobR"
+              [attr.fill]="finish().dark"
+              stroke="rgba(0,0,0,0.2)"
+              stroke-width="0.35"
+            />
+            <rect
+              [attr.x]="geometry().doorLeverX"
+              [attr.y]="-geometry().doorLeverH / 2"
+              [attr.width]="geometry().doorLeverW"
+              [attr.height]="geometry().doorLeverH"
+              [attr.rx]="geometry().doorLeverH * 0.48"
+              [attr.fill]="finish().light"
+              stroke="rgba(0,0,0,0.3)"
+              stroke-width="0.35"
+            />
+          </g>
         }
 
         <text

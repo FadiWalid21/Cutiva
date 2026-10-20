@@ -46,7 +46,7 @@ export class FramePreview {
   readonly compact = input(false);
   readonly paneStyle = input<PreviewPaneStyle | null>(null);
   readonly layout = input<PreviewLayout>('auto');
-  /** When set, draw colored role strokes over the frame/sash. */
+  /** Role colors for recipes try-size only — do not pass from quotes/projects/plans. */
   readonly roleColors = input<Partial<Record<PreviewRole, string>> | null>(null);
 
   readonly formatCm = formatCm;
@@ -159,26 +159,45 @@ export class FramePreview {
     const midX = x + iw / 2;
     const midY = y + ih / 2;
 
+    const twoPane = this.resolvedLayout() === 'sliding';
+
     const handleScale = Math.min(1.6, Math.max(0.75, Math.min(innerW, innerH) / 80));
     const inset = Math.min(innerW * 0.22, Math.max(frame * 0.85, 5 * handleScale));
+    // Sliding/casement: handle on movable sash outer stile (right edge, LTR).
     const handleX = innerX + innerW - inset;
     const handleY = midY;
     const s = handleScale;
 
-    const tilt = Math.min(innerH * 0.28, 22);
-    const sashBottomY = innerY + innerH - 2;
-    const sashTopY = innerY + 2;
+    // Side elevation for tilt/hopper: wall | frame | sash hinged at top swinging open.
+    const wallX = Math.max(6, x - 10);
+    const frameDepth = Math.max(10, Math.min(18, frame * 1.35));
+    const frameFrontX = x + iw * 0.42;
+    const hingeX = frameFrontX + frameDepth * 0.35;
+    const hingeY = innerY + 2;
+    const sashLen = Math.max(24, innerH - 4);
+    const openRad = (32 * Math.PI) / 180;
+    const sashTipX = hingeX - Math.sin(openRad) * sashLen;
+    const sashTipY = hingeY + Math.cos(openRad) * sashLen;
+    const sashThick = Math.max(3.2, frame * 0.38);
+    const nx = -Math.cos(openRad);
+    const ny = -Math.sin(openRad);
     const hopperPoints = [
-      `${innerX + 2},${sashTopY}`,
-      `${innerX + innerW - 2},${sashTopY}`,
-      `${innerX + innerW - 6},${sashBottomY - tilt}`,
-      `${innerX + 6},${sashBottomY - tilt}`,
+      `${hingeX + nx * sashThick * 0.15},${hingeY + ny * sashThick * 0.15}`,
+      `${hingeX - nx * sashThick},${hingeY - ny * sashThick}`,
+      `${sashTipX - nx * sashThick},${sashTipY - ny * sashThick}`,
+      `${sashTipX + nx * sashThick * 0.15},${sashTipY + ny * sashThick * 0.15}`,
     ].join(' ');
+    const closedSashX = hingeX;
+    const arcR = sashLen * 0.92;
+    const hopHandleX = sashTipX - nx * sashThick * 0.4;
+    const hopHandleY = sashTipY - ny * sashThick * 0.4;
 
     const sashInset = Math.max(2.5, frame * 0.35);
-    const sashX = innerX + sashInset;
+    const sashX = twoPane ? midX + sashInset * 0.35 : innerX + sashInset;
     const sashY = innerY + sashInset;
-    const sashW = Math.max(4, innerW - sashInset * 2);
+    const sashW = twoPane
+      ? Math.max(4, innerX + innerW - sashInset - (midX + sashInset * 0.35))
+      : Math.max(4, innerW - sashInset * 2);
     const sashH = Math.max(4, innerH - sashInset * 2);
     const sashStroke = Math.max(2.2, frame * 0.28);
 
@@ -214,9 +233,20 @@ export class FramePreview {
       mullionW: Math.max(2.4, Math.min(4.2, frame * 0.45)),
       iguGap: Math.max(1.2, Math.min(2.4, frame * 0.18)),
       hopperPoints,
-      hingeY: sashTopY,
-      hingeX1: innerX + 4,
-      hingeX2: innerX + innerW - 4,
+      hingeY,
+      hingeX,
+      wallX,
+      frameFrontX,
+      frameDepth,
+      closedSashX,
+      sashTipX,
+      sashTipY,
+      arcR,
+      hopHandleX,
+      hopHandleY,
+      hopHandleR: Math.max(2.4, 2.6 * s),
+      hopLeverW: Math.max(7, 8 * s),
+      hopLeverH: Math.max(2, 2.2 * s),
       sashX,
       sashY,
       sashW,

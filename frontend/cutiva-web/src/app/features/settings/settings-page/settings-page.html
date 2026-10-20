@@ -161,7 +161,7 @@
 
       <ul class="list element-list">
         @for (sector of sectors(); track sector.id) {
-          <li class="element-card" [class.element-card--unlinked]="!sector.materialId">
+          <li class="element-card" [class.element-card--unlinked]="!isSectorLinked(sector)">
             <div class="element-card__main">
               <strong>{{ sector.code }} — {{ sector.name }}</strong>
               @if (materialLabel(sector); as label) {

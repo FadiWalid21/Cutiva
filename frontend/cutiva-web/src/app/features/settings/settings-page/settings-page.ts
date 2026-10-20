@@ -71,14 +71,20 @@ export class SettingsPage implements OnInit {
   reloadAll(): void {
     this.materialsReady.set(false);
     forkJoin({
-      materials: this.materialsApi.list(),
+      materials: this.materialsApi.list({
+        category: 'Aluminum',
+        activeOnly: true,
+      }),
       sectors: this.sectorsApi.list(),
     }).subscribe({
       next: ({ materials, sectors }) => {
         this.profileMaterials.set(materials);
         this.materialsReady.set(true);
-        if (!this.sectorMaterialId && materials.length) {
-          this.sectorMaterialId = materials[0].id;
+        if (
+          !this.sectorMaterialId ||
+          !materials.some((m) => m.id === this.sectorMaterialId)
+        ) {
+          this.sectorMaterialId = materials[0]?.id ?? '';
         }
         this.sectors.set(
           sectors.filter(
@@ -199,7 +205,17 @@ export class SettingsPage implements OnInit {
     this.linkDrafts.update((map) => ({ ...map, [id]: value }));
   }
 
+  isSectorLinked(sector: Sector): boolean {
+    return (
+      !!sector.materialId &&
+      this.profileMaterials().some((m) => m.id === sector.materialId)
+    );
+  }
+
   materialLabel(sector: Sector): string {
+    if (!this.isSectorLinked(sector)) return '';
+    const active = this.profileMaterials().find((m) => m.id === sector.materialId);
+    if (active) return `${active.code} — ${active.name}`;
     if (sector.materialCode && sector.materialName) {
       return `${sector.materialCode} — ${sector.materialName}`;
     }

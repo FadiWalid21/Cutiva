@@ -2,8 +2,7 @@ namespace CuttingOptimizer.Application.Abstractions.Auth;
 
 public interface IPasswordResetService
 {
-    /// <summary>Always succeeds from the caller's perspective (no email enumeration).</summary>
-    Task RequestForgotPasswordAsync(
+    Task<ForgotPasswordOutcome> RequestForgotPasswordAsync(
         string email,
         bool arabic,
         CancellationToken cancellationToken);
@@ -13,6 +12,12 @@ public interface IPasswordResetService
         string code,
         string newPassword,
         CancellationToken cancellationToken);
+}
+
+public enum ForgotPasswordOutcome
+{
+    Sent,
+    EmailNotFound
 }
 
 public enum PasswordResetOutcome

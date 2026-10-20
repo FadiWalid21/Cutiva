@@ -20,18 +20,18 @@ public sealed class PasswordResetService(
     private static readonly TimeSpan OtpLifetime = TimeSpan.FromMinutes(10);
     private const int MaxAttempts = 5;
 
-    public async Task RequestForgotPasswordAsync(
+    public async Task<ForgotPasswordOutcome> RequestForgotPasswordAsync(
         string email,
         bool arabic,
         CancellationToken cancellationToken)
     {
         var normalized = email.Trim();
         if (string.IsNullOrWhiteSpace(normalized))
-            return;
+            return ForgotPasswordOutcome.EmailNotFound;
 
         var user = await userManager.FindByEmailAsync(normalized);
         if (user is null)
-            return;
+            return ForgotPasswordOutcome.EmailNotFound;
 
         var code = AuthEmailTemplates.GenerateOtp();
         var hash = AuthEmailTemplates.HashOtp(code);
@@ -66,6 +66,8 @@ public sealed class PasswordResetService(
         {
             logger.LogError(ex, "Failed to send password reset OTP to {Email}", user.Email);
         }
+
+        return ForgotPasswordOutcome.Sent;
     }
 
     public async Task<PasswordResetOutcome> ResetPasswordAsync(

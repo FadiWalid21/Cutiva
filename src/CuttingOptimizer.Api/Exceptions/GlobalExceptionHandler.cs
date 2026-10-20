@@ -2,7 +2,6 @@ using CuttingOptimizer.Application.Resources;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 
 namespace CuttingOptimizer.Api.Exceptions;
@@ -61,9 +60,9 @@ public sealed class GlobalExceptionHandler(
             problem.Extensions["errors"] = errors;
             problem.Extensions["message"] = localizer["ValidationFailedDetail"].Value;
         }
-        else if (exception is DbUpdateException || exception.GetBaseException() is DbUpdateException)
+        else
         {
-            // Surface store errors for workshop ops (e.g. schema drift) instead of an opaque 500.
+            // Always surface the base error so workshop ops are not stuck on opaque 500 titles.
             problem.Extensions["message"] = baseError;
         }
 

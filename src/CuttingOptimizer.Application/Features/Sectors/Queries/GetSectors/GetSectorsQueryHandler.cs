@@ -19,9 +19,15 @@ public sealed class GetSectorsQueryHandler(
                 sector.Id,
                 sector.Code,
                 sector.Name,
-                sector.MaterialId,
-                sector.Material != null ? sector.Material.Code : null,
-                sector.Material != null ? sector.Material.Name : null))
+                sector.Material != null && sector.Material.IsActive
+                    ? sector.MaterialId
+                    : null,
+                sector.Material != null && sector.Material.IsActive
+                    ? sector.Material.Code
+                    : null,
+                sector.Material != null && sector.Material.IsActive
+                    ? sector.Material.Name
+                    : null))
             .ToListAsync(cancellationToken);
     }
 }

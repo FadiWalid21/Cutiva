@@ -421,10 +421,8 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasDefaultValue("Aluminum");
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -436,9 +434,7 @@ namespace CuttingOptimizer.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true);
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()

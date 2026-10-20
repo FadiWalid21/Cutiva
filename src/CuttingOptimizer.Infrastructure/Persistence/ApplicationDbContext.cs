@@ -269,16 +269,17 @@ public class ApplicationDbContext(
             entity.Property(x => x.Description)
                 .HasMaxLength(500);
 
+            // Send Category/IsActive on INSERT (do not omit via store-default semantics).
             entity.Property(x => x.Category)
                 .HasConversion<string>()
                 .HasMaxLength(32)
-                .HasDefaultValue(Domain.Enums.MaterialCategory.Aluminum);
+                .IsRequired();
 
             entity.Property(x => x.ThicknessMm)
                 .HasPrecision(10, 2);
 
             entity.Property(x => x.IsActive)
-                .HasDefaultValue(true);
+                .IsRequired();
 
             entity.HasIndex(x => new
             {

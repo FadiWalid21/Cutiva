@@ -22,8 +22,7 @@ You may **delete and recreate** the FreeSite if an old Git deploy config is mess
 2. **GitHub repository URL** (HTTPS, ends with `.git`):
    `https://github.com/FadiWalid21/Cutiva.git`
 3. If the repo is **private**, paste a GitHub Personal Access Token, then **Load** branches
-4. **Branch:** `feature/resources-products-costing`  
-   (switch to `main` after you merge this work)
+4. **Branch:** `main` (required — do not leave an old feature branch selected)
 5. **Deployment type:** **Build .NET app**
 6. **Project to build** (multi-project repo):  
    `src/CuttingOptimizer.Api/CuttingOptimizer.Api.csproj`
@@ -32,14 +31,20 @@ You may **delete and recreate** the FreeSite if an old Git deploy config is mess
 
 Enabling does **not** change the live site until you publish.
 
-### Publish
+### Publish (every API change)
 
-1. **Pull latest** (fetches the branch into staging)
+1. **Pull latest** (fetches `main` into staging)
 2. **Build & publish** (server runs `dotnet publish` and deploys output to `\wwwroot`)
 3. Check **Recent builds** / logs if it fails
-4. On the site overview: **Restart**
+4. On the site overview: **Restart** (required — migrations + `MaterialsSchemaRepair` run on startup)
 
-On **FreeSite**, auto-deploy on every push is usually **not** available (Premium). After each `git push`, repeat **Pull latest** → **Build & publish**.
+On **FreeSite**, auto-deploy on every push is usually **not** available (Premium). After each `git push` to `main`, repeat **Pull latest** → **Build & publish** → **Restart**.
+
+Verify the new build is live:
+
+```bash
+curl -sS https://cutiva.runasp.net/api/diagnostics/build
+```
 
 ### Environment variables
 
@@ -47,7 +52,7 @@ Set these in the MonsterASP site settings (ASP.NET Core `__` nesting):
 
 | Variable | Notes |
 |----------|--------|
-| `ConnectionStrings__DefaultConnection` | Postgres. If password contains `=`, use `Password='…'` |
+| `ConnectionStrings__DefaultConnection` | Postgres. If the password contains `=`, **quote it**: `Password='yourPasswordHere'`. Full shape: `Server=…;Port=5432;Database=…;User Id=…;Password='…';Ssl Mode=Prefer;` |
 | `Jwt__Key` | ≥32 random chars (`openssl rand -base64 48`) |
 | `Jwt__Issuer` | `Cutiva` |
 | `Jwt__Audience` | `Cutiva` |
@@ -68,7 +73,12 @@ CORS already allows `https://cutiva-kappa.vercel.app` and `*.vercel.app`.
 
 DB migrations run automatically on API startup via `MigrateAsync()` (IdentityDataSeeder). After each **Build & publish**, click **Restart** so pending EF migrations apply.
 
-If `POST /api/materials` returns Arabic 500 while `GET /api/materials` works, production may still have leftover glass-era columns (`Kind` NOT NULL). Migration `EnsureMaterialsSchemaAligned` plus startup `MaterialsSchemaRepair` drop those and ensure `Category` / `IsActive` / `ThicknessMm`. After deploy, **Restart** the site so repair SQL runs; check site logs for “Materials schema repair applied” or the Npgsql message if create still fails.
+If `POST /api/materials` returns Arabic 500 while `GET /api/materials` works:
+
+1. Confirm Git deploy branch is **`main`**, then Pull → Build & publish → **Restart**.
+2. Hit `GET /api/diagnostics/build` — if it 404s, the old binary is still live.
+3. DB migrations (including `EnsureMaterialsSchemaAligned`) are already applied on production; startup also runs idempotent `MaterialsSchemaRepair`. Current `main` creates materials successfully against this DB when the new binary is running.
+4. After restart, create should return **201**. If it still fails, the JSON body `message` field carries the store error.
 
 ## Optional local fallback (not required)
 

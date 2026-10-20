@@ -260,29 +260,6 @@ export class ResourcesPage implements OnInit, AfterViewInit {
             this.reloadMaterials();
           },
           error: (err) => {
-            // #region agent log
-            const httpErr = err as { status?: number; error?: unknown };
-            fetch('http://127.0.0.1:7715/ingest/fd9c8ceb-adb9-4559-8014-d713c70670b7', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Debug-Session-Id': '50384f',
-              },
-              body: JSON.stringify({
-                sessionId: '50384f',
-                runId: 'create-material',
-                hypothesisId: 'A-D',
-                location: 'resources-page.ts:createMaterial',
-                message: 'materials create failed',
-                data: {
-                  status: httpErr?.status ?? null,
-                  body: httpErr?.error ?? null,
-                  code: this.materialCode.trim(),
-                },
-                timestamp: Date.now(),
-              }),
-            }).catch(() => {});
-            // #endregion
             const fields = apiFieldErrors(err);
             this.materialFieldErrors.set({
               code: firstFieldError(fields, 'code'),

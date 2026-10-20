@@ -489,18 +489,19 @@ public sealed class AdminClientService(
     public async Task<IReadOnlyList<AdminPlanDto>> ListPlansAsync(
         CancellationToken cancellationToken)
     {
-        return await db.SubscriptionPlans
+        var plans = await db.SubscriptionPlans
             .AsNoTracking()
+            .Include(p => p.Features)
+            .ThenInclude(f => f.Feature)
             .OrderBy(p => p.PriceSar)
-            .Select(p => new AdminPlanDto(
-                p.Id,
-                p.Code,
-                p.Name,
-                p.PriceSar,
-                p.DurationDays,
-                p.MaxUsers,
-                p.IsActive))
             .ToListAsync(cancellationToken);
+
+        var catalog = await db.FeatureDefinitions
+            .AsNoTracking()
+            .OrderBy(f => f.SortOrder)
+            .ToListAsync(cancellationToken);
+
+        return plans.Select(p => ToPlanDto(p, catalog)).ToList();
     }
 
     public async Task<AdminPlanDto?> UpdatePlanAsync(
@@ -509,6 +510,7 @@ public sealed class AdminClientService(
         CancellationToken cancellationToken)
     {
         var plan = await db.SubscriptionPlans
+            .Include(p => p.Features)
             .FirstOrDefaultAsync(p => p.Id == planId, cancellationToken);
         if (plan is null)
             return null;
@@ -528,7 +530,66 @@ public sealed class AdminClientService(
         if (request.IsActive.HasValue)
             plan.IsActive = request.IsActive.Value;
 
+        if (request.Features is { Count: > 0 })
+        {
+            var known = await db.FeatureDefinitions
+                .AsNoTracking()
+                .Select(f => f.Code)
+                .ToListAsync(cancellationToken);
+            var knownSet = known.ToHashSet(StringComparer.Ordinal);
+
+            foreach (var update in request.Features)
+            {
+                if (string.IsNullOrWhiteSpace(update.Code)
+                    || !knownSet.Contains(update.Code))
+                    continue;
+
+                var row = plan.Features
+                    .FirstOrDefault(f => f.FeatureCode == update.Code);
+                if (row is null)
+                {
+                    plan.Features.Add(new SubscriptionPlanFeature
+                    {
+                        PlanId = plan.Id,
+                        FeatureCode = update.Code,
+                        IsEnabled = update.IsEnabled
+                    });
+                }
+                else
+                {
+                    row.IsEnabled = update.IsEnabled;
+                }
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
+
+        var catalog = await db.FeatureDefinitions
+            .AsNoTracking()
+            .OrderBy(f => f.SortOrder)
+            .ToListAsync(cancellationToken);
+
+        await db.Entry(plan).Collection(p => p.Features).LoadAsync(cancellationToken);
+        foreach (var feature in plan.Features)
+            await db.Entry(feature).Reference(f => f.Feature).LoadAsync(cancellationToken);
+
+        return ToPlanDto(plan, catalog);
+    }
+
+    private static AdminPlanDto ToPlanDto(
+        SubscriptionPlan plan,
+        IReadOnlyList<FeatureDefinition> catalog)
+    {
+        var enabled = plan.Features
+            .ToDictionary(f => f.FeatureCode, f => f.IsEnabled, StringComparer.Ordinal);
+
+        var features = catalog
+            .Select(c => new AdminPlanFeatureDto(
+                c.Code,
+                c.Name,
+                c.SortOrder,
+                enabled.TryGetValue(c.Code, out var on) && on))
+            .ToList();
 
         return new AdminPlanDto(
             plan.Id,
@@ -537,7 +598,8 @@ public sealed class AdminClientService(
             plan.PriceSar,
             plan.DurationDays,
             plan.MaxUsers,
-            plan.IsActive);
+            plan.IsActive,
+            features);
     }
 
     public async Task<IReadOnlyList<PublicPlanDto>> ListPublicPlansAsync(

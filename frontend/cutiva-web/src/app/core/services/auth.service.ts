@@ -80,6 +80,7 @@ export class AuthService {
       roles: result.roles ?? [],
       workshopId: result.workshopId ?? null,
       subscription: result.subscription ?? null,
+      features: result.features ?? [],
     });
     if (!(result.roles ?? []).includes('Admin')) {
       this.workshops.load();

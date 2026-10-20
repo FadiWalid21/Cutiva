@@ -50,6 +50,8 @@
   align-items: center;
   gap: 0.85rem;
   margin-bottom: 1.35rem;
+  /* Keep [mark][name] lockup in RTL — do not flip with dir=rtl flex axis. */
+  direction: ltr;
   text-decoration: none;
   color: inherit;
 }

@@ -18,6 +18,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { MotionService } from '../../core/motion/motion.service';
+import { PlanEntitlementsService } from '../../core/services/plan-entitlements.service';
 import { WorkshopContextService } from '../../core/services/workshop-context.service';
 import { KpiCards } from './components/kpi-cards/kpi-cards';
 import { QuickCreateCta } from './components/quick-create-cta/quick-create-cta';
@@ -50,6 +51,7 @@ export class Dashboard implements AfterViewInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly workshopContext = inject(WorkshopContextService);
   private readonly motion = inject(MotionService);
+  readonly entitlements = inject(PlanEntitlementsService);
   private readonly pageRoot = viewChild<ElementRef<HTMLElement>>('pageRoot');
 
   readonly state$: Observable<DashboardViewState> = combineLatest([

@@ -40,6 +40,13 @@ export interface AdminClientDetail extends AdminClientListItem {
   users: AdminWorkshopUser[];
 }
 
+export interface AdminPlanFeature {
+  code: string;
+  name: string;
+  sortOrder: number;
+  isEnabled: boolean;
+}
+
 export interface AdminPlan {
   id: string;
   code: string;
@@ -48,6 +55,7 @@ export interface AdminPlan {
   durationDays: number;
   maxUsers: number | null;
   isActive: boolean;
+  features: AdminPlanFeature[];
 }
 
 export interface AdminReportSummary {
@@ -199,6 +207,7 @@ export class AdminApi {
       maxUsers: number | null;
       durationDays?: number | null;
       isActive?: boolean | null;
+      features?: { code: string; isEnabled: boolean }[] | null;
     },
   ): Observable<AdminPlan> {
     return this.http.put<AdminPlan>(`${this.base}/plans/${planId}`, body);

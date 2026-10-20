@@ -44,7 +44,16 @@
     "manageClients": "Manage clients",
     "clientsTitle": "Clients & subscriptions",
     "plansTitle": "Subscription plans",
-    "plansHint": "Edit catalog name, price, seats, and duration. Changes apply to new client forms and the public landing page.",
+    "plansHint": "Edit catalog name, price, seats, duration, and which features each plan unlocks.",
+    "planFeatures": "Features on this plan",
+    "feature": {
+      "resources": "Resources catalog",
+      "productTemplates": "Product templates",
+      "remnants": "Remnant warehouse",
+      "planComparisons": "Plan comparisons",
+      "clientQuotes": "Client quotes",
+      "workshopReports": "Workshop reports"
+    },
     "createClient": "Create client account",
     "workshopName": "Workshop name",
     "ownerEmail": "Owner email",
@@ -201,7 +210,39 @@
     "productTemplates": "Product recipes",
     "cuttingPlans": "What to buy",
     "quotes": "Quotes",
+    "reports": "Reports",
     "settings": "Settings"
+  },
+  "reports": {
+    "title": "Workshop reports",
+    "subtitle": "Waste, cost, and activity for the selected date range.",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "loadError": "Could not load the report.",
+    "empty": "No data in this range.",
+    "materialsTitle": "Top materials by cost",
+    "projectsTitle": "Projects in range",
+    "colMaterial": "Material",
+    "colPlans": "Plans",
+    "colBars": "Bars",
+    "colWaste": "Waste",
+    "colCost": "Cost",
+    "colProject": "Project",
+    "colGenerated": "Generated",
+    "colApproved": "Approved",
+    "colLast": "Last activity",
+    "kpi": {
+      "projects": "Active projects",
+      "plansGenerated": "Plans generated",
+      "plansApproved": "Plans approved",
+      "barsUsed": "Bars used",
+      "efficiency": "Efficiency",
+      "waste": "Waste",
+      "cost": "Material cost",
+      "remnantsStock": "Remnants in stock",
+      "remnantsUsed": "Remnants used"
+    }
   },
   "language": {
     "label": "Language",
@@ -325,6 +366,8 @@
     "source": "Source",
     "compareTitle": "Buy alternatives",
     "compareSubtitle": "Compare cost, waste, and whether the option can complete the job, then open details.",
+    "resultTitle": "Buy result",
+    "resultSubtitle": "Open the plan details to confirm and continue.",
     "badgeCheapest": "Cheapest",
     "badgeLeastWaste": "Least waste",
     "badgeUsable": "Works for the job",
@@ -427,7 +470,7 @@
     "surchargesTotal": "Extras total",
     "grandTotal": "Grand total",
     "notes": "Notes for the client",
-    "exportPdf": "Export invoice",
+    "exportPdf": "Export quotation",
     "saved": "Quote saved.",
     "notFound": "Quote not found.",
     "loadError": "Could not open quote. Confirm the plan first.",
@@ -566,7 +609,7 @@
       "twoTitle": "Generate a cut plan",
       "twoBody": "Compare buy alternatives, use remnant stock when it helps, and approve with confidence.",
       "threeTitle": "Quote the client",
-      "threeBody": "Turn the approved plan into a clear invoice — materials, accessories, and totals."
+      "threeBody": "Turn the approved plan into a clear quotation — materials, accessories, and totals."
     },
     "pricing": {
       "title": "Simple pricing",
@@ -576,15 +619,15 @@
       "cta": "Request this plan",
       "starter": {
         "name": "Starter",
-        "feature": "One workshop, core cutting plans, and quotes."
+        "feature": "One workshop, core cutting plans, and resources."
       },
       "workshop": {
         "name": "Workshop",
-        "feature": "Remnant warehouse, comparisons, and client invoices."
+        "feature": "Remnants, plan comparisons, quotes, and workshop reports."
       },
       "studio": {
         "name": "Studio",
-        "feature": "Multiple workshops and priority support for growing teams."
+        "feature": "Everything unlocked for growing teams, with priority support."
       },
       "seatsUpTo": "Up to {{count}} users",
       "seatsUnlimited": "Unlimited users"

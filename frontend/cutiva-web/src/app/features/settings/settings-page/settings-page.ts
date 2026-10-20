@@ -7,7 +7,6 @@ import { Material, MaterialsApi } from '../../../core/api/materials.api';
 import { Sector, SectorsApi } from '../../../core/api/sectors.api';
 import { WorkshopsApi } from '../../../core/api/workshops.api';
 import { MARKET_MATERIALS_SECTOR_CODE } from '../../../core/constants/market';
-import { FeatureFlagsService } from '../../../core/services/feature-flags.service';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 
 @Component({
@@ -21,8 +20,7 @@ export class SettingsPage implements OnInit {
   private readonly sectorsApi = inject(SectorsApi);
   private readonly materialsApi = inject(MaterialsApi);
   readonly workshopContext = inject(WorkshopContextService);
-  readonly features = inject(FeatureFlagsService);
-  readonly marketLink = this.features.resourcesV2 ? '/resources' : '/materials';
+  readonly marketLink = '/resources';
 
   readonly sectors = signal<Sector[]>([]);
   readonly profileMaterials = signal<Material[]>([]);

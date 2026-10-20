@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../config/api.config';
 import {
   PagedWorkshopsResponse,
   WorkshopDashboardResponse,
+  WorkshopReportResponse,
   WorkshopSummary,
 } from './workshops.models';
 
@@ -28,6 +29,18 @@ export class WorkshopsApi {
   getDashboard(workshopId: string): Observable<WorkshopDashboardResponse> {
     return this.http.get<WorkshopDashboardResponse>(
       `${this.baseUrl}/${workshopId}/dashboard`,
+    );
+  }
+
+  getReportSummary(
+    workshopId: string,
+    from: string,
+    to: string,
+  ): Observable<WorkshopReportResponse> {
+    const params = new HttpParams().set('from', from).set('to', to);
+    return this.http.get<WorkshopReportResponse>(
+      `${this.baseUrl}/${workshopId}/reports/summary`,
+      { params },
     );
   }
 

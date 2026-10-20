@@ -31,7 +31,9 @@
           <app-kpi-cards [kpis]="state.data.kpis" />
 
           <div class="dashboard__mid">
-            <app-remnant-panel [remnants]="state.data.remnantInventory" />
+            @if (entitlements.remnants()) {
+              <app-remnant-panel [remnants]="state.data.remnantInventory" />
+            }
             <app-quick-create-cta />
           </div>
 

@@ -77,29 +77,31 @@
 
         <p class="continuity-note">{{ 'plans.continuityRule' | translate }}</p>
 
-        <label class="remnant-toggle">
-          <input
-            type="checkbox"
-            [(ngModel)]="useRemnants"
-            name="useRemnants"
-            (ngModelChange)="onUseRemnantsChange()"
-          />
-          <span>
-            <strong>{{ 'plans.useRemnants' | translate }}</strong>
-            <small>{{ 'plans.useRemnantsHint' | translate }}</small>
-            @if (usableRemnantCount() > 0) {
-              <small class="remnant-toggle__status remnant-toggle__status--ok">
-                {{
-                  'plans.remnantsAvailable' | translate: { count: usableRemnantCount() }
-                }}
-              </small>
-            } @else {
-              <small class="remnant-toggle__status remnant-toggle__status--warn">
-                {{ 'plans.noUsableRemnantsAffectingCost' | translate }}
-              </small>
-            }
-          </span>
-        </label>
+        @if (entitlements.remnants()) {
+          <label class="remnant-toggle">
+            <input
+              type="checkbox"
+              [(ngModel)]="useRemnants"
+              name="useRemnants"
+              (ngModelChange)="onUseRemnantsChange()"
+            />
+            <span>
+              <strong>{{ 'plans.useRemnants' | translate }}</strong>
+              <small>{{ 'plans.useRemnantsHint' | translate }}</small>
+              @if (usableRemnantCount() > 0) {
+                <small class="remnant-toggle__status remnant-toggle__status--ok">
+                  {{
+                    'plans.remnantsAvailable' | translate: { count: usableRemnantCount() }
+                  }}
+                </small>
+              } @else {
+                <small class="remnant-toggle__status remnant-toggle__status--warn">
+                  {{ 'plans.noUsableRemnantsAffectingCost' | translate }}
+                </small>
+              }
+            </span>
+          </label>
+        }
 
         @if (needsRegenerate()) {
           <p class="page__notice">{{ 'plans.needsRegenerate' | translate }}</p>
@@ -148,8 +150,13 @@
     @if (comparison(); as cmp) {
       <section class="compare">
         <header class="compare__header">
-          <h2>{{ 'plans.compareTitle' | translate }}</h2>
-          <p>{{ 'plans.compareSubtitle' | translate }}</p>
+          @if (entitlements.planComparisons() && cmp.alternatives.length > 1) {
+            <h2>{{ 'plans.compareTitle' | translate }}</h2>
+            <p>{{ 'plans.compareSubtitle' | translate }}</p>
+          } @else {
+            <h2>{{ 'plans.resultTitle' | translate }}</h2>
+            <p>{{ 'plans.resultSubtitle' | translate }}</p>
+          }
         </header>
 
         <div class="compare__grid">

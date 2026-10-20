@@ -20,3 +20,5 @@ public sealed record UpsertClientQuoteNotFound : UpsertClientQuoteResult;
 public sealed record UpsertClientQuotePlanNotApproved : UpsertClientQuoteResult;
 
 public sealed record UpsertClientQuoteNoBillableLines : UpsertClientQuoteResult;
+
+public sealed record UpsertClientQuoteFeatureDisabled : UpsertClientQuoteResult;

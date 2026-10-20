@@ -1,0 +1,132 @@
+<section class="reports">
+  <header class="reports__header">
+    <div>
+      <h1>{{ 'reports.title' | translate }}</h1>
+      <p>{{ 'reports.subtitle' | translate }}</p>
+    </div>
+    <form class="reports__range" (ngSubmit)="reload()">
+      <label>
+        <span>{{ 'reports.from' | translate }}</span>
+        <input type="date" [(ngModel)]="fromDate" name="fromDate" required />
+      </label>
+      <label>
+        <span>{{ 'reports.to' | translate }}</span>
+        <input type="date" [(ngModel)]="toDate" name="toDate" required />
+      </label>
+      <button type="submit" class="btn btn--primary" [disabled]="loading()">
+        {{ 'reports.apply' | translate }}
+      </button>
+    </form>
+  </header>
+
+  @if (error()) {
+    <p class="page__error">{{ error()! | translate }}</p>
+  }
+
+  @if (loading()) {
+    <p class="page__muted">{{ 'common.loading' | translate }}</p>
+  } @else if (report(); as r) {
+    <div class="reports__kpis">
+      <article class="kpi">
+        <span>{{ 'reports.kpi.projects' | translate }}</span>
+        <strong>{{ r.kpis.projectsActive }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.plansGenerated' | translate }}</span>
+        <strong>{{ r.kpis.plansGenerated }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.plansApproved' | translate }}</span>
+        <strong>{{ r.kpis.plansApproved }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.barsUsed' | translate }}</span>
+        <strong>{{ r.kpis.stockBarsUsed }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.efficiency' | translate }}</span>
+        <strong>{{ r.kpis.materialEfficiencyPercent | number: '1.0-1' }}%</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.waste' | translate }}</span>
+        <strong>{{ r.kpis.wastePercent | number: '1.0-1' }}%</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.cost' | translate }}</span>
+        <strong>{{ r.kpis.totalMaterialCost | number: '1.0-2' }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.remnantsStock' | translate }}</span>
+        <strong>{{ r.kpis.remnantBarsInStock }}</strong>
+      </article>
+      <article class="kpi">
+        <span>{{ 'reports.kpi.remnantsUsed' | translate }}</span>
+        <strong>{{ r.kpis.remnantBarsConsumed }}</strong>
+      </article>
+    </div>
+
+    <div class="reports__grid">
+      <article class="card">
+        <h2>{{ 'reports.materialsTitle' | translate }}</h2>
+        @if (r.topMaterialsByCost.length === 0) {
+          <p class="page__muted">{{ 'reports.empty' | translate }}</p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'reports.colMaterial' | translate }}</th>
+                <th>{{ 'reports.colPlans' | translate }}</th>
+                <th>{{ 'reports.colBars' | translate }}</th>
+                <th>{{ 'reports.colWaste' | translate }}</th>
+                <th>{{ 'reports.colCost' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of r.topMaterialsByCost; track row.materialId) {
+                <tr>
+                  <td>{{ row.materialName }}</td>
+                  <td>{{ row.plansApproved }}</td>
+                  <td>{{ row.stockBarsUsed }}</td>
+                  <td>{{ row.wastePercent | number: '1.0-1' }}%</td>
+                  <td>{{ row.totalMaterialCost | number: '1.0-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </article>
+
+      <article class="card">
+        <h2>{{ 'reports.projectsTitle' | translate }}</h2>
+        @if (r.projects.length === 0) {
+          <p class="page__muted">{{ 'reports.empty' | translate }}</p>
+        } @else {
+          <table>
+            <thead>
+              <tr>
+                <th>{{ 'reports.colProject' | translate }}</th>
+                <th>{{ 'reports.colGenerated' | translate }}</th>
+                <th>{{ 'reports.colApproved' | translate }}</th>
+                <th>{{ 'reports.colCost' | translate }}</th>
+                <th>{{ 'reports.colLast' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of r.projects; track row.projectId) {
+                <tr>
+                  <td>
+                    <a [routerLink]="['/projects', row.projectId]">{{ row.projectName }}</a>
+                  </td>
+                  <td>{{ row.plansGenerated }}</td>
+                  <td>{{ row.plansApproved }}</td>
+                  <td>{{ row.totalMaterialCost | number: '1.0-2' }}</td>
+                  <td>{{ row.lastActivityUtc | date: 'mediumDate' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </article>
+    </div>
+  }
+</section>

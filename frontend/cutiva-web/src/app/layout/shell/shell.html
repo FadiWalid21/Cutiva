@@ -109,55 +109,38 @@
           <span>{{ 'nav.projects' | translate }}</span>
         }
       </a>
-      @if (canManageCatalog()) {
-        @if (features.resourcesV2) {
-          <a
-            routerLink="/resources"
-            routerLinkActive="is-active"
-            [title]="'glossary.resources' | translate"
-          >
-            <span class="sidebar__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
-              </svg>
-            </span>
-            @if (!collapsed()) {
-              <span>{{ 'glossary.resources' | translate }}</span>
-            }
-          </a>
-        } @else {
-          <a
-            routerLink="/materials"
-            routerLinkActive="is-active"
-            [title]="'nav.materials' | translate"
-          >
-            <span class="sidebar__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
-              </svg>
-            </span>
-            @if (!collapsed()) {
-              <span>{{ 'nav.materials' | translate }}</span>
-            }
-          </a>
-        }
-        @if (features.productTemplates) {
-          <a
-            routerLink="/product-templates"
-            routerLinkActive="is-active"
-            [title]="'glossary.productRecipes' | translate"
-          >
-            <span class="sidebar__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="5" y="4" width="14" height="16" rx="2" />
-                <path d="M9 9h6M9 13h6M9 17h4" stroke-linecap="round" />
-              </svg>
-            </span>
-            @if (!collapsed()) {
-              <span>{{ 'glossary.productRecipes' | translate }}</span>
-            }
-          </a>
-        }
+      @if (canManageCatalog() && entitlements.resources()) {
+        <a
+          routerLink="/resources"
+          routerLinkActive="is-active"
+          [title]="'glossary.resources' | translate"
+        >
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+            </svg>
+          </span>
+          @if (!collapsed()) {
+            <span>{{ 'glossary.resources' | translate }}</span>
+          }
+        </a>
+      }
+      @if (canManageCatalog() && entitlements.productTemplates()) {
+        <a
+          routerLink="/product-templates"
+          routerLinkActive="is-active"
+          [title]="'glossary.productRecipes' | translate"
+        >
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="5" y="4" width="14" height="16" rx="2" />
+              <path d="M9 9h6M9 13h6M9 17h4" stroke-linecap="round" />
+            </svg>
+          </span>
+          @if (!collapsed()) {
+            <span>{{ 'glossary.productRecipes' | translate }}</span>
+          }
+        </a>
       }
       <a
         routerLink="/cutting-plans/new"
@@ -174,17 +157,32 @@
           <span>{{ 'nav.cuttingPlans' | translate }}</span>
         }
       </a>
-      <a routerLink="/quotes" routerLinkActive="is-active" [title]="'nav.quotes' | translate">
-        <span class="sidebar__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M7 4h10a2 2 0 0 1 2 2v14l-3.5-2L12 20l-3.5-2L5 20V6a2 2 0 0 1 2-2Z" />
-            <path d="M9 9h6M9 13h4" stroke-linecap="round" />
-          </svg>
-        </span>
-        @if (!collapsed()) {
-          <span>{{ 'nav.quotes' | translate }}</span>
-        }
-      </a>
+      @if (entitlements.clientQuotes()) {
+        <a routerLink="/quotes" routerLinkActive="is-active" [title]="'nav.quotes' | translate">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 4h10a2 2 0 0 1 2 2v14l-3.5-2L12 20l-3.5-2L5 20V6a2 2 0 0 1 2-2Z" />
+              <path d="M9 9h6M9 13h4" stroke-linecap="round" />
+            </svg>
+          </span>
+          @if (!collapsed()) {
+            <span>{{ 'nav.quotes' | translate }}</span>
+          }
+        </a>
+      }
+      @if (entitlements.workshopReports()) {
+        <a routerLink="/reports" routerLinkActive="is-active" [title]="'nav.reports' | translate">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19V5M4 19h16" stroke-linecap="round" />
+              <path d="M8 16V10M12 16V7M16 16v-5" stroke-linecap="round" />
+            </svg>
+          </span>
+          @if (!collapsed()) {
+            <span>{{ 'nav.reports' | translate }}</span>
+          }
+        </a>
+      }
       <a routerLink="/settings" routerLinkActive="is-active" [title]="'nav.settings' | translate">
         <span class="sidebar__icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

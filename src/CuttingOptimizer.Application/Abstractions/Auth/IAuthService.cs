@@ -26,7 +26,8 @@ public sealed record AuthResult(
     string UserId,
     IReadOnlyList<string> Roles,
     Guid? WorkshopId,
-    SubscriptionSummaryDto? Subscription);
+    SubscriptionSummaryDto? Subscription,
+    IReadOnlyList<string> Features);
 
 public sealed record AuthUserDto(
     string UserId,
@@ -34,7 +35,8 @@ public sealed record AuthUserDto(
     string? DisplayName,
     IReadOnlyList<string> Roles,
     Guid? WorkshopId,
-    SubscriptionSummaryDto? Subscription);
+    SubscriptionSummaryDto? Subscription,
+    IReadOnlyList<string> Features);
 
 public sealed record SubscriptionSummaryDto(
     string PlanCode,

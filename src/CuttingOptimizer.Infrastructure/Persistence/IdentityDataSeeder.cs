@@ -37,6 +37,7 @@ public static class IdentityDataSeeder
         }
 
         await EnsurePlansAsync(db);
+        await EnsurePlanFeaturesAsync(db);
         await EnsureFxFallbackAsync(db);
 
         var admin = await userManager.FindByEmailAsync(DefaultAdminEmail);
@@ -108,6 +109,75 @@ public static class IdentityDataSeeder
         }
 
         await db.SaveChangesAsync();
+    }
+
+    private static async Task EnsurePlanFeaturesAsync(ApplicationDbContext db)
+    {
+        foreach (var (code, name, sort) in PlanFeatureCodes.Catalog)
+        {
+            var existing = await db.FeatureDefinitions
+                .FirstOrDefaultAsync(f => f.Code == code);
+            if (existing is null)
+            {
+                db.FeatureDefinitions.Add(new FeatureDefinition
+                {
+                    Code = code,
+                    Name = name,
+                    SortOrder = sort
+                });
+            }
+            else
+            {
+                // Keep Name/Sort in sync with catalog; admin toggles live on plan rows.
+                existing.Name = name;
+                existing.SortOrder = sort;
+            }
+        }
+
+        await db.SaveChangesAsync();
+
+        var plans = await db.SubscriptionPlans
+            .Include(p => p.Features)
+            .ToListAsync();
+
+        foreach (var plan in plans)
+        {
+            var defaults = DefaultFeaturesForPlan(plan.Code);
+            foreach (var (code, _, _) in PlanFeatureCodes.Catalog)
+            {
+                if (plan.Features.Any(f => f.FeatureCode == code))
+                    continue;
+
+                plan.Features.Add(new SubscriptionPlanFeature
+                {
+                    PlanId = plan.Id,
+                    FeatureCode = code,
+                    IsEnabled = defaults.Contains(code)
+                });
+            }
+        }
+
+        await db.SaveChangesAsync();
+    }
+
+    private static HashSet<string> DefaultFeaturesForPlan(string planCode)
+    {
+        // Starter: catalog only. Workshop+: paid capabilities. Studio: all.
+        if (string.Equals(planCode, SubscriptionPlanCodes.Starter, StringComparison.Ordinal))
+        {
+            return
+            [
+                PlanFeatureCodes.Resources
+            ];
+        }
+
+        if (string.Equals(planCode, SubscriptionPlanCodes.Workshop, StringComparison.Ordinal)
+            || string.Equals(planCode, SubscriptionPlanCodes.Studio, StringComparison.Ordinal))
+        {
+            return PlanFeatureCodes.All.ToHashSet(StringComparer.Ordinal);
+        }
+
+        return [];
     }
 
     private static async Task EnsureFxFallbackAsync(ApplicationDbContext db)

@@ -2,8 +2,11 @@ using System.Security.Claims;
 using CuttingOptimizer.Api.Contracts.Workshops;
 using CuttingOptimizer.Application.Features.ClientQuotes;
 using CuttingOptimizer.Application.Features.ClientQuotes.Queries.ListWorkshopQuotes;
+using CuttingOptimizer.Application.Abstractions.Entitlements;
 using CuttingOptimizer.Application.Features.Dashboard;
 using CuttingOptimizer.Application.Features.Dashboard.Queries.GetWorkshopDashboard;
+using CuttingOptimizer.Application.Features.Reports;
+using CuttingOptimizer.Application.Features.Reports.Queries.GetWorkshopReport;
 using CuttingOptimizer.Application.Features.Workshops.Commands.CreateWorkshop;
 using CuttingOptimizer.Application.Features.Workshops.Commands.DeleteWorkshop;
 using CuttingOptimizer.Application.Features.Workshops.Commands.UpdateWorkshop;
@@ -23,6 +26,7 @@ namespace CuttingOptimizer.Api.Controllers;
 [Route("api/[controller]")]
 public sealed class WorkshopsController(
     ISender sender,
+    IPlanEntitlementService entitlements,
     IStringLocalizer<Messages> localizer) : ControllerBase
 {
     [HttpPost]
@@ -80,6 +84,17 @@ public sealed class WorkshopsController(
         Guid workshopId,
         CancellationToken cancellationToken)
     {
+        if (!await entitlements.HasAsync(
+                workshopId,
+                PlanFeatureCodes.ClientQuotes,
+                cancellationToken))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                message = "Client quotes are not enabled for this plan."
+            });
+        }
+
         var quotes = await sender.Send(
             new ListWorkshopQuotesQuery(workshopId),
             cancellationToken);
@@ -93,6 +108,42 @@ public sealed class WorkshopsController(
         }
 
         return Ok(quotes);
+    }
+
+    [HttpGet("{workshopId:guid}/reports/summary")]
+    public async Task<ActionResult<WorkshopReportDto>> GetReportSummary(
+        Guid workshopId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        if (!await entitlements.HasAsync(
+                workshopId,
+                PlanFeatureCodes.WorkshopReports,
+                cancellationToken))
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new
+            {
+                message = "Workshop reports are not enabled for this plan."
+            });
+        }
+
+        var toUtc = to?.ToUniversalTime() ?? DateTime.UtcNow;
+        var fromUtc = from?.ToUniversalTime() ?? toUtc.AddDays(-30);
+
+        var report = await sender.Send(
+            new GetWorkshopReportQuery(workshopId, fromUtc, toUtc),
+            cancellationToken);
+
+        if (report is null)
+        {
+            return NotFound(new
+            {
+                message = localizer["WorkshopNotFound"].Value
+            });
+        }
+
+        return Ok(report);
     }
 
     [HttpGet]

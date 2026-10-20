@@ -50,6 +50,12 @@ public sealed record AdminWorkshopUserDto(
     IReadOnlyList<string> Roles,
     bool IsLockedOut);
 
+public sealed record AdminPlanFeatureDto(
+    string Code,
+    string Name,
+    int SortOrder,
+    bool IsEnabled);
+
 public sealed record AdminPlanDto(
     Guid Id,
     string Code,
@@ -57,14 +63,20 @@ public sealed record AdminPlanDto(
     decimal PriceSar,
     int DurationDays,
     int? MaxUsers,
-    bool IsActive);
+    bool IsActive,
+    IReadOnlyList<AdminPlanFeatureDto> Features);
 
 public sealed record UpdateSubscriptionPlanRequest(
     string Name,
     decimal PriceSar,
     int? MaxUsers,
     int? DurationDays,
-    bool? IsActive);
+    bool? IsActive,
+    IReadOnlyList<AdminPlanFeatureUpdateDto>? Features = null);
+
+public sealed record AdminPlanFeatureUpdateDto(
+    string Code,
+    bool IsEnabled);
 
 public sealed record PublicPlanDto(
     string Code,

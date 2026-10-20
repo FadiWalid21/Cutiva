@@ -2,6 +2,7 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  OnDestroy,
   computed,
   inject,
   signal,
@@ -18,6 +19,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { WorkshopContextService } from '../../core/services/workshop-context.service';
 
 const SIDEBAR_KEY = 'cutiva.sidebarCollapsed';
+const NARROW_MQ = '(max-width: 900px)';
 
 @Component({
   selector: 'app-shell',
@@ -25,7 +27,7 @@ const SIDEBAR_KEY = 'cutiva.sidebarCollapsed';
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
-export class Shell implements AfterViewInit {
+export class Shell implements AfterViewInit, OnDestroy {
   private readonly languageService = inject(LanguageService);
   private readonly themeService = inject(ThemeService);
   private readonly auth = inject(AuthService);
@@ -58,8 +60,29 @@ export class Shell implements AfterViewInit {
   });
   readonly showInstall = this.pwa.showInstallControl;
   readonly mobileNavOpen = signal(false);
-  readonly collapsed = signal(localStorage.getItem(SIDEBAR_KEY) === '1');
+  /** Desktop preference only — ignored on narrow viewports. */
+  private readonly collapsedPref = signal(localStorage.getItem(SIDEBAR_KEY) === '1');
+  private readonly narrowViewport = signal(
+    typeof window !== 'undefined' ? window.matchMedia(NARROW_MQ).matches : false,
+  );
+  private narrowMql: MediaQueryList | null = null;
+  private readonly onNarrowChange = (event: MediaQueryListEvent) => {
+    this.narrowViewport.set(event.matches);
+    if (event.matches) {
+      this.mobileNavOpen.set(false);
+    }
+  };
+
+  /** Effective collapse for UI — always expanded on mobile/PWA drawer. */
+  readonly collapsed = computed(
+    () => !this.narrowViewport() && this.collapsedPref(),
+  );
+
   ngAfterViewInit(): void {
+    this.narrowMql = window.matchMedia(NARROW_MQ);
+    this.narrowViewport.set(this.narrowMql.matches);
+    this.narrowMql.addEventListener('change', this.onNarrowChange);
+
     this.motion.pageEnter(this.shellRoot()?.nativeElement ?? null);
     const nav = this.navLinks()?.nativeElement;
     if (nav && !this.collapsed()) {
@@ -67,9 +90,17 @@ export class Shell implements AfterViewInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.narrowMql?.removeEventListener('change', this.onNarrowChange);
+  }
+
   toggleSidebar(): void {
-    const next = !this.collapsed();
-    this.collapsed.set(next);
+    if (this.narrowViewport()) {
+      this.toggleMobileNav();
+      return;
+    }
+    const next = !this.collapsedPref();
+    this.collapsedPref.set(next);
     localStorage.setItem(SIDEBAR_KEY, next ? '1' : '0');
   }
 

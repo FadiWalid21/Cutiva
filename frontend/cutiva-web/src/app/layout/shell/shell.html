@@ -72,7 +72,11 @@
         [routerLinkActiveOptions]="{ exact: true }"
         [title]="'nav.dashboard' | translate"
       >
-        <span class="sidebar__icon" aria-hidden="true">⌂</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5Z" />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.dashboard' | translate }}</span>
         }
@@ -83,13 +87,24 @@
         routerLinkActive="is-active"
         [title]="'nav.newProject' | translate"
       >
-        <span class="sidebar__icon" aria-hidden="true">+</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25">
+            <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.newProject' | translate }}</span>
         }
       </a>
       <a routerLink="/projects" routerLinkActive="is-active" [title]="'nav.projects' | translate">
-        <span class="sidebar__icon" aria-hidden="true">▣</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="4" y="4" width="7" height="7" rx="1.2" />
+            <rect x="13" y="4" width="7" height="7" rx="1.2" />
+            <rect x="4" y="13" width="7" height="7" rx="1.2" />
+            <rect x="13" y="13" width="7" height="7" rx="1.2" />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.projects' | translate }}</span>
         }
@@ -101,7 +116,11 @@
             routerLinkActive="is-active"
             [title]="'glossary.resources' | translate"
           >
-            <span class="sidebar__icon" aria-hidden="true">▦</span>
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+              </svg>
+            </span>
             @if (!collapsed()) {
               <span>{{ 'glossary.resources' | translate }}</span>
             }
@@ -112,7 +131,11 @@
             routerLinkActive="is-active"
             [title]="'nav.materials' | translate"
           >
-            <span class="sidebar__icon" aria-hidden="true">▦</span>
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+              </svg>
+            </span>
             @if (!collapsed()) {
               <span>{{ 'nav.materials' | translate }}</span>
             }
@@ -124,7 +147,12 @@
             routerLinkActive="is-active"
             [title]="'glossary.productRecipes' | translate"
           >
-            <span class="sidebar__icon" aria-hidden="true">◫</span>
+            <span class="sidebar__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="5" y="4" width="14" height="16" rx="2" />
+                <path d="M9 9h6M9 13h6M9 17h4" stroke-linecap="round" />
+              </svg>
+            </span>
             @if (!collapsed()) {
               <span>{{ 'glossary.productRecipes' | translate }}</span>
             }
@@ -136,19 +164,37 @@
         routerLinkActive="is-active"
         [title]="'nav.cuttingPlans' | translate"
       >
-        <span class="sidebar__icon" aria-hidden="true">◎</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="7" />
+            <circle cx="12" cy="12" r="2.5" />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.cuttingPlans' | translate }}</span>
         }
       </a>
       <a routerLink="/quotes" routerLinkActive="is-active" [title]="'nav.quotes' | translate">
-        <span class="sidebar__icon" aria-hidden="true">▤</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 4h10a2 2 0 0 1 2 2v14l-3.5-2L12 20l-3.5-2L5 20V6a2 2 0 0 1 2-2Z" />
+            <path d="M9 9h6M9 13h4" stroke-linecap="round" />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.quotes' | translate }}</span>
         }
       </a>
       <a routerLink="/settings" routerLinkActive="is-active" [title]="'nav.settings' | translate">
-        <span class="sidebar__icon" aria-hidden="true">⚙</span>
+        <span class="sidebar__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M12 3.5v2.2M12 18.3v2.2M4.9 6.5l1.6 1.6M17.5 17.9l1.6 1.6M3.5 12h2.2M18.3 12h2.2M4.9 17.5l1.6-1.6M17.5 6.1l1.6-1.6"
+              stroke-linecap="round"
+            />
+          </svg>
+        </span>
         @if (!collapsed()) {
           <span>{{ 'nav.settings' | translate }}</span>
         }

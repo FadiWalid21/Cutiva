@@ -13,9 +13,19 @@
         <span>{{ 'reports.to' | translate }}</span>
         <input type="date" [(ngModel)]="toDate" name="toDate" required />
       </label>
-      <button type="submit" class="btn btn--primary" [disabled]="loading()">
-        {{ 'reports.apply' | translate }}
-      </button>
+      <div class="reports__actions">
+        <button type="submit" class="btn btn--primary" [disabled]="loading()">
+          {{ 'reports.apply' | translate }}
+        </button>
+        <button
+          type="button"
+          class="btn--ghost"
+          [disabled]="loading() || !report()"
+          (click)="exportExcel()"
+        >
+          {{ 'reports.exportExcel' | translate }}
+        </button>
+      </div>
     </form>
   </header>
 

@@ -2,7 +2,8 @@ import { DecimalPipe, DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import * as XLSX from 'xlsx';
 import { WorkshopsApi } from '../../../core/api/workshops.api';
 import { WorkshopReportResponse } from '../../../core/api/workshops.models';
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
@@ -15,6 +16,7 @@ import { WorkshopContextService } from '../../../core/services/workshop-context.
 })
 export class ReportsPage implements OnInit {
   private readonly workshopsApi = inject(WorkshopsApi);
+  private readonly translate = inject(TranslateService);
   readonly workshopContext = inject(WorkshopContextService);
 
   readonly report = signal<WorkshopReportResponse | null>(null);
@@ -56,5 +58,81 @@ export class ReportsPage implements OnInit {
         this.error.set('reports.loadError');
       },
     });
+  }
+
+  exportExcel(): void {
+    const r = this.report();
+    if (!r || this.loading()) return;
+
+    const t = (key: string) => this.translate.instant(key);
+
+    const summaryRows = [
+      [t('reports.from'), this.fromDate],
+      [t('reports.to'), this.toDate],
+      [],
+      [t('reports.kpi.projects'), r.kpis.projectsActive],
+      [t('reports.kpi.plansGenerated'), r.kpis.plansGenerated],
+      [t('reports.kpi.plansApproved'), r.kpis.plansApproved],
+      [t('reports.kpi.barsUsed'), r.kpis.stockBarsUsed],
+      [t('reports.kpi.efficiency'), r.kpis.materialEfficiencyPercent],
+      [t('reports.kpi.waste'), r.kpis.wastePercent],
+      [t('reports.kpi.cost'), r.kpis.totalMaterialCost],
+      [t('reports.kpi.remnantsStock'), r.kpis.remnantBarsInStock],
+      [t('reports.kpi.remnantsUsed'), r.kpis.remnantBarsConsumed],
+    ];
+
+    const materialsRows = [
+      [
+        t('reports.colMaterial'),
+        t('reports.colPlans'),
+        t('reports.colBars'),
+        t('reports.colWaste'),
+        t('reports.colCost'),
+      ],
+      ...r.topMaterialsByCost.map((row) => [
+        row.materialName,
+        row.plansApproved,
+        row.stockBarsUsed,
+        row.wastePercent,
+        row.totalMaterialCost,
+      ]),
+    ];
+
+    const projectsRows = [
+      [
+        t('reports.colProject'),
+        t('reports.colGenerated'),
+        t('reports.colApproved'),
+        t('reports.colCost'),
+        t('reports.colLast'),
+      ],
+      ...r.projects.map((row) => [
+        row.projectName,
+        row.plansGenerated,
+        row.plansApproved,
+        row.totalMaterialCost,
+        row.lastActivityUtc.slice(0, 10),
+      ]),
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(summaryRows),
+      'Summary',
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(materialsRows),
+      'Materials',
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(projectsRows),
+      'Projects',
+    );
+
+    const stamp = this.toDate || new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `cutiva-workshop-report-${stamp}.xlsx`);
   }
 }

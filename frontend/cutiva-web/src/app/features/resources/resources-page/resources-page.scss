@@ -30,9 +30,10 @@
   cursor: pointer;
 
   &.is-active {
-    background: var(--color-surface-2, #ececea);
-    color: var(--color-text);
-    border-color: transparent;
+    /* Aluminum bronze / gold finish used elsewhere in the product. */
+    background: #b8924f;
+    color: #1a1410;
+    border-color: #8a6a3d;
     font-weight: 600;
   }
 }

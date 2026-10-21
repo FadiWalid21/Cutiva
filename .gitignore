@@ -60,6 +60,10 @@ Desktop.ini
 # Design mockups / inspiration images (local only — not for GitHub)
 design-refs/
 
+# Kept on this machine only; not published
+/docs/
+/scripts/
+
 # Cursor / AI local files
 .cursor/
 .cursorignore

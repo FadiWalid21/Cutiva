@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CuttingOptimizer.Infrastructure;
@@ -30,14 +31,15 @@ public static class DependencyInjection
 
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.Configure<FeaturesOptions>(
             configuration.GetSection(FeaturesOptions.SectionName));
 
         services
             .AddPersistence(configuration)
-            .AddIdentityAndAuth(configuration)
+            .AddIdentityAndAuth(configuration, environment.IsDevelopment())
             .AddExternalServices(configuration);
 
         return services;
@@ -58,14 +60,16 @@ public static class DependencyInjection
 
     private static IServiceCollection AddIdentityAndAuth(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool isDevelopment)
     {
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
-        services.PostConfigure<JwtOptions>(ApplyFallbackJwtKey);
+        services.PostConfigure<JwtOptions>(options =>
+            ApplyFallbackJwtKey(options, isDevelopment));
 
         var jwtOptions = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
                          ?? new JwtOptions();
-        ApplyFallbackJwtKey(jwtOptions);
+        ApplyFallbackJwtKey(jwtOptions, isDevelopment);
 
         services
             .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -138,9 +142,17 @@ public static class DependencyInjection
         return services;
     }
 
-    private static void ApplyFallbackJwtKey(JwtOptions options)
+    private static void ApplyFallbackJwtKey(JwtOptions options, bool isDevelopment)
     {
-        if (string.IsNullOrWhiteSpace(options.Key) || options.Key.Length < 32)
-            options.Key = FallbackJwtKey;
+        if (!string.IsNullOrWhiteSpace(options.Key) && options.Key.Length >= 32)
+            return;
+
+        if (!isDevelopment)
+        {
+            throw new InvalidOperationException(
+                "Jwt:Key must be set to at least 32 characters.");
+        }
+
+        options.Key = FallbackJwtKey;
     }
 }

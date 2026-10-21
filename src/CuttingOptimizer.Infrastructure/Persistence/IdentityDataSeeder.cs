@@ -3,6 +3,7 @@ using CuttingOptimizer.Domain.Entities;
 using CuttingOptimizer.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -10,9 +11,6 @@ namespace CuttingOptimizer.Infrastructure.Persistence;
 
 public static class IdentityDataSeeder
 {
-    public const string DefaultAdminEmail = "fadialhallag@gmail.com";
-    public const string DefaultAdminPassword = "Admin123!";
-
     public static async Task SeedAsync(IServiceProvider services)
     {
         using var scope = services.CreateScope();
@@ -42,19 +40,37 @@ public static class IdentityDataSeeder
         await EnsureFxFallbackAsync(db);
         await EnsureMarketSectorAsync(db);
 
-        var admin = await userManager.FindByEmailAsync(DefaultAdminEmail);
+        await EnsureAdminAsync(sp, userManager, logger);
+    }
+
+    private static async Task EnsureAdminAsync(
+        IServiceProvider services,
+        UserManager<ApplicationUser> userManager,
+        ILogger logger)
+    {
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var email = configuration["Seed:AdminEmail"];
+        var password = configuration["Seed:AdminPassword"];
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            logger.LogInformation(
+                "Seed admin skipped. Set Seed:AdminEmail and Seed:AdminPassword to create one.");
+            return;
+        }
+
+        var admin = await userManager.FindByEmailAsync(email);
         if (admin is null)
         {
             admin = new ApplicationUser
             {
-                UserName = DefaultAdminEmail,
-                Email = DefaultAdminEmail,
+                UserName = email,
+                Email = email,
                 DisplayName = "Platform Admin",
                 EmailConfirmed = true,
                 WorkshopId = null
             };
 
-            var created = await userManager.CreateAsync(admin, DefaultAdminPassword);
+            var created = await userManager.CreateAsync(admin, password);
             if (!created.Succeeded)
             {
                 logger.LogError(
@@ -63,9 +79,7 @@ public static class IdentityDataSeeder
                 return;
             }
 
-            logger.LogInformation(
-                "Created default admin {Email}",
-                DefaultAdminEmail);
+            logger.LogInformation("Created default admin {Email}", email);
         }
 
         if (!await userManager.IsInRoleAsync(admin, AppRoles.Admin))

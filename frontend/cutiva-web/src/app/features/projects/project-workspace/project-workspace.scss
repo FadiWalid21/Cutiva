@@ -320,6 +320,15 @@ table {
   font-size: 0.95rem;
 }
 
+.item-preview-cell {
+  width: 148px;
+  vertical-align: middle;
+
+  app-frame-preview {
+    display: block;
+  }
+}
+
 .row-actions {
   display: flex;
   flex-wrap: wrap;

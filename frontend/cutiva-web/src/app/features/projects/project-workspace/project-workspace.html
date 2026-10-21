@@ -132,11 +132,13 @@
           <div class="draft-preview">
             <app-frame-preview
               [label]="itemLabel.trim() || itemPreviewKindLabel()"
-              [sectorCode]="itemPreviewKindCode()"
+              [sectorCode]="itemPreview().sectorCode"
               [sectorName]="itemPreviewKindLabel()"
               [heightMm]="itemPreviewHeightMm()"
               [widthMm]="itemPreviewWidthMm()"
               [quantity]="itemQty"
+              [layout]="itemPreview().layout"
+              [paneStyle]="itemPreview().paneStyle"
               [compact]="true"
             />
           </div>
@@ -314,6 +316,7 @@
           <table>
             <thead>
               <tr>
+                <th></th>
                 <th>{{ 'projectItems.label' | translate }}</th>
                 <th>{{ 'projectItems.variant' | translate }}</th>
                 <th>{{ 'projectItems.size' | translate }}</th>
@@ -324,6 +327,19 @@
             <tbody>
               @for (item of productItems(); track item.id) {
                 <tr>
+                  <td class="item-preview-cell">
+                    <app-frame-preview
+                      [label]="item.label"
+                      [sectorCode]="itemRowPreview(item).sectorCode"
+                      [sectorName]="item.productVariantName"
+                      [heightMm]="item.heightMm"
+                      [widthMm]="item.widthMm"
+                      [quantity]="item.quantity"
+                      [layout]="itemRowPreview(item).layout"
+                      [paneStyle]="itemRowPreview(item).paneStyle"
+                      [compact]="true"
+                    />
+                  </td>
                   <td>{{ item.label }}</td>
                   <td>{{ item.productVariantName }}</td>
                   <td>{{ itemSizeLabel(item) }}</td>

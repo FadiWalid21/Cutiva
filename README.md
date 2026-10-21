@@ -1,25 +1,62 @@
+<div align="center">
+
 # CUTIVA
 
-Software for an aluminum workshop.
+**Smarter cuts. Less waste. More profit.**
 
-Profiles, glass, and accessories become a cutting plan, then a client quote.
+A cutting optimizer built for aluminum workshops.
 
-[Preview the app](https://cutiva-kappa.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-cutiva--kappa.vercel.app-0B0E0F?style=for-the-badge&logo=vercel&logoColor=white)](https://cutiva-kappa.vercel.app)
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 96" width="640" height="96" role="img" aria-label="A stock bar cut into pieces">
-  <rect x="8" y="36" width="624" height="24" rx="4" fill="#e7e5e4"/>
-  <rect x="8" y="36" width="168" height="24" rx="4" fill="#0f766e">
-    <animate attributeName="width" values="40;168;168" dur="2.8s" repeatCount="indefinite"/>
-  </rect>
-  <rect x="184" y="36" width="120" height="24" rx="4" fill="#115e59">
-    <animate attributeName="opacity" values="0;0;1" dur="2.8s" repeatCount="indefinite"/>
-  </rect>
-  <rect x="312" y="36" width="96" height="24" rx="4" fill="#134e4a">
-    <animate attributeName="opacity" values="0;0;1" dur="2.8s" begin="0.35s" repeatCount="indefinite"/>
-  </rect>
-  <rect x="416" y="36" width="72" height="24" rx="4" fill="#1c1917" opacity="0.25">
-    <animate attributeName="opacity" values="0;0;0.35" dur="2.8s" begin="0.7s" repeatCount="indefinite"/>
-  </rect>
-</svg>
+</div>
 
-Stock · Cutting plan · Quote
+<br />
+
+<!-- Add a screenshot or GIF here:
+<div align="center">
+  <img src="./docs/preview.gif" alt="Cutiva preview" width="85%" />
+</div>
+-->
+
+## The Idea
+
+Every aluminum workshop faces the same daily problem: a list of required pieces, and a stock of fixed-length profiles to cut them from.
+
+Most of the time, the plan lives in the craftsman's head or on a piece of paper. The result is leftover scrap, wasted material, and time lost on every job.
+
+**Cutiva solves this.** Enter the pieces you need, and it works out the best way to cut them from your stock, so you use fewer bars and throw away less.
+
+## How It Works
+
+1. **Enter your stock** — the standard length of your profiles.
+2. **Add the pieces** — sizes and quantities needed for the job.
+3. **Get the optimal plan** — a clear cutting layout bar by bar, with the remaining waste for each one.
+
+## Why Cutiva
+
+- **Less waste** — fewer leftovers, lower material cost.
+- **Faster planning** — no more manual calculations or guesswork.
+- **Built for the workshop** — made around real aluminum fabrication work, not generic math.
+- **Works on any device** — installable and mobile-friendly, so it's usable on the shop floor.
+
+## Live Demo
+
+**[cutiva-kappa.vercel.app](https://cutiva-kappa.vercel.app)**
+
+<!-- Add a "Built With" section here once you confirm the final stack -->
+
+## Author
+
+**Fadi Walid** — Software Engineer based in Egypt
+
+[![GitHub](https://img.shields.io/badge/GitHub-FadiWalid21-0B0E0F?style=flat&logo=github&logoColor=white)](https://github.com/FadiWalid21)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Fadi_Walid-0B0E0F?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/fadi-walid21/)
+[![Portfolio](https://img.shields.io/badge/Portfolio-fadi21portfolio-0B0E0F?style=flat&logo=netlify&logoColor=white)](https://fadi21portfolio.netlify.app/)
+
+<br />
+
+<div align="center">
+
+<sub>Built to turn scrap into savings.</sub>
+
+</div>

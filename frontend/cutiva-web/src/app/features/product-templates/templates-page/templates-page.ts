@@ -45,10 +45,9 @@ import {
 import {
   DEFAULT_ROLE_COLORS,
   FramePreview,
-  PreviewLayout,
-  PreviewPaneStyle,
   PreviewRole,
 } from '../../../shared/frame-preview/frame-preview';
+import { resolveFramePreview } from '../../../shared/frame-preview/preview-resolve';
 
 @Component({
   selector: 'app-templates-page',
@@ -114,48 +113,21 @@ export class TemplatesPage implements OnInit, AfterViewInit {
     () => this.variant()?.name || this.selectedType()?.name || 'Preview',
   );
 
-  readonly previewLayout = computed<PreviewLayout>(() => {
-    const v = this.variant();
+  readonly previewResolved = computed(() => {
+    const variant = this.variant();
     const type = this.selectedType();
-    const code = (v?.code ?? '').toUpperCase();
-    const name = `${v?.name ?? ''} ${type?.name ?? ''}`.toUpperCase();
-    if (
-      code.includes('TILT') ||
-      name.includes('TILT') ||
-      name.includes('قلاب')
-    ) {
-      return 'tilt';
-    }
-    if (type?.kind === 'Door' || code.includes('DOOR') || name.includes('باب')) {
-      return 'door';
-    }
-    if (
-      (v?.sashCount ?? 0) >= 2 ||
-      code.includes('SLID') ||
-      name.includes('SLID') ||
-      name.includes('سحاب')
-    ) {
-      return 'sliding';
-    }
-    return 'casement';
+    return resolveFramePreview({
+      kind: type?.kind,
+      code: variant?.code,
+      name: `${variant?.name ?? ''} ${type?.name ?? ''}`,
+      sashCount: variant?.sashCount,
+      hasGlass: (variant?.glassSlots?.length ?? 0) > 0,
+    });
   });
 
-  readonly previewPaneStyle = computed<PreviewPaneStyle>(() => {
-    const v = this.variant();
-    const hasGlass = (v?.glassSlots?.length ?? 0) > 0;
-    if (this.previewLayout() === 'door') {
-      return hasGlass ? 'Structure' : 'Solid';
-    }
-    return 'Double';
-  });
-
-  readonly previewSectorCode = computed(() => {
-    const layout = this.previewLayout();
-    if (layout === 'door') return 'DOOR';
-    if (layout === 'tilt') return 'TILT';
-    if (layout === 'sliding') return 'WIN-SLIDING';
-    return 'WIN-CASEMENT';
-  });
+  readonly previewLayout = computed(() => this.previewResolved().layout);
+  readonly previewPaneStyle = computed(() => this.previewResolved().paneStyle);
+  readonly previewSectorCode = computed(() => this.previewResolved().sectorCode);
 
   readonly previewRows = computed(() => {
     const v = this.variant();

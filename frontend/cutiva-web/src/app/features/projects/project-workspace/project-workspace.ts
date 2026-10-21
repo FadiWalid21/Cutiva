@@ -39,6 +39,7 @@ import { PlanEntitlementsService } from '../../../core/services/plan-entitlement
 import { WorkshopContextService } from '../../../core/services/workshop-context.service';
 import { cmToMm, formatCm, mmToCm } from '../../../core/units/length';
 import { FramePreview } from '../../../shared/frame-preview/frame-preview';
+import { resolveFramePreview } from '../../../shared/frame-preview/preview-resolve';
 import {
   QuickAddMode,
   QuickAddResult,
@@ -255,13 +256,48 @@ export class ProjectWorkspace {
     return this.productTypes().find((t) => t.id === this.itemTypeId) ?? null;
   }
 
-  itemPreviewKindCode(): string {
-    return this.selectedProductType()?.kind ?? '';
-  }
-
   itemPreviewKindLabel(): string {
     const type = this.selectedProductType();
     return type?.name ?? type?.kind ?? '';
+  }
+
+  itemPreview() {
+    const variant = this.selectedVariant();
+    const type = this.selectedProductType();
+    return resolveFramePreview({
+      kind: variant?.productKind ?? type?.kind,
+      code: variant?.code,
+      name: `${variant?.name ?? ''} ${type?.name ?? ''}`,
+      sashCount: variant?.sashCount,
+      hasGlass:
+        (variant?.glassSlots.length ?? 0) > 0 ||
+        this.glassChoices.some((choice) => !!choice.glassSpecId),
+    });
+  }
+
+  itemRowPreview(item: ProjectItemSummary) {
+    let kind = undefined as ProductType['kind'] | undefined;
+    let sashCount: number | null = null;
+    let typeName = '';
+    let code = '';
+    let hasGlass = false;
+    for (const type of this.productTypes()) {
+      const variant = type.variants.find((row) => row.id === item.productVariantId);
+      if (!variant) continue;
+      kind = type.kind;
+      sashCount = variant.sashCount;
+      typeName = type.name;
+      code = variant.code;
+      hasGlass = variant.glassSlotCount > 0;
+      break;
+    }
+    return resolveFramePreview({
+      kind,
+      code,
+      name: `${item.productVariantName} ${typeName}`,
+      sashCount,
+      hasGlass,
+    });
   }
 
   sizeLabel(section: ProjectSection): string {
